@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contacto | Vive Verde</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/css/styles.css">
+        <style>
+            .contact-info {
+                margin-top: 30px;
+            }
+            .contact-info h3 {
+                margin-bottom: 20px;
+            }
+            .contact-info p {
+                font-size: 1.2rem;
+            }
+            .contact-info .social-icons {
+                font-size: 1.5rem;
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                gap: 30px; /* Separación entre los iconos */
+                justify-content: center;
+            }
+            .contact-info .social-icons a {
+                color: green;
+                text-decoration: none;
+            }
+            .contact-info .social-icons a:hover {
+                color: darkgreen;
+            }
+            #map {
+                height: 300px; /* Reducción de tamaño */
+                width: 100%; /* Ajuste de ancho */
+                margin-top: 20px;
+            }
+            .header-info {
+                background-color: #000; /* Fondo negro */
+                padding: 30px;
+                text-align: center;
+                border-radius: 8px; /* Bordes redondeados */
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+                margin-bottom: 30px; /* Separación con el contenido */
+                color: #fff; /* Texto blanco */
+            }
+            .header-info h2 {
+                margin: 0;
+                font-size: 2rem; /* Tamaño de texto más grande */
+            }
+            .header-info .address, .header-info .hours {
+                font-size: 1.2rem;
+                color: #fff; /* Color de texto blanco */
+            }
+            .contact-details {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+            }
+            .contact-details img {
+                margin-right: 10px;
+            }
+            .social-icons h3 {
+                width: 100%;
+                text-align: center;
+                font-size: 1.5rem;
+                color: #388e3c;
+                margin-bottom: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div th:replace="~{navbar}"></div>
+
+        <!-- Encabezado de contacto -->
+        <div class="header-info">
+            <h2>¡Vení a visitarnos!</h2>
+            <p class="address">Necochea 2986, Rosario</p>
+            <p class="hours">Horarios de atención: Lunes a Viernes 8:00 AM - 12:00 PM y 16:00 PM - 20:00 PM, Sábados 8:00 AM - 13:00 PM, Domingos 8:00 AM - 13:00 PM</p>
+        </div>
+
+        <div class="container contact-info">
+            <!-- Redes sociales -->
+            <div>
+                <h3>¡Escribinos!</h3>
+                <div class="social-icons">
+                    <!-- WhatsApp -->
+                    <div>
+                        <a href="https://wa.me/3412622060" target="_blank">
+                            <img src="/images/whatsapp-logo.png" alt="WhatsApp" width="30" height="30">
+                        </a>
+                        <span>341-2622060</span>
+                    </div>
+
+                    <!-- Instagram -->
+                    <div>
+                        <a href="https://www.instagram.com/viveroviveverde/" target="_blank">
+                            <img src="/images/instagram-logo.png" alt="Instagram" width="30" height="30">
+                        </a>
+                        <span>/viveroviveverde</span>
+                    </div>
+
+                    <!-- Facebook -->
+                    <div>
+                        <a href="https://www.facebook.com/vive.verde.45" target="_blank">
+                            <img src="/images/facebook-logo.png" alt="Facebook" width="30" height="30">
+                        </a>
+                        <span>vive verde grow green</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa de Google -->
+            <div id="map"></div>
+        </div>
+
+        <!-- Mapa en Iframe -->
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3347.108271127871!2d-60.63335342529883!3d-32.97454517358168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b7ab3ab1d1edc3%3A0xd1886ad773728f3f!2sVivero%20Vive%20Verde!5e0!3m2!1ses-419!2sar!4v1736796284701!5m2!1ses-419!2sar" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+        <!-- Scripts para Bootstrap y Popper.js -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

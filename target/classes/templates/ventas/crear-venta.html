@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Nueva Venta</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="/css/styles.css">
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    </head>
+
+    <body>
+
+        <!-- Contenedor principal para navbar y botones -->
+        <div class="navbar-container d-flex justify-content-between align-items-center">
+            <!-- Navbar se carga con th:replace -->
+            <div th:replace="~{navbar :: navbar}"></div>
+
+            <!-- Botones específicos para cada página -->
+
+        </div>
+
+
+
+
+        <div class="container mt-5">
+            <h1>Nueva Venta</h1>
+            <div class="separator"></div>
+            <form id="ventaForm" th:action="@{/ventas/crear}" method="post">
+
+                <div class="form-group d-flex">
+                    <div style="width: 60%; height: 150%;">
+                        <label for="cliente" class="form-title">Cliente</label>
+                        <select id="cliente" name="cliente" class="form-control">
+                            <option value="">Seleccionar Cliente</option>
+                            <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}">
+                            </option>
+                        </select>
+                        <a th:href="@{/clientes/crear}" class="btn btn-primary">Nuevo Cliente</a>
+                    </div>
+                </div>
+                <div class="separator"></div>
+                <div class="form-group d-flex">
+                    <div style="width: 60%; height: 150%;">
+                        <label for="producto" class="form-title">Producto</label>
+                        <select id="producto" name="producto" class="form-control">
+                            <option th:each="producto : ${productos}" th:value="${producto.id}" th:text="${producto.nombre}"
+                                    th:data-precio="${producto.precio}" th:data-stock="${producto.stock}"></option>
+                        </select>
+                        <button type="button" id="agregarProducto" class="btn btn-success align-self-end ml-2">Agregar
+                            Producto</button>
+                    </div>
+
+                </div>
+                <div class="separator"></div>
+                <h3 class="mt-5">Productos Seleccionados</h3>
+
+                <table class="table table-striped mt-3">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Cantidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosSeleccionados"></tbody>
+                </table>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="metodoPago" class="form-title">Método de Pago</label>
+                            <select id="metodoPago" name="metodoPago" class="form-control">
+                                <option th:each="metodo : ${metodosPago}" th:value="${metodo}" th:text="${metodo}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="descuento" class="form-title">Descuento</label>
+                            <select id="descuento" name="descuento" class="form-control">
+                                <option th:each="descuento : ${descuentos}" th:value="${descuento.porcentaje}"
+                                        th:text="${descuento.descripcion}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="totalLista" class="form-title">Total Precio de Lista</label>
+                            <input type="text" id="totalLista" name="total" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="totalMetodoPago" class="form-title">Total Método de Pago</label>
+                            <input type="text" id="totalMetodoPago" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="totalFinal" class="form-title">Total con Descuento</label>
+                            <input type="text" id="totalFinal" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="separator"></div>
+                <button type="submit" class="btn btn-success">Aceptar</button>
+                <a href="/ventas/listar" class="btn btn-danger">Cancelar</a>
+            </form>
+        </div>
+
+        <script>
+            $(document).ready(function () {
+                $('#cliente').select2({
+                    placeholder: 'Seleccionar Cliente...',
+                    allowClear: true,
+                    width: '50%',
+                    dropdownCssClass: 'select2-dropdown'
+                });
+
+                $('#producto').select2({
+                    placeholder: 'Buscar Producto...',
+                    allowClear: true,
+                    width: '50%',
+                    dropdownCssClass: 'select2-dropdown'
+                });
+
+                function actualizarTotales() {
+                    let totalLista = 0;
+                    let totalMetodoPago = 0;
+                    let totalFinal = 0;
+                    const metodoPago = $('#metodoPago').val();
+                    const descuentoPorcentaje = parseFloat($('#descuento').val()) || 0;
+
+                    $('#productosSeleccionados tr').each(function () {
+                        const precio = parseFloat($(this).find('.precio').text());
+                        const cantidad = parseInt($(this).find('.cantidad').val());
+                        totalLista += precio * cantidad;
+                    });
+
+                    if (metodoPago === 'CREDITO') {
+                        totalMetodoPago = totalLista * 1.15;
+                    } else {
+                        totalMetodoPago = totalLista;
+                    }
+
+                    totalFinal = totalMetodoPago - (totalMetodoPago * (descuentoPorcentaje / 100));
+
+                    $('#totalLista').val(totalLista.toFixed(2));
+                    $('#totalMetodoPago').val(totalMetodoPago.toFixed(2));
+                    $('#totalFinal').val(totalFinal.toFixed(2));
+                }
+
+                $('#agregarProducto').click(function () {
+                    const productoId = $('#producto').val();
+                    const productoNombre = $('#producto option:selected').text();
+                    const precio = $('#producto option:selected').data('precio');
+                    const stock = $('#producto option:selected').data('stock');
+
+                    if (productoId) {
+                        if ($('#productosSeleccionados input[name="productoIds[]"][value="' + productoId + '"]').length > 0) {
+                            alert('Este producto ya está en la lista.');
+                            return;
+                        }
+
+                        if (stock <= 0) {
+                            alert('Este producto no tiene stock disponible.');
+                            return;
+                        }
+
+                        $('#productosSeleccionados').append(`
+                        <tr>
+                            <td>${productoNombre}</td>
+                            <td class="precio">${precio}</td>
+                            <td>${stock}</td>
+                            <td><input type="number" name="cantidades[]" class="form-control cantidad" min="1" max="${stock}" value="1"></td>
+                            <td><button type="button" class="btn btn-danger eliminarProducto">Eliminar</button></td>
+                            <input type="hidden" name="productoIds[]" value="${productoId}">
+                        </tr>
+                    `);
+
+                        actualizarTotales();
+                    }
+                });
+
+                $('#productosSeleccionados').on('change', '.cantidad', function () {
+                    const cantidad = $(this).val();
+                    const stock = $(this).closest('tr').find('td').eq(2).text();
+
+                    if (parseInt(cantidad) > parseInt(stock)) {
+                        alert('La cantidad no puede ser mayor que el stock disponible.');
+                        $(this).val(stock);
+                    }
+
+                    actualizarTotales();
+                });
+
+                $('#productosSeleccionados').on('click', '.eliminarProducto', function () {
+                    $(this).closest('tr').remove();
+                    actualizarTotales();
+                });
+
+                $('#metodoPago, #descuento').change(function () {
+                    actualizarTotales();
+                });
+
+                $('#ventaForm').submit(function (event) {
+                    if ($('#productosSeleccionados tr').length === 0) {
+                        alert('Debe agregar al menos un producto antes de crear la venta.');
+                        event.preventDefault(); // Evita que el formulario se envíe
+                    }
+                });
+
+
+
+            });
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bienvenidos a Vive Verde</title>
+        <link rel="stylesheet" href="/css/styles.css">
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            /* Efecto gradual para el logo */
+            .logo {
+                filter: grayscale(100%); /* Empieza en escala de grises */
+                opacity: 0; /* Logo invisible al principio */
+                transition: filter 2s ease, opacity 2s ease; /* Transición gradual de color y opacidad */
+            }
+
+            .logo-visible {
+                filter: grayscale(0%); /* Pasa a color */
+                opacity: 1; /* Logo completamente visible */
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Barra de navegación -->
+        <div th:replace="~{navbar}"></div>
+
+        <!-- Contenido principal -->
+        <div class="container mt-4 text-center">
+            <!-- Logo de la página -->
+            <div>
+                <img id="logo" src="/images/logo.png" class="img-fluid logo" alt="Logo Vive Verde">
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="/js/navbar.js"></script>
+
+        <script>
+            // Cuando la página termine de cargar, aplicar el efecto de visibilidad al logo
+            window.onload = function() {
+                document.getElementById("logo").classList.add("logo-visible");
+            };
+        </script>
+    </body>
+</html>

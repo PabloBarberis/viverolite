@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ventas</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/styles.css">
+        <script src="/js/script.js"></script>
+    </head>
+
+    <body>
+
+        <!-- Contenedor principal para navbar y botones -->
+        <div class="navbar-container d-flex justify-content-between align-items-center">
+            <!-- Navbar se carga con th:replace -->
+            <div th:replace="~{navbar :: navbar}"></div>
+
+            <!-- Botones específicos para cada página -->
+            <div class="nuevo-retroceder d-flex">
+                <a th:href="@{/ventas/crear}" class="btn btn-nueva-venta">Nueva Venta</a>
+            </div>
+        </div>
+
+
+        <div class="container-fluid mt-5" style="max-width: 90%;">
+            <h1>Ventas</h1>
+
+            <div class="separator"></div>
+
+            <h3>Totales del Día:</h3> 
+
+            <form style= "margin-bottom: 20px;">
+                <label for="fecha">Seleccionar fecha:</label>
+                <input type="date" id="fecha" name="fecha">
+            </form>
+
+  <table class="table table-bordered text-center">
+    <thead>
+        <tr>
+            <th>Efectivo</th>
+            <th>Crédito</th>
+            <th>Débito</th>
+            <th>MercadoPago</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><div class="form-control text-center" id="totalEfectivo" readonly>$ 0.00</div></td>
+            <td><div class="form-control text-center" id="totalCredito" readonly>$ 0.00</div></td>
+            <td><div class="form-control text-center" id="totalDebito" readonly>$ 0.00</div></td>
+            <td><div class="form-control text-center" id="totalMercadoPago" readonly>$ 0.00</div></td>
+            <td><div class="form-control fw-bold text-center" id="totalGeneral" readonly>$ 0.00</div></td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+
+            <div class="separator"></div>
+
+
+
+            <!-- Botones de Nueva Venta y Retroceder junto a la barra de paginación -->
+            <div class="mb-3 d-flex justify-content-between">
+                <div>
+                    <ul class="pagination">
+                        <li th:classappend="${ventas.hasPrevious()} ? 'page-item' : 'page-item disabled'">
+                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number - 1})}"
+                               class="page-link">Anterior</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, ventas.totalPages - 1)}"
+                            th:classappend="${ventas.number == i} ? 'page-item active'">
+                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${i})}" class="page-link"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                        <li th:classappend="${ventas.hasNext()} ? 'page-item' : 'page-item disabled'">
+                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number + 1})}"
+                               class="page-link">Siguiente</a>
+                        </li>
+
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Fecha</th>
+                        <th>Método de Pago</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="venta : ${ventas.content}">
+                        <td th:text="${venta.id}"></td>
+                        <td th:text="${venta.cliente != null ? venta.cliente.nombre : 'N/A'}"></td>
+                        <td th:text="${#numbers.formatDecimal(venta.total, 2, 2)}"></td>
+                        <td th:text="${#dates.format(venta.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${venta.metodoPago}"></td>
+                        <td>
+                            <a th:href="@{/ventas/editar/{id}(id=${venta.id})}" class="btn btn-warning btn-sm">Editar</a>
+                            <form th:action="@{/ventas/eliminar/{id}(id=${venta.id})}" method="post" style="display:inline;"
+                                  onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta venta?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                            <a th:href="@{/ventas/detalle/{id}(id=${venta.id})}" class="btn btn-info btn-sm">Ver</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mb-3 d-flex justify-content-between">
+                <div>
+                    <ul class="pagination">
+                        <li th:classappend="${ventas.hasPrevious()} ? 'page-item' : 'page-item disabled'">
+                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number - 1})}"
+                               class="page-link">Anterior</a>
+                        </li>
+
+                        <li th:each="i : ${#numbers.sequence(0, ventas.totalPages - 1)}"
+                            th:classappend="${ventas.number == i} ? 'page-item active'">
+                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${i})}" class="page-link"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                        <li th:classappend="${ventas.hasNext()} ? 'page-item' : 'page-item disabled'">
+                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number + 1})}"
+                               class="page-link">Siguiente</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </body>
+
+</html>

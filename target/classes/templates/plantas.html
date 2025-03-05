@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantas - Vive Verde</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .category-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .plant-name {
+            color: #00ff00;
+            text-align: center;
+            margin-top: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>Categorías de Plantas</h1>
+
+    <!-- Grilla de Categorías -->
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <!-- Categorías -->
+        <div class="col" th:each="categoria : ${categorias}">
+            <div class="card bg-dark">
+                <a th:href="@{/categoria/{nombre}(nombre=${categoria})}">
+                    <img th:src="@{/images/plantas/{categoria}.jpg(categoria=${categoria})}" class="category-img" alt="[[${categoria}]]">
+                </a>
+                <div class="card-body">
+                    <p class="plant-name">[[${categoria}]]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const categorias = ["Aromaticas", "Florales", "Frutales", "Arboles", "Cactus", "Suculentas"];
+        const container = document.querySelector(".row");
+        container.innerHTML = "";
+
+        categorias.forEach(categoria => {
+            const col = document.createElement("div");
+            col.className = "col";
+            col.innerHTML = `
+                <div class="card bg-dark">
+                    <a href="categoria/${categoria.toLowerCase()}">
+                        <img src="images/plantas/${categoria.toLowerCase()}.jpg" class="category-img" alt="${categoria}">
+                    </a>
+                    <div class="card-body">
+                        <p class="plant-name">${categoria}</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+    });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

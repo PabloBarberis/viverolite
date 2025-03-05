@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/styles.css">
+        <title>Clientes</title>
+    </head>
+    <body>
+
+        <!-- Contenedor principal para navbar y botones -->
+        <div class="navbar-container d-flex justify-content-between align-items-center">
+            <!-- Navbar se carga con th:replace -->
+            <div th:replace="~{navbar :: navbar}"></div>
+
+            <!-- Botones específicos para cada página -->
+            <div class="nuevo-retroceder">
+                <a th:href="@{/clientes/crear}" class="btn btn-nueva-venta">Nuevo Cliente</a>                
+            </div>
+        </div>
+
+
+
+        <div class="container-fluid mt-5" style="max-width: 90%;">   
+            <h1>Clientes</h1>
+            <div class="separator"></div>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Cuil</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="cliente : ${clientes}">
+                    <tr>
+                        <td th:text="${cliente.id}"></td>
+                        <td th:text="${cliente.nombre}"></td>
+                        <td th:text="${cliente.email}"></td>
+                        <td th:text="${cliente.telefono}"></td>
+                        <td th:text="${cliente.direccion}"></td>
+                        <td th:text="${cliente.cuil}"></td>
+                        <td>
+                            <!-- Botón para editar cliente -->
+                            <a th:href="@{/clientes/editar/{id}(id=${cliente.id})}" class="btn btn-warning btn-sm">Editar</a>
+                            <!-- Botón para dar de baja cliente con confirmación -->
+                            <form th:action="@{/clientes/dar-de-baja}" method="post" style="display:inline;">
+                                <input type="hidden" name="clienteSeleccionado" th:value="${cliente.id}"/>
+                                <button type="submit" class="btn btn-danger btn-sm" 
+                                        onclick="return confirm('¿Estás seguro de que quieres dar de baja a este cliente?');">
+                                    Dar de Baja
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </body>
+</html>

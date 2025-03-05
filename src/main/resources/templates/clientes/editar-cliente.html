@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Cliente</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    
+    <!-- Contenedor principal para navbar y botones -->
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <!-- Navbar se carga con th:replace -->
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div>
+
+    <div class="container-fluid mt-5" style="max-width: 90%;">
+        <h1>Editar Cliente</h1>
+        <div class="separator"></div>
+
+        <form th:action="@{/clientes/editar/{id}(id=${cliente.id})}" method="post">
+            <table class="table" style="table-layout: auto;">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Cuil</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" name="nombre" class="form-control" th:value="${cliente.nombre}" required></td>
+                        <td><input type="email" name="email" class="form-control" th:value="${cliente.email}" required></td>
+                        <td><input type="text" name="telefono" class="form-control" th:value="${cliente.telefono}"></td>
+                        <td><input type="text" name="direccion" class="form-control" th:value="${cliente.direccion}"></td>
+                        <td><input type="text" name="cuil" class="form-control" th:value="${cliente.cuil}" required></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="separator"></div>
+
+            <button type="submit" class="btn btn-success">Aceptar</button>
+            <a th:href="@{/clientes/listar}" class="btn btn-danger">Cancelar</a>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
