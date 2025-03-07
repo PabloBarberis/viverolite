@@ -3,7 +3,7 @@ package com.vivero.viveroApp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.vivero.viveroApp")
 public class ViveroAppApplication {
 
 	public static void main(String[] args) {

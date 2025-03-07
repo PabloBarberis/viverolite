@@ -1,5 +1,4 @@
-
-package com.vivero.viveroApp.Repository;
+package com.vivero.viveroApp.repository;
 
 import com.vivero.viveroApp.model.PerdidaInventario;
 import org.springframework.data.jpa.repository.JpaRepository;

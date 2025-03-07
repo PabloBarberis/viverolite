@@ -1,6 +1,6 @@
 package com.vivero.viveroApp.service;
 
-import com.vivero.viveroApp.Repository.PerdidaInventarioRepository;
+import com.vivero.viveroApp.repository.PerdidaInventarioRepository;
 import com.vivero.viveroApp.model.PerdidaInventario;
 import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.repository.ProductoRepository;
