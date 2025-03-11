@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="/css/styles.css">
+        <script src="/js/ventas.js"></script>
     </head>
 
     <body>
@@ -21,9 +22,12 @@
 
         </div>
 
-   <div class="container-fluid mt-5" style="max-width: 90%;">            <h1>Editar Venta</h1>
-            <div class="separator"></div>
+        <div class="container-fluid mt-5" style="max-width: 90%;">            
             
+            <h1>Editar Venta</h1>
+            
+            <div class="separator"></div>
+
             <form id="ventaForm" th:action="@{/ventas/actualizar}" method="post">
                 <input type="hidden" name="id" th:value="${venta.id}" />
 
@@ -56,6 +60,21 @@
                 </div>
 
                 <button type="button" id="agregarProducto" class="btn btn-success">Agregar</button>
+
+                <div class="separator"></div>
+
+<div class="form-group">
+    <label for="fecha" class="form-title">Fecha de Venta</label>
+    <input type="date" id="fecha" name="fecha" class="form-control"
+           th:value="${#temporals.format(venta.fecha, 'dd-MM-yyyy HH:mm:ss')}">
+</div>
+
+<div class="form-group">
+    <label for="hora" class="form-title">Hora de Venta</label>
+    <input type="time" id="hora" name="hora" class="form-control"
+           th:value="${#temporals.format(venta.fecha, 'HH:mm')}">
+</div>
+
 
                 <div class="separator"></div>
 
@@ -140,120 +159,6 @@
         <script src="https://stackpath.bootstrap.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-       <script>
-$(document).ready(function () {
-    $('#cliente').select2({
-        placeholder: 'Seleccionar Cliente...',
-        allowClear: true
-    });
-
-    $('#producto').select2({
-        placeholder: 'Buscar Producto...',
-        allowClear: true
-    });
-
-    function actualizarTotales() {
-        let totalLista = 0;
-        let totalMetodoPago = 0;
-        let totalFinal = 0;
-        const metodoPago = $('#metodoPago').val();
-        const descuentoPorcentaje = parseFloat($('#descuento').val()) || 0;
-
-        $('#productosSeleccionados tr').each(function () {
-            const precio = parseFloat($(this).find('.precio').text());
-            const cantidad = parseInt($(this).find('.cantidad').val());
-            totalLista += precio * cantidad;
-        });
-
-        if (metodoPago === 'CREDITO') {
-            totalMetodoPago = totalLista * 1.15;
-        } else {
-            totalMetodoPago = totalLista;
-        }
-
-        totalFinal = totalMetodoPago - (totalMetodoPago * (descuentoPorcentaje / 100));
-
-        $('#totalLista').val(totalLista.toFixed(2));
-        $('#totalMetodoPago').val(totalMetodoPago.toFixed(2));
-        $('#totalFinal').val(totalFinal.toFixed(2));
-    }
-
-    $('#agregarProducto').click(function () {
-        const productoId = $('#producto').val();
-        const productoNombre = $('#producto option:selected').text();
-        const precio = $('#producto option:selected').data('precio');
-        const stock = $('#producto option:selected').data('stock');
-
-        if (productoId) {
-            if ($('#productosSeleccionados input[name="productoIds[]"][value="' + productoId + '"]').length > 0) {
-                alert('Este producto ya está en la lista.');
-                return;
-            }
-
-            if (stock <= 0) {
-                alert('Este producto no tiene stock disponible.');
-                return;
-            }
-
-            $('#productosSeleccionados').append(`
-                <tr>
-                    <td>${productoNombre}</td>
-                    <td class="precio">${precio}</td>
-                    <td>${stock}</td>
-                    <td><input type="number" name="cantidades[]" class="form-control cantidad" min="1" max="${stock}" value="1"></td>
-                    <td><button type="button" class="btn btn-danger eliminarProducto">Eliminar</button></td>
-                    <input type="hidden" name="productoIds[]" value="${productoId}">
-                </tr>
-            `);
-
-            actualizarTotales();
-        }
-    });
-
-    $('#productosSeleccionados').on('change', '.cantidad', function () {
-        const cantidad = $(this).val();
-        const stock = $(this).closest('tr').find('td').eq(2).text();
-
-        if (parseInt(cantidad) > parseInt(stock)) {
-            alert('La cantidad no puede ser mayor que el stock disponible.');
-            $(this).val(stock);
-        }
-
-        actualizarTotales();
-    });
-
-    $('#productosSeleccionados').on('click', '.eliminarProducto', function () {
-        if ($('#productosSeleccionados tr').length === 1) {
-            alert('No puede eliminar el último producto.');
-            return false;
-        }
-        $(this).closest('tr').remove();
-        actualizarTotales();
-    });
-
-    $('#metodoPago, #descuento').change(function () {
-        actualizarTotales();
-    });
-
-    // Inicializar eventos al cargar la página
-    $('#productosSeleccionados .eliminarProducto').each(function () {
-        $(this).off('click').on('click', function () {
-            if ($('#productosSeleccionados tr').length === 1) {
-                alert('No puede eliminar el último producto.');
-                return false;
-            }
-            $(this).closest('tr').remove();
-            actualizarTotales();
-        });
-    });
-
-    // Llamar a actualizarTotales al cargar la página para mostrar los valores correctos
-    actualizarTotales();
-});
-</script>
-
-
-
 
     </body>
 

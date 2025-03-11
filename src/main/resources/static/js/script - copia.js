@@ -687,12 +687,252 @@ function obtenerVentas(fecha) {
 
 
 
+////////////////////////-PERDIDA INVENTARIO-///////////////////////////
+
+$(document).ready(function () {
+    $('#modalPerdida').on('show.bs.modal', function () {
+        $.getJSON('/perdida_inventario/productos', function (data) {
+            let select = $('#producto');
+            select.empty();
+            select.append('<option value="">Seleccione un producto</option>');
+
+            $.each(data, function (index, producto) {
+                select.append('<option value="' + producto.id + '">' + producto.nombre + '</option>');
+            });
+
+            // Recargar el selectpicker después de cargar los productos
+            select.selectpicker('refresh');
+        });
+    });
+});
+
+$('#formPerdida').submit(function (event) {
+    event.preventDefault(); // Evita el envío automático
+
+    let productoId = $('#producto').val();
+    let cantidad = $('#cantidad').val();
+    let descripcion = $('#descripcion').val();
+
+    if (!productoId || !cantidad || cantidad <= 0) {
+        alert("Debe seleccionar un producto y una cantidad válida.");
+        return;
+    }
+
+    // Obtener el token CSRF del meta tag
+    let csrfToken = $('meta[name="_csrf"]').attr('content');
+    let csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+    $.ajax({
+        url: `${BASE_URL}/perdida_inventario/guardar`,
+        type: "POST",
+        contentType: "application/x-www-form-urlencoded",
+        data: {
+            productoId: productoId,
+            cantidad: cantidad,
+            descripcion: descripcion
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader(csrfHeader, csrfToken); // Agregar CSRF token en el header
+        },
+        success: function (response) {
+            alert("Pérdida de inventario registrada correctamente.");
+            location.reload(); // Recargar la página después de guardar
+        },
+        error: function (xhr, status, error) {
+            alert("Error al registrar la pérdida: " + xhr.responseText);
+        }
+    });
+});
+
+
+///////////////////////////////-PRECIOS-//////////////////////////
+
+// Manejar el aumento de precios
+document.getElementById("formAumento").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const tipoProducto = document.getElementById("tipoProductoAumento").value;
+    const porcentaje = document.getElementById("porcentajeAumento").value;
+
+    if (!confirm(`¿Estás seguro de que deseas aumentar los precios en un ${porcentaje}% para los productos de tipo ${tipoProducto}?`)) {
+        return; // Cancelar si el usuario no confirma
+    }
+
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
+
+    fetch(`${BASE_URL}/precios/aumentar`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            [csrfHeader]: csrfToken,
+        },
+        body: JSON.stringify({tipoProducto, porcentaje}),
+    })
+            .then((response) => {
+                if (response.ok) {
+                    alert("Aumento aplicado con éxito.");
+                } else {
+                    alert("Error al aplicar el aumento.");
+                }
+            })
+            .catch(() => alert("Error de conexión."));
+});
+
+// Manejar el descuento de precios
+document.getElementById("formDescuento").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const tipoProducto = document.getElementById("tipoProductoDescuento").value;
+    const porcentaje = document.getElementById("porcentajeDescuento").value;
+
+    if (!confirm(`¿Estás seguro de que deseas aplicar un descuento del ${porcentaje}% para los productos de tipo ${tipoProducto}?`)) {
+        return; // Cancelar si el usuario no confirma
+    }
+
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
+
+    fetch(`${BASE_URL}/precios/descuento`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            [csrfHeader]: csrfToken,
+        },
+        body: JSON.stringify({tipoProducto, porcentaje}),
+    })
+            .then((response) => {
+                if (response.ok) {
+                    alert("Descuento aplicado con éxito.");
+                } else {
+                    alert("Error al aplicar el descuento.");
+                }
+            })
+            .catch(() => alert("Error de conexión."));
+});
+
 
 //////////////////////////////////////////////-VENTAS-/////////////////////////////////////////////
 
 
+
 $(document).ready(function () {
-    // Inicializar select2 para los dropdowns
+    $('#cliente').select2({
+        placeholder: 'Seleccionar Cliente...',
+        allowClear: true
+    });
+
+    $('#producto').select2({
+        placeholder: 'Buscar Producto...',
+        allowClear: true
+    });
+
+    function actualizarTotales() {
+        let totalLista = 0;
+        let totalMetodoPago = 0;
+        let totalFinal = 0;
+        const metodoPago = $('#metodoPago').val();
+        const descuentoPorcentaje = parseFloat($('#descuento').val()) || 0;
+
+        $('#productosSeleccionados tr').each(function () {
+            const precio = parseFloat($(this).find('.precio').text());
+            const cantidad = parseInt($(this).find('.cantidad').val());
+            totalLista += precio * cantidad;
+        });
+
+        if (metodoPago === 'CREDITO') {
+            totalMetodoPago = totalLista * 1.15;
+        } else {
+            totalMetodoPago = totalLista;
+        }
+
+        totalFinal = totalMetodoPago - (totalMetodoPago * (descuentoPorcentaje / 100));
+
+        $('#totalLista').val(totalLista.toFixed(2));
+        $('#totalMetodoPago').val(totalMetodoPago.toFixed(2));
+        $('#totalFinal').val(totalFinal.toFixed(2));
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $('#agregarProducto').click(function () {
+            const productoId = $('#producto').val();
+            const productoNombre = $('#producto option:selected').text();
+            const precio = $('#producto option:selected').data('precio');
+            const stock = $('#producto option:selected').data('stock');
+
+            if (productoId) {
+                if ($('#productosSeleccionados input[name="productoIds[]"][value="' + productoId + '"]').length > 0) {
+                    alert('Este producto ya está en la lista.');
+                    return;
+                }
+
+                if (stock <= 0) {
+                    alert('Este producto no tiene stock disponible.');
+                    return;
+                }
+
+                $('#productosSeleccionados').append(`
+                <tr>
+                    <td>${productoNombre}</td>
+                    <td class="precio">${precio}</td>
+                    <td>${stock}</td>
+                    <td><input type="number" name="cantidades[]" class="form-control cantidad" min="1" max="${stock}" value="1"></td>
+                    <td><button type="button" class="btn btn-danger eliminarProducto">Eliminar</button></td>
+                    <input type="hidden" name="productoIds[]" value="${productoId}">
+                </tr>
+            `);
+
+                actualizarTotales();
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $('#productosSeleccionados').on('change', '.cantidad', function () {
+            const cantidad = $(this).val();
+            const stock = $(this).closest('tr').find('td').eq(2).text();
+
+            if (parseInt(cantidad) > parseInt(stock)) {
+                alert('La cantidad no puede ser mayor que el stock disponible.');
+                $(this).val(stock);
+            }
+
+            actualizarTotales();
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $('#productosSeleccionados').on('click', '.eliminarProducto', function () {
+            if ($('#productosSeleccionados tr').length === 1) {
+                alert('No puede eliminar el último producto.');
+                return false;
+            }
+            $(this).closest('tr').remove();
+            actualizarTotales();
+        });
+    });
+    
+    $('#metodoPago, #descuento').change(function () {
+        actualizarTotales();
+    });
+
+    // Inicializar eventos al cargar la página
+    $('#productosSeleccionados .eliminarProducto').each(function () {
+        $(this).off('click').on('click', function () {
+            if ($('#productosSeleccionados tr').length === 1) {
+                alert('No puede eliminar el último producto.');
+                return false;
+            }
+            $(this).closest('tr').remove();
+            actualizarTotales();
+        });
+    });
+
+    // Llamar a actualizarTotales al cargar la página para mostrar los valores correctos
+    actualizarTotales();
+});
+
+$(document).ready(function () {
     $('#cliente').select2({
         placeholder: 'Seleccionar Cliente...',
         allowClear: true,
@@ -707,7 +947,6 @@ $(document).ready(function () {
         dropdownCssClass: 'select2-dropdown'
     });
 
-    // Función para actualizar totales
     function actualizarTotales() {
         let totalLista = 0;
         let totalMetodoPago = 0;
@@ -715,7 +954,6 @@ $(document).ready(function () {
         const metodoPago = $('#metodoPago').val();
         const descuentoPorcentaje = parseFloat($('#descuento').val()) || 0;
 
-        // Calcular totales
         $('#productosSeleccionados tr').each(function () {
             const precio = parseFloat($(this).find('.precio').text());
             const cantidad = parseInt($(this).find('.cantidad').val());
@@ -723,90 +961,77 @@ $(document).ready(function () {
         });
 
         if (metodoPago === 'CREDITO') {
-            totalMetodoPago = totalLista * 1.15; // 15% extra
+            totalMetodoPago = totalLista * 1.15;
         } else {
             totalMetodoPago = totalLista;
         }
 
         totalFinal = totalMetodoPago - (totalMetodoPago * (descuentoPorcentaje / 100));
 
-        // Actualizar los campos de total en el DOM
         $('#totalLista').val(totalLista.toFixed(2));
         $('#totalMetodoPago').val(totalMetodoPago.toFixed(2));
         $('#totalFinal').val(totalFinal.toFixed(2));
     }
 
-    // Evento para agregar producto a la lista
-    $('#agregarProducto').click(function () {
-        const productoId = $('#producto').val();
-        const productoNombre = $('#producto option:selected').text();
-        const precio = $('#producto option:selected').data('precio');
-        const stock = $('#producto option:selected').data('stock');
+//    $('#agregarProducto').click(function () {
+//        const productoId = $('#producto').val();
+//        const productoNombre = $('#producto option:selected').text();
+//        const precio = $('#producto option:selected').data('precio');
+//        const stock = $('#producto option:selected').data('stock');
+//
+//        if (productoId) {
+//            if ($('#productosSeleccionados input[name="productoIds[]"][value="' + productoId + '"]').length > 0) {
+//                alert('Este producto ya está en la lista.');
+//                return;
+//            }
+//
+//            if (stock <= 0) {
+//                alert('Este producto no tiene stock disponible.');
+//                return;
+//            }
+//
+//            $('#productosSeleccionados').append(`
+//                        <tr>
+//                            <td>${productoNombre}</td>
+//                            <td class="precio">${precio}</td>
+//                            <td>${stock}</td>
+//                            <td><input type="number" name="cantidades[]" class="form-control cantidad" min="1" max="${stock}" value="1"></td>
+//                            <td><button type="button" class="btn btn-danger eliminarProducto">Eliminar</button></td>
+//                            <input type="hidden" name="productoIds[]" value="${productoId}">
+//                        </tr>
+//                    `);
+//
+//            actualizarTotales();
+//        }
+//    });
 
-        if (productoId) {
-            if ($('#productosSeleccionados input[name="productoIds[]"][value="' + productoId + '"]').length > 0) {
-                alert('Este producto ya está en la lista.');
-                return;
-            }
-
-            if (stock <= 0) {
-                alert('Este producto no tiene stock disponible.');
-                return;
-            }
-
-            // Agregar fila a la tabla
-            $('#productosSeleccionados').append(`
-                <tr>
-                    <td>${productoNombre}</td>
-                    <td class="precio">${precio}</td>
-                    <td>${stock}</td>
-                    <td><input type="number" name="cantidades[]" class="form-control cantidad" min="1" max="${stock}" value="1"></td>
-                    <td><button type="button" class="btn btn-danger eliminarProducto">Eliminar</button></td>
-                    <input type="hidden" name="productoIds[]" value="${productoId}">
-                </tr>
-            `);
-
-            // Actualizar totales
-            actualizarTotales();
-        }
-    });
-
-    // Evento para actualizar totales al cambiar cantidad
     $('#productosSeleccionados').on('change', '.cantidad', function () {
         const cantidad = $(this).val();
         const stock = $(this).closest('tr').find('td').eq(2).text();
 
         if (parseInt(cantidad) > parseInt(stock)) {
             alert('La cantidad no puede ser mayor que el stock disponible.');
-            $(this).val(stock); // Restablecer al stock máximo
+            $(this).val(stock);
         }
 
         actualizarTotales();
     });
 
-    // Evento para eliminar producto de la lista
     $('#productosSeleccionados').on('click', '.eliminarProducto', function () {
-        if ($('#productosSeleccionados tr').length === 1) {
-            alert('No puede eliminar el último producto.');
-            return false;
-        }
         $(this).closest('tr').remove();
         actualizarTotales();
     });
 
-    // Evento para recalcular totales al cambiar descuento o método de pago
     $('#metodoPago, #descuento').change(function () {
         actualizarTotales();
     });
 
-    // Validación del formulario al enviarlo
     $('#ventaForm').submit(function (event) {
         if ($('#productosSeleccionados tr').length === 0) {
             alert('Debe agregar al menos un producto antes de crear la venta.');
-            event.preventDefault(); // Evitar el envío del formulario
+            event.preventDefault(); // Evita que el formulario se envíe
         }
     });
 
-    // Llamar a actualizarTotales al cargar la página para mostrar valores iniciales
-    actualizarTotales();
 });
+

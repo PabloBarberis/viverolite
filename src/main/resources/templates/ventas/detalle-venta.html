@@ -24,7 +24,7 @@
 
 
 
-        <div class="container mt-5">
+        <div class="container-fluid mt-5" style="max-width: 90%;">            
 
             <h1>Detalle de Venta</h1>
 
@@ -40,7 +40,7 @@
                 </tr>
                 <tr>
                     <th>Fecha</th>
-                    <td th:text="${#dates.format(venta.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy HH:mm:ss')}"></td>
                 </tr>
                 <tr>
                     <th>Método de Pago</th>

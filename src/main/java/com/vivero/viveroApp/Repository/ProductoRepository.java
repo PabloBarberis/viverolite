@@ -11,5 +11,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     @Query("SELECT p FROM Producto p WHERE TYPE(p) = :tipoProducto")
     List<Producto> findByTipo(@Param("tipoProducto") Class<? extends Producto> tipoProducto);
+
+    List<Producto> findByActivoTrue();
         
 }

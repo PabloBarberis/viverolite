@@ -1,153 +1,89 @@
 <!DOCTYPE html>
 <html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
-    <title>Actualizar Precios</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="_csrf" th:content="${_csrf.token}">
+        <meta name="_csrf_header" th:content="${_csrf.headerName}">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/styles.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <title>Actualizar Precios</title>
+    </head>
 
-<body>
-    <!-- Navbar cargada dinámicamente -->
-    <div th:replace="~{navbar :: navbar}"></div>
+    <body>
+        <!-- Navbar cargada dinámicamente -->
+        <div th:replace="~{navbar :: navbar}"></div>
 
-    <!-- Contenido principal -->
-    <div class="container mt-5" style="max-width: 90%;">
-        <h1 class="mb-4">Actualizar Precios de Productos</h1>
-        <div class="separator mb-4"></div>
+        <!-- Contenido principal -->
+        <div class="container mt-5" style="max-width: 90%;">
+            <h1 class="mb-4">Actualizar Precios de Productos</h1>
+            <div class="separator mb-4"></div>
 
-        <!-- Formulario de aumento de precios -->
-        <form id="formAumento" class="form">
-            <h3>Aumentar Precios</h3>
-            <div class="form-group">
-                <label for="tipoProductoAumento">Tipo de Producto:</label>
-                <select id="tipoProductoAumento" name="tipoProducto" class="form-control">
-                    <option value="planta">Planta</option>
-                    <option value="maceta">Maceta</option>
-                    <option value="decoracion">Decoración</option>
-                    <option value="grow">Grow</option>
-                    <option value="tierra">Tierra</option>
-                </select>
-            </div>
+            <!-- Formulario de aumento de precios -->
+            <form id="formAumento" class="form">
+                <h3>Aumentar Precios</h3>
+                <div class="form-group">
+                    <label for="tipoProductoAumento">Tipo de Producto:</label>
+                    <select id="tipoProductoAumento" name="tipoProducto" class="form-control">
+                        <option value="planta">Planta</option>
+                        <option value="maceta">Maceta</option>
+                        <option value="decoracion">Decoración</option>
+                        <option value="grow">Grow</option>
+                        <option value="tierra">Tierra</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="porcentajeAumento">Porcentaje de Aumento:</label>
-                <select id="porcentajeAumento" name="porcentaje" class="form-control">
-                    <!-- Opciones generadas dinámicamente con Thymeleaf -->
-                    <th:block th:each="i : ${#numbers.sequence(1, 200)}">
-                        <option th:value="${i}" th:text="${i + '%'}"></option>
-                    </th:block>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="porcentajeAumento">Porcentaje de Aumento:</label>
+                    <select id="porcentajeAumento" name="porcentaje" class="form-control">
+                        <!-- Opciones generadas dinámicamente con Thymeleaf -->
+                        <th:block th:each="i : ${#numbers.sequence(1, 200)}">
+                            <option th:value="${i}" th:text="${i + '%'}"></option>
+                        </th:block>
+                    </select>
+                </div>
 
-            <button type="submit" class="btn btn-success">Aplicar Aumento</button>
-        </form>
+                <button type="submit" class="btn btn-success">Aplicar Aumento</button>
+            </form>
 
-        <div class="separator mb-4 mt-4"></div>
+            <div class="separator mb-4 mt-4"></div>
 
-        <!-- Formulario de descuento de precios -->
-        <form id="formDescuento" class="form">
-            <h3>Aplicar Descuentos</h3>
-            <div class="form-group">
-                <label for="tipoProductoDescuento">Tipo de Producto:</label>
-                <select id="tipoProductoDescuento" name="tipoProducto" class="form-control">
-                    <option value="planta">Planta</option>
-                    <option value="maceta">Maceta</option>
-                    <option value="decoracion">Decoración</option>
-                    <option value="grow">Grow</option>
-                    <option value="tierra">Tierra</option>
-                </select>
-            </div>
+            <!-- Formulario de descuento de precios -->
+            <form id="formDescuento" class="form">
+                <h3>Aplicar Descuentos</h3>
+                <div class="form-group">
+                    <label for="tipoProductoDescuento">Tipo de Producto:</label>
+                    <select id="tipoProductoDescuento" name="tipoProducto" class="form-control">
+                        <option value="planta">Planta</option>
+                        <option value="maceta">Maceta</option>
+                        <option value="decoracion">Decoración</option>
+                        <option value="grow">Grow</option>
+                        <option value="tierra">Tierra</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="porcentajeDescuento">Porcentaje de Descuento:</label>
-                <select id="porcentajeDescuento" name="porcentaje" class="form-control">
-                    <!-- Opciones generadas dinámicamente con Thymeleaf -->
-                    <th:block th:each="i : ${#numbers.sequence(1, 100)}">
-                        <option th:value="${i}" th:text="${i + '%'}"></option>
-                    </th:block>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="porcentajeDescuento">Porcentaje de Descuento:</label>
+                    <select id="porcentajeDescuento" name="porcentaje" class="form-control">
+                        <!-- Opciones generadas dinámicamente con Thymeleaf -->
+                        <th:block th:each="i : ${#numbers.sequence(1, 100)}">
+                            <option th:value="${i}" th:text="${i + '%'}"></option>
+                        </th:block>
+                    </select>
+                </div>
 
-            <button type="submit" class="btn btn-danger">Aplicar Descuento</button>
-        </form>
-    </div>
+                <button type="submit" class="btn btn-danger">Aplicar Descuento</button>
+            </form>
+        </div>
 
-    <!-- Scripts de Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <!-- Scripts de Bootstrap -->
+        
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <!-- Script para manejar los formularios -->
-    <script>
-        // Manejar el aumento de precios
-        document.getElementById("formAumento").addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const tipoProducto = document.getElementById("tipoProductoAumento").value;
-            const porcentaje = document.getElementById("porcentajeAumento").value;
-
-            if (!confirm(`¿Estás seguro de que deseas aumentar los precios en un ${porcentaje}% para los productos de tipo ${tipoProducto}?`)) {
-                return; // Cancelar si el usuario no confirma
-            }
-
-            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
-
-            fetch("/precios/aumentar", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    [csrfHeader]: csrfToken,
-                },
-                body: JSON.stringify({ tipoProducto, porcentaje }),
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        alert("Aumento aplicado con éxito.");
-                    } else {
-                        alert("Error al aplicar el aumento.");
-                    }
-                })
-                .catch(() => alert("Error de conexión."));
-        });
-
-        // Manejar el descuento de precios
-        document.getElementById("formDescuento").addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const tipoProducto = document.getElementById("tipoProductoDescuento").value;
-            const porcentaje = document.getElementById("porcentajeDescuento").value;
-
-            if (!confirm(`¿Estás seguro de que deseas aplicar un descuento del ${porcentaje}% para los productos de tipo ${tipoProducto}?`)) {
-                return; // Cancelar si el usuario no confirma
-            }
-
-            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
-
-            fetch("/precios/descuento", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    [csrfHeader]: csrfToken,
-                },
-                body: JSON.stringify({ tipoProducto, porcentaje }),
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        alert("Descuento aplicado con éxito.");
-                    } else {
-                        alert("Error al aplicar el descuento.");
-                    }
-                })
-                .catch(() => alert("Error de conexión."));
-        });
-    </script>
-</body>
+<script src="/js/precios.js"></script>
+    </body>
 
 </html>

@@ -23,9 +23,10 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
         @Transactional(readOnly = true)
-    public List<Producto> getAllProductos() {
-        return productoRepository.findAll();
+    public List<Producto> getAllProductosActivos() {
+        return productoRepository.findByActivoTrue();
     }
+    
     @Transactional(readOnly = true)
     public Optional<Producto> getProductoById(Long id) {
         return productoRepository.findById(id);

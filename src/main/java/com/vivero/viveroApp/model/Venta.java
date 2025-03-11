@@ -5,9 +5,10 @@ import com.vivero.viveroApp.model.enums.MetodoPago;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Data
@@ -26,8 +27,8 @@ public class Venta {
 
     private Double total; // Atributo para almacenar el total de la venta
 
-    @Temporal(TemporalType.TIMESTAMP) // Para almacenar la fecha y hora
-    private Date fecha;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 🛠 Formato de fecha
+    private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING) // Almacena el método de pago como un String en la base de datos
     @Column(name = "tipo_pago")
@@ -40,7 +41,7 @@ public class Venta {
     // Constructor
     public Venta(Cliente cliente, MetodoPago metodoPago, Descuento descuento) {
         this.cliente = cliente;
-        this.fecha = new Date(); // Establecer la fecha actual al crear la venta
+        this.fecha = LocalDateTime.now(); // Fecha y hora actual
         this.metodoPago = metodoPago;
         this.descuento = descuento; // Asignamos el descuento al crear la venta
     }

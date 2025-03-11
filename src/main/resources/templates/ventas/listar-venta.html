@@ -7,7 +7,17 @@
         <title>Ventas</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link rel="stylesheet" href="/css/styles.css">
-        <script src="/js/script.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script
+            
+        <!-- Incluir Popper.js desde jsDelivr -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+
+        <!-- Incluir Bootstrap JS desde CDN -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="/js/ventas.js"></script>
+
+
     </head>
 
     <body>
@@ -36,26 +46,26 @@
                 <input type="date" id="fecha" name="fecha">
             </form>
 
-  <table class="table table-bordered text-center">
-    <thead>
-        <tr>
-            <th>Efectivo</th>
-            <th>Crédito</th>
-            <th>Débito</th>
-            <th>MercadoPago</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><div class="form-control text-center" id="totalEfectivo" readonly>$ 0.00</div></td>
-            <td><div class="form-control text-center" id="totalCredito" readonly>$ 0.00</div></td>
-            <td><div class="form-control text-center" id="totalDebito" readonly>$ 0.00</div></td>
-            <td><div class="form-control text-center" id="totalMercadoPago" readonly>$ 0.00</div></td>
-            <td><div class="form-control fw-bold text-center" id="totalGeneral" readonly>$ 0.00</div></td>
-        </tr>
-    </tbody>
-</table>
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Efectivo</th>
+                        <th>Crédito</th>
+                        <th>Débito</th>
+                        <th>MercadoPago</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><div class="form-control text-center" id="totalEfectivo" readonly>$ 0.00</div></td>
+                        <td><div class="form-control text-center" id="totalCredito" readonly>$ 0.00</div></td>
+                        <td><div class="form-control text-center" id="totalDebito" readonly>$ 0.00</div></td>
+                        <td><div class="form-control text-center" id="totalMercadoPago" readonly>$ 0.00</div></td>
+                        <td><div class="form-control fw-bold text-center" id="totalGeneral" readonly>$ 0.00</div></td>
+                    </tr>
+                </tbody>
+            </table>
 
 
 
@@ -105,7 +115,8 @@
                         <td th:text="${venta.id}"></td>
                         <td th:text="${venta.cliente != null ? venta.cliente.nombre : 'N/A'}"></td>
                         <td th:text="${#numbers.formatDecimal(venta.total, 2, 2)}"></td>
-                        <td th:text="${#dates.format(venta.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy HH:mm:ss')}"></td>
+
                         <td th:text="${venta.metodoPago}"></td>
                         <td>
                             <a th:href="@{/ventas/editar/{id}(id=${venta.id})}" class="btn btn-warning btn-sm">Editar</a>
@@ -142,7 +153,7 @@
 
 
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        
     </body>
 
 </html>

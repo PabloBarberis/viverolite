@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -51,13 +52,17 @@ public class PerdidaInventarioController {
             return ResponseEntity.badRequest().body("Error: Datos inválidos.");
         }
 
-        // Crear y guardar la pérdida de inventario
-        Optional<Producto> prOptional = productoService.getProductoById(productoId);
-        Producto producto = prOptional.get();
-
-        perdidaInventarioService.createPerdidaInventario(new PerdidaInventario(productoId, producto, descripcion, null, cantidad));
-
-        return ResponseEntity.ok("Pérdida de inventario registrada correctamente.");
+        try {
+            // Crear y guardar la pérdida de inventario
+            Optional<Producto> prOptional = productoService.getProductoById(productoId);
+            Producto producto = prOptional.get();
+            perdidaInventarioService.createPerdidaInventario(new PerdidaInventario(productoId, producto, descripcion, null, cantidad));
+            return ResponseEntity.ok("Pérdida de inventario registrada correctamente.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al registrar la pérdida: " + e.getMessage());
+        }
     }
 
     @PostMapping("/eliminar/{id}")
@@ -84,13 +89,7 @@ public class PerdidaInventarioController {
     @ResponseBody
     public List<Producto> obtenerProductos() {
 
-        System.out.println("ingresando a OBTENERPRODUCTOS");
-
-        List<Producto> listaProductos = productoService.getAllProductos();
-        for (Producto producto : listaProductos) {
-            System.out.println(producto.getNombre());
-        }
-        return productoService.getAllProductos();
+        return productoService.getAllProductosActivos();
     }
 
 }

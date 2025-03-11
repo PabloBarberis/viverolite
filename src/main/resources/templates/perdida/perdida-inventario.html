@@ -13,6 +13,8 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link rel="stylesheet" href="/css/styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="/js/perdida.js"></script>
     </head>
 
     <body>
@@ -86,7 +88,7 @@
                         <td th:text="${perdida.producto.nombre}"></td>
                         <td th:text="${perdida.cantidad}"></td>
                         <td th:text="${perdida.descripcion}"></td>
-                        <td th:text="${#dates.format(perdida.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${#dates.format(perdida.fecha, 'dd-MM-yyyy HH:mm')}"></td>
                         <td>
                             <form th:action="@{/perdida_inventario/eliminar/{id}(id=${perdida.id})}" method="post" style="display:inline;"
                                   onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta pérdida?');">
@@ -167,76 +169,12 @@
 
 
             <!-- jQuery y Select2 -->
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
             <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
             <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
-
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
-            <script>
-                                      $(document).ready(function () {
-                                          $('#modalPerdida').on('show.bs.modal', function () {
-                                              $.getJSON('/perdida_inventario/productos', function (data) {
-                                                  let select = $('#producto');
-                                                  select.empty();
-                                                  select.append('<option value="">Seleccione un producto</option>');
 
-                                                  $.each(data, function (index, producto) {
-                                                      select.append('<option value="' + producto.id + '">' + producto.nombre + '</option>');
-                                                  });
-
-                                                  // Recargar el selectpicker después de cargar los productos
-                                                  select.selectpicker('refresh');
-                                              });
-                                          });
-                                      });
-
-                                      $('#formPerdida').submit(function (event) {
-                                          event.preventDefault(); // Evita el envío automático
-
-                                          let productoId = $('#producto').val();
-                                          let cantidad = $('#cantidad').val();
-                                          let descripcion = $('#descripcion').val();
-
-                                          console.log("Producto seleccionado:", productoId);
-                                          console.log("Cantidad:", cantidad);
-                                          console.log("Descripción:", descripcion);
-
-                                          if (!productoId || !cantidad || cantidad <= 0) {
-                                              alert("Debe seleccionar un producto y una cantidad válida.");
-                                              return;
-                                          }
-
-                                          // Obtener el token CSRF del meta tag
-                                          let csrfToken = $('meta[name="_csrf"]').attr('content');
-                                          let csrfHeader = $('meta[name="_csrf_header"]').attr('content');
-
-                                          $.ajax({
-                                              url: "/perdida_inventario/guardar",
-                                              type: "POST",
-                                              contentType: "application/x-www-form-urlencoded",
-                                              data: {
-                                                  productoId: productoId,
-                                                  cantidad: cantidad,
-                                                  descripcion: descripcion
-                                              },
-                                              beforeSend: function (xhr) {
-                                                  xhr.setRequestHeader(csrfHeader, csrfToken); // Agregar CSRF token en el header
-                                              },
-                                              success: function (response) {
-                                                  alert("Pérdida de inventario registrada correctamente.");
-                                                  location.reload(); // Recargar la página después de guardar
-                                              },
-                                              error: function (xhr, status, error) {
-                                                  alert("Error al registrar la pérdida: " + xhr.responseText);
-                                              }
-                                          });
-                                      });
-
-
-
-            </script>
 
     </body>
 
