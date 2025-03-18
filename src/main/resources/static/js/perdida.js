@@ -1,7 +1,4 @@
-const BASE_URL = "http://localhost:8080";
-//const BASE_URL = "http://149.50.139.89:8080";
-
-
+import BASE_URL from '/js/config.js';
 
 ////////////////////////-PERDIDA INVENTARIO-///////////////////////////
 

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <title>Ingresos y Egresos</title>
+
+</head>
+
+<body>
+    <!-- Contenedor principal para navbar y botones -->
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div>
+
+    <div class="container-fluid mt-5">
+
+        <div class=" container-fluid mt-4">
+            <div class="row align-items-center justify-content-between">
+                <h1>Ingresos y Gastos</h1>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalIngresoEgreso">
+                    Nuevo Ingreso/Egreso
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Botón para abrir el modal -->
+
+        <div class="separator"></div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <select id="mes" name="mes" class="form-control" aria-label="Seleccionar mes">
+                    <option value="">Seleccionar mes</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <select id="anio" name="anio" class="form-control" aria-label="Seleccionar año">
+                    <option value="">Seleccionar año</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+
+        <div class="container-fluid mt-5">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div style="border: 2px solid green; padding: 20px;">
+                        <h2>Ingresos en Efectivo</h2>
+                        <table class="table table-striped table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Periodo</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaEfectivo"></tbody>
+                        </table>
+
+                        <h2>Movimientos en Efectivo</h2>
+                        <table class="table table-striped table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movEfectivo"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div style="border: 2px solid green; padding: 20px;">
+                        <h2>Ingresos con Tarjeta</h2>
+                        <table class="table table-striped table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Periodo</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaTarjeta"></tbody>
+                        </table>
+
+                        <h3>Movimientos con Tarjeta</h3>
+                        <table class="table table-striped table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Método</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movTarjeta"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- comment -->
+
+
+    <div class="container-fluid mt-5">
+
+        <div class="row">
+            <div class="col-md-6">
+                <div style="border: 2px solid green; padding: 20px;">
+                    <h2>Ingresos MercadoPago Valeria</h2>
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Periodo</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaMpVale"></tbody>
+                    </table>
+
+                    <h3>Movimientos MercadoPago Valeria</h3>
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                                <th>Usuario</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movMpVale"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div style="border: 2px solid green; padding: 20px;">
+                    <h2>Ingresos MercadoPago Sacha</h2>
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Periodo</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaMpSacha"></tbody>
+                    </table>
+
+                    <h3>Movimientos MercadoPago Sacha</h3>
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                                <th>Usuario</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movMpSacha"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- comment--->
+
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalIngresoEgreso" tabindex="-1" aria-labelledby="modalIngresoEgresoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalIngresoEgresoLabel">Nuevo Ingreso/Egreso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formIngresoEgreso">
+                        <!-- Tipo de movimiento (Ingreso/Egreso) -->
+                        <div class="mb-3">
+                            <label for="tipoMovimiento" class="form-label">Tipo de Movimiento</label>
+                            <select class="form-select" id="tipoMovimiento" name="tipoMovimiento" required>
+                                <option value="true">Ingreso</option>
+                                <option value="false">Egreso</option>
+                            </select>
+                        </div>
+
+                        <!-- Método de Pago -->
+                        <div class="mb-3">
+                            <label for="metodoPago" class="form-label">Método de Pago</label>
+                            <select class="form-select" id="metodoPago" name="metodoPago" required>
+                                <option value="EFECTIVO">Efectivo</option>
+                                <option value="DEBITO">Débito</option>
+                                <option value="CREDITO">Crédito</option>
+                                <option value="MERCADOPAGO">MercadoPago</option>
+                            </select>
+                        </div>
+
+                        <!-- Usuario -->
+                        <div class="mb-3">
+                            <label for="usuario" class="form-label">Usuario</label>
+                            <select class="form-select" id="usuario" name="usuario" required>
+                                <!-- Se llenará dinámicamente con JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                                required></textarea>
+                        </div>
+
+                        <!-- Monto -->
+                        <div class="mb-3">
+                            <label for="monto" class="form-label">Monto</label>
+                            <input type="number" class="form-control" id="monto" name="monto" step="0.01" required>
+                        </div>
+
+                        <!-- Botón de enviar -->
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                aria-label="Cerrar">Cerrar</button>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script type="module" src="/js/entrada-salida.js"></script>
+
+
+</body>
+
+</html>

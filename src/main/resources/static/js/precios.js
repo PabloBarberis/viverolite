@@ -1,7 +1,7 @@
 // ============================
 // CONFIGURACIÓN Y CONSTANTES
 // ============================
-const BASE_URL = "http://localhost:8080"; // Cambia la URL si estás usando otro servidor
+import BASE_URL from '/js/config.js';
 
 ///////////////////////////////-AUMENTO DE PRECIOS-//////////////////////////
 

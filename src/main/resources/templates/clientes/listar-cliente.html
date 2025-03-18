@@ -15,15 +15,19 @@
             <div th:replace="~{navbar :: navbar}"></div>
 
             <!-- Botones específicos para cada página -->
-            <div class="nuevo-retroceder">
-                <a th:href="@{/clientes/crear}" class="btn btn-nueva-venta">Nuevo Cliente</a>                
-            </div>
+
         </div>
 
 
 
         <div class="container-fluid mt-5" style="max-width: 90%;">   
-            <h1>Clientes</h1>
+            <div class="row d-flex align-items-center">
+                <h1 class="col">Clientes</h1>
+                <div class="ms-auto">
+                    <a th:href="@{/clientes/crear}" class="btn btn-nueva-venta">Nuevo Cliente</a>                
+                </div>
+            </div>
+
             <div class="separator"></div>
             <table class="table table-striped">
                 <thead class="thead-dark">

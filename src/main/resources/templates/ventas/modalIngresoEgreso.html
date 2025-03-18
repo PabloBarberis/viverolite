@@ -1,0 +1,67 @@
+<!-- Modal crearIngresoEgreso-->
+            <div class="modal fade" id="modalIngresoEgreso" tabindex="-1" aria-labelledby="modalIngresoEgresoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalIngresoEgresoLabel">Nuevo Ingreso/Egreso</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="formIngresoEgreso">
+                                <!-- Tipo de movimiento (Ingreso/Egreso) -->
+                                <div class="mb-3">
+                                    <label for="tipoMovimiento" class="form-label">Tipo de Movimiento</label>
+                                    <select class="form-select" id="tipoMovimiento" name="tipoMovimiento" required>
+                                        <option value="true">Ingreso</option>
+                                        <option value="false">Egreso</option>
+                                    </select>
+                                </div>
+
+                                <!-- Método de Pago -->
+                                <div class="mb-3">
+                                    <label for="metodoPago" class="form-label">Método de Pago</label>
+                                    <select class="form-select" id="metodoPago" name="metodoPago" required>
+                                        <option value="EFECTIVO">Efectivo</option>
+                                        <option value="DEBITO">Débito</option>
+                                        <option value="CREDITO">Crédito</option>
+                                        <option value="MERCADOPAGO">MercadoPago</option>
+                                    </select>
+                                </div>
+
+                                <!-- Usuario -->
+                                <div class="mb-3">
+                                    <label for="usuario" class="form-label">Usuario</label>
+                                    <select class="form-select" id="usuario" name="usuario" required>
+                                        <!-- Se llenará dinámicamente con JavaScript -->
+                                    </select>
+                                </div>
+
+                                <!-- Fecha -->
+                                <div class="mb-3">
+                                    <label for="fecha" class="form-label">Fecha</label>
+                                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                                </div>
+
+                                <!-- Descripción -->
+                                <div class="mb-3">
+                                    <label for="descripcion" class="form-label">Descripción</label>
+                                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                                </div>
+
+                                <!-- Monto -->
+                                <div class="mb-3">
+                                    <label for="monto" class="form-label">Monto</label>
+                                    <input type="number" class="form-control" id="monto" name="monto" step="0.01" required>
+                                </div>
+
+                                <!-- Botón de enviar -->
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success">Guardar</button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Cerrar">Cerrar</button>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>

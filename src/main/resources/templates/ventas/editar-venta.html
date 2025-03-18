@@ -8,7 +8,8 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="/css/styles.css">
-        <script src="/js/ventas.js"></script>
+        <script type="module" src="/js/ventas.js"></script>
+
     </head>
 
     <body>
@@ -23,9 +24,9 @@
         </div>
 
         <div class="container-fluid mt-5" style="max-width: 90%;">            
-            
+
             <h1>Editar Venta</h1>
-            
+
             <div class="separator"></div>
 
             <form id="ventaForm" th:action="@{/ventas/actualizar}" method="post">
@@ -62,18 +63,25 @@
                 <button type="button" id="agregarProducto" class="btn btn-success">Agregar</button>
 
                 <div class="separator"></div>
+                
+                <h3 class="mt-5">Fecha y hora de la venta</h3>
 
-<div class="form-group">
-    <label for="fecha" class="form-title">Fecha de Venta</label>
-    <input type="date" id="fecha" name="fecha" class="form-control"
-           th:value="${#temporals.format(venta.fecha, 'dd-MM-yyyy HH:mm:ss')}">
-</div>
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <label for="fecha" class="form-title">Fecha</label>
+                        <input type="date" id="fecha" name="fecha" class="form-control"
+                               th:value="${#temporals.format(venta.fecha, 'yyyy-MM-dd')}"
+                               style="width: 150px;">
+                    </div>
 
-<div class="form-group">
-    <label for="hora" class="form-title">Hora de Venta</label>
-    <input type="time" id="hora" name="hora" class="form-control"
-           th:value="${#temporals.format(venta.fecha, 'HH:mm')}">
-</div>
+                    <div class="col-auto">
+                        <label for="hora" class="form-title">Hora</label>
+                        <input type="time" id="hora" name="hora" class="form-control"
+                               th:value="${#temporals.format(venta.fecha, 'HH:mm')}"
+                               style="width: 100px;">
+                    </div>
+                </div>
+
 
 
                 <div class="separator"></div>

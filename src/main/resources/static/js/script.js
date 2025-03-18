@@ -1,8 +1,8 @@
-const BASE_URL = "http://localhost:8080";
-//const BASE_URL = "http://149.50.139.89:8080";
+import BASE_URL from '/js/config.js';
 
-
-
+// Obtén el token CSRF y el encabezado del HTML
+const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
 
 ///////////////////////////////////////-HORAS-////////////////////////////////////
 
@@ -29,24 +29,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
-function cargarUsuario() {
-
+window.cargarUsuario = function () {
+    
     var usuarioId = document.getElementById('usuario').value;
     var configuracion = document.getElementById('configuracion');
     configuracion.style.display = 'block';
 
-    // Evitar llamadas duplicadas
     if (usuarioId !== configuracion.dataset.lastUserId) {
         configuracion.dataset.lastUserId = usuarioId;
 
-        // Limpiar la tabla antes de cargar nuevos datos
         var tablaRegistros = document.getElementById('tablaRegistros');
         tablaRegistros.innerHTML = '';
 
         saludarUsuario(usuarioId);
     }
-}
+};
+
 
 
 function saludarUsuario(usuarioId) {
@@ -55,17 +53,16 @@ function saludarUsuario(usuarioId) {
     cargarDias(); // Solo llamamos a cargarDias aquí    
 }
 
-
+window.cargarDias = cargarDias;
 function cargarDias() {
     var usuarioId = document.getElementById('usuario').value;
     var mes = document.getElementById('mes').value;
     var año = document.getElementById('año').value;
     cargarDiasParaUsuario(usuarioId, mes, año);
-    cargarAdelantosParaUsuario(usuarioId, mes, año); // Llama a cargarAdelantosParaUsuario para cargar los adelantos del mes y año seleccionados
     obtenerTotales();
 }
 
-
+window.cargarDiasParaUsuario = cargarDiasParaUsuario;
 function cargarDiasParaUsuario(usuarioId, mes, año) {
 
     var tablaRegistros = document.getElementById('tablaRegistros');
@@ -112,23 +109,31 @@ function cargarDiasParaUsuario(usuarioId, mes, año) {
 
 
 
-function calcularTotalHoras(dia) {
-    var entradaTM = document.querySelector(`[name="entradaTM_${dia}"]`).value;
-    var salidaTM = document.querySelector(`[name="salidaTM_${dia}"]`).value;
-    var entradaTT = document.querySelector(`[name="entradaTT_${dia}"]`).value;
-    var salidaTT = document.querySelector(`[name="salidaTT_${dia}"]`).value;
+window.calcularTotalHoras = function (dia) {
+    
+    var entradaTM = document.querySelector(`[name="entradaTM_${dia}"]`);
+    if (!entradaTM) {
+        console.error(`Elemento entradaTM_${dia} no encontrado`);
+        return;
+    }
+    var salidaTM = document.querySelector(`[name="salidaTM_${dia}"]`);
+    var entradaTT = document.querySelector(`[name="entradaTT_${dia}"]`);
+    var salidaTT = document.querySelector(`[name="salidaTT_${dia}"]`);
 
-    var totalHorasTM = calcularHoras(entradaTM, salidaTM);
-    var totalHorasTT = calcularHoras(entradaTT, salidaTT);
+    var totalHorasTM = calcularHoras(entradaTM.value, salidaTM.value);
+    var totalHorasTT = calcularHoras(entradaTT.value, salidaTT.value);
     var totalHoras = totalHorasTM + totalHorasTT;
 
     document.querySelector(`[name="totalHoras_${dia}"]`).value = totalHoras.toFixed(2);
-
-    // Calcular el total a pagar para el día
     calcularTotal(dia);
-}
+};
 
-function calcularHoras(entrada, salida) {
+window.guardar = function (dia, id) {
+    console.log("Función guardar ejecutada para el día:", dia, "ID:", id);
+};
+
+
+window.calcularHoras = function (entrada, salida) {
     if (!entrada || !salida)
         return 0;
 
@@ -138,10 +143,11 @@ function calcularHoras(entrada, salida) {
     var entradaTotalMinutos = (entradaH * 60) + entradaM;
     var salidaTotalMinutos = (salidaH * 60) + salidaM;
 
-    return (salidaTotalMinutos - entradaTotalMinutos) / 60; // Retorna el total de horas
-}
+    return (salidaTotalMinutos - entradaTotalMinutos) / 60;
+};
 
-function calcularTotal(dia) {
+
+window.calcularTotal = function (dia) {
     var totalHoras = parseFloat(document.querySelector(`[name="totalHoras_${dia}"]`).value) || 0;
     var precioHora = parseFloat(document.querySelector(`[name="precioHora_${dia}"]`).value) || 0;
     var feriado = document.querySelector(`[name="feriado_${dia}"]`).checked;
@@ -149,12 +155,13 @@ function calcularTotal(dia) {
     var total = totalHoras * precioHora;
 
     if (feriado) {
-        total *= 2; // Ejemplo: duplicar el total si es feriado
+        total *= 2;
     }
 
     document.querySelector(`[name="total_${dia}"]`).value = total.toFixed(2);
-}
+};
 
+window.guardar = guardar;
 function guardar(dia, id) {
     var usuarioId = document.getElementById('usuario').value;
     var mes = document.getElementById('mes').value;
@@ -180,9 +187,7 @@ function guardar(dia, id) {
         total *= 2;
     }
 
-    // Obtén el token CSRF y el encabezado del HTML
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
 
     fetch(`${BASE_URL}/horas/guardar`, {
         method: 'POST',
@@ -225,211 +230,6 @@ function guardar(dia, id) {
 }
 
 
-function agregarAdelanto() {
-
-    var usuarioId = document.getElementById('usuario').value;
-    var fechaAdelanto = document.getElementById('fechaAdelanto').value;
-    var cantidadAdelanto = parseFloat(document.getElementById('cantidadAdelanto').value);
-    var conceptoAdelanto = document.getElementById('conceptoAdelanto').value;
-
-    if (!fechaAdelanto || isNaN(cantidadAdelanto) || !conceptoAdelanto) {
-        alert('Por favor complete todos los campos del adelanto.');
-        return;
-    }
-
-    var adelanto = {
-        usuario: {id: usuarioId},
-        fecha: fechaAdelanto,
-        cantidad: cantidadAdelanto,
-        concepto: conceptoAdelanto
-    };
-
-    // Obtén el token CSRF y el encabezado desde las metaetiquetas
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
-
-    fetch(`${BASE_URL}/adelantos/guardar`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken // Agrega el token CSRF en el encabezado
-        },
-        body: JSON.stringify(adelanto)
-    })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    alert('Adelanto agregado correctamente.');
-                    cargarAdelantos();
-                    obtenerTotales();
-                } else {
-                    alert('Error al agregar el adelanto.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al agregar el adelanto.');
-            });
-}
-
-
-function cargarAdelantos() {
-
-    var usuarioId = document.getElementById('usuario').value;
-    var mes = document.getElementById('mes').value;
-    var año = document.getElementById('año').value;
-    cargarAdelantosParaUsuario(usuarioId, mes, año);
-}
-
-function cargarAdelantosParaUsuario(usuarioId, mes, año) {
-
-    var tablaAdelantos = document.getElementById('tablaAdelantos');
-    tablaAdelantos.innerHTML = ''; // Limpiar tabla antes de cargar nuevos datos
-
-    fetch(`${BASE_URL}/adelantos/cargarAdelantos?usuarioId=${usuarioId}&mes=${mes}&año=${año}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    data.adelantos.forEach(adelanto => {
-                        var fechaAdelanto = new Date(adelanto.fecha);
-                        if (fechaAdelanto.getMonth() + 1 === parseInt(mes) && fechaAdelanto.getFullYear() === parseInt(año)) {
-                            var fila = `
-                        <tr>
-                            <td>${adelanto.fecha}</td>
-                            <td>${adelanto.cantidad}</td>
-                            <td>${adelanto.concepto}</td> <!-- Muestra el concepto -->
-                            <td>
-                                <button class="btn btn-primary" onclick="editarAdelanto(${adelanto.id})">Editar</button>
-                                <button class="btn btn-danger" onclick="eliminarAdelanto(${adelanto.id})">Eliminar</button>
-                            </td>
-                        </tr>
-                    `;
-                            tablaAdelantos.insertAdjacentHTML('beforeend', fila);
-                        }
-                    });
-                } else {
-                    alert('Error al cargar los adelantos.');
-                }
-
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al cargar los adelantos.');
-            });
-}
-
-
-function editarAdelanto(id) {
-
-    fetch(`${BASE_URL}/adelantos/${id}`)
-            .then(response => response.json())
-            .then(adelanto => {
-                if (adelanto) {
-                    document.getElementById('editarAdelantoId').value = adelanto.id;
-                    document.getElementById('editarFechaAdelanto').value = adelanto.fecha;
-                    document.getElementById('editarCantidadAdelanto').value = adelanto.cantidad;
-                    document.getElementById('editarConceptoAdelanto').value = adelanto.concepto; // Agregado el campo concepto
-                    $('#editarAdelantoModal').modal('show');
-                } else {
-                    alert('Adelanto no encontrado.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al cargar el adelanto para editar.');
-            });
-}
-
-
-function guardarAdelantoEditado() {
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
-
-    var id = document.getElementById('editarAdelantoId').value;
-    var fecha = document.getElementById('editarFechaAdelanto').value;
-    var cantidad = parseFloat(document.getElementById('editarCantidadAdelanto').value);
-    var concepto = document.getElementById('editarConceptoAdelanto').value; // Agregado concepto
-
-    if (!fecha || isNaN(cantidad) || !concepto) {
-        alert('Por favor complete todos los campos del adelanto.');
-        return;
-    }
-
-    var adelanto = {
-        id: id,
-        fecha: fecha,
-        cantidad: cantidad,
-        concepto: concepto, // Incluyendo concepto
-        usuario: {id: document.getElementById('usuario').value}
-    };
-
-    fetch(`${BASE_URL}/adelantos/editar`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-        },
-        body: JSON.stringify(adelanto)
-    })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    alert('Adelanto editado correctamente.');
-                    $('#editarAdelantoModal').modal('hide');
-                    cargarAdelantos();
-                    obtenerTotales();
-                } else {
-                    alert('Error al editar el adelanto.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al editar el adelanto.');
-            });
-}
-
-function eliminarAdelanto(id) {
-
-
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
-
-    fetch(`${BASE_URL}/adelantos/eliminar/${id}`, {
-        method: 'DELETE',
-        headers: {
-            [csrfHeader]: csrfToken
-        }
-    })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    alert('Adelanto eliminado correctamente.');
-                    cargarAdelantos();
-                    obtenerTotales();
-                } else {
-                    alert('Error al eliminar el adelanto.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al eliminar el adelanto.');
-            });
-}
 
 
 function obtenerTotales() {
@@ -505,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function cargarUsuariosEliminar() {
 
-    console.trace();
+    
     fetch(`${BASE_URL}/usuarios/listar`)
             .then(response => response.json())
             .then(data => {
@@ -527,7 +327,7 @@ function cargarUsuariosEliminar() {
                 alert('Error al cargar los usuarios.');
             });
 }
-
+window.eliminarUsuario = eliminarUsuario;
 function eliminarUsuario() {
     var usuarioId = document.getElementById('usuarioEliminar').value;
 
@@ -542,10 +342,6 @@ function eliminarUsuario() {
     if (!confirmarEliminacion) {
         return; // Si el usuario cancela, no hacer nada
     }
-
-    // Obtener el token CSRF de las meta tags
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
 
     fetch(`${BASE_URL}/usuarios/eliminar/${usuarioId}`, {
         method: 'DELETE',
@@ -586,9 +382,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Obtener los valores del formulario
             const nombre = document.getElementById("nombre").value;
-            // Obtener el token CSRF de las meta tags
-            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
 
             fetch(`${BASE_URL}/usuarios/crear`, {
                 method: "POST",
@@ -647,166 +440,9 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();  // Evitar el comportamiento por defecto del formulario
 
             // Llamar a la función para crear el usuario
-            crearUsuario();
+            
         });
     }
 });
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    let fechaInput = document.getElementById("fecha");
-
-    // 📌 Cargar la fecha actual al abrir la página
-    let hoy = new Date().toISOString().split("T")[0];
-    fechaInput.value = hoy;
-
-    // 🔥 Llamar a la función al cargar la página
-    obtenerVentas(hoy);
-
-    // 📅 Evento cuando se cambia la fecha
-    fechaInput.addEventListener("change", function () {
-        obtenerVentas(this.value);
-    });
-});
-
-function obtenerVentas(fecha) {
-    fetch(`${BASE_URL}/ventas/fechas?fecha=${fecha}`)
-            .then(response => response.json())
-            .then(data => {
-
-                // 📌 Actualizar el HTML con los valores obtenidos
-                document.getElementById("totalEfectivo").textContent = data.totalEfectivo.toFixed(2);
-                document.getElementById("totalCredito").textContent = data.totalCredito.toFixed(2);
-                document.getElementById("totalDebito").textContent = data.totalDebito.toFixed(2);
-                document.getElementById("totalMercadoPago").textContent = data.totalMercadoPago.toFixed(2);
-                document.getElementById("totalGeneral").textContent = data.totalGeneral.toFixed(2);
-            })
-            .catch(error => console.error("Error al obtener las ventas:", error));
-}
-
-
-
-
-
-//////////////////////////////////////////////-VENTAS-/////////////////////////////////////////////
-
-
-$(document).ready(function () {
-    // Inicializar select2 para los dropdowns
-    $('#cliente').select2({
-        placeholder: 'Seleccionar Cliente...',
-        allowClear: true,
-        width: '50%',
-        dropdownCssClass: 'select2-dropdown'
-    });
-
-    $('#producto').select2({
-        placeholder: 'Buscar Producto...',
-        allowClear: true,
-        width: '50%',
-        dropdownCssClass: 'select2-dropdown'
-    });
-
-    // Función para actualizar totales
-    function actualizarTotales() {
-        let totalLista = 0;
-        let totalMetodoPago = 0;
-        let totalFinal = 0;
-        const metodoPago = $('#metodoPago').val();
-        const descuentoPorcentaje = parseFloat($('#descuento').val()) || 0;
-
-        // Calcular totales
-        $('#productosSeleccionados tr').each(function () {
-            const precio = parseFloat($(this).find('.precio').text());
-            const cantidad = parseInt($(this).find('.cantidad').val());
-            totalLista += precio * cantidad;
-        });
-
-        if (metodoPago === 'CREDITO') {
-            totalMetodoPago = totalLista * 1.15; // 15% extra
-        } else {
-            totalMetodoPago = totalLista;
-        }
-
-        totalFinal = totalMetodoPago - (totalMetodoPago * (descuentoPorcentaje / 100));
-
-        // Actualizar los campos de total en el DOM
-        $('#totalLista').val(totalLista.toFixed(2));
-        $('#totalMetodoPago').val(totalMetodoPago.toFixed(2));
-        $('#totalFinal').val(totalFinal.toFixed(2));
-    }
-
-    // Evento para agregar producto a la lista
-    $('#agregarProducto').click(function () {
-        const productoId = $('#producto').val();
-        const productoNombre = $('#producto option:selected').text();
-        const precio = $('#producto option:selected').data('precio');
-        const stock = $('#producto option:selected').data('stock');
-
-        if (productoId) {
-            if ($('#productosSeleccionados input[name="productoIds[]"][value="' + productoId + '"]').length > 0) {
-                alert('Este producto ya está en la lista.');
-                return;
-            }
-
-            if (stock <= 0) {
-                alert('Este producto no tiene stock disponible.');
-                return;
-            }
-
-            // Agregar fila a la tabla
-            $('#productosSeleccionados').append(`
-                <tr>
-                    <td>${productoNombre}</td>
-                    <td class="precio">${precio}</td>
-                    <td>${stock}</td>
-                    <td><input type="number" name="cantidades[]" class="form-control cantidad" min="1" max="${stock}" value="1"></td>
-                    <td><button type="button" class="btn btn-danger eliminarProducto">Eliminar</button></td>
-                    <input type="hidden" name="productoIds[]" value="${productoId}">
-                </tr>
-            `);
-
-            // Actualizar totales
-            actualizarTotales();
-        }
-    });
-
-    // Evento para actualizar totales al cambiar cantidad
-    $('#productosSeleccionados').on('change', '.cantidad', function () {
-        const cantidad = $(this).val();
-        const stock = $(this).closest('tr').find('td').eq(2).text();
-
-        if (parseInt(cantidad) > parseInt(stock)) {
-            alert('La cantidad no puede ser mayor que el stock disponible.');
-            $(this).val(stock); // Restablecer al stock máximo
-        }
-
-        actualizarTotales();
-    });
-
-    // Evento para eliminar producto de la lista
-    $('#productosSeleccionados').on('click', '.eliminarProducto', function () {
-        if ($('#productosSeleccionados tr').length === 1) {
-            alert('No puede eliminar el último producto.');
-            return false;
-        }
-        $(this).closest('tr').remove();
-        actualizarTotales();
-    });
-
-    // Evento para recalcular totales al cambiar descuento o método de pago
-    $('#metodoPago, #descuento').change(function () {
-        actualizarTotales();
-    });
-
-    // Validación del formulario al enviarlo
-    $('#ventaForm').submit(function (event) {
-        if ($('#productosSeleccionados tr').length === 0) {
-            alert('Debe agregar al menos un producto antes de crear la venta.');
-            event.preventDefault(); // Evitar el envío del formulario
-        }
-    });
-
-    // Llamar a actualizarTotales al cargar la página para mostrar valores iniciales
-    actualizarTotales();
-});

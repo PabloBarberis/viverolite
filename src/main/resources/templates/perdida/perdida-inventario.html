@@ -14,7 +14,8 @@
         <link rel="stylesheet" href="/css/styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="/js/perdida.js"></script>
+        <script type="module" src="/js/perdida.js"></script>
+
     </head>
 
     <body>
@@ -23,13 +24,19 @@
             <!-- Navbar se carga con th:replace -->
             <div th:replace="~{navbar :: navbar}"></div>
 
+            
+        </div>
+        <div class="container-fluid mt-5" style="max-width: 90%;">
+
+            <div class="row align-items-center justify-content-between">
+                <h1>Pérdida Inventario</h1>
             <!-- Botones específicos para cada página -->
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPerdida">
                 Agregar Pérdida
             </button>
-        </div>
-        <div class="container-fluid mt-5" style="max-width: 90%;">
-            <h1>Lista de Pérdidas de Inventario</h1>
+            </div>
+
+
             <div class="separator"></div>
 
             <!-- Paginación arriba de la tabla -->

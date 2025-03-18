@@ -16,15 +16,20 @@
             <!-- Navbar se carga con th:replace -->
             <div th:replace="~{navbar :: navbar}"></div>
 
-            <!-- Botones específicos para cada página -->
-            <div class="nuevo-retroceder">
-                <a th:href="@{/proveedores/crear}" class="btn btn-nueva-venta">Nuevo Proveedor</a>
-            </div>
+
         </div>
 
 
         <div class="container-fluid mt-5" style="max-width: 90%;">
-            <h1>Proveedores</h1>
+
+            <div class="row align-items-center justify-content-between">
+                <h1>Proveedor</h1>
+                <div>
+                    <a th:href="@{/proveedor/crear}" class="btn btn-nueva-venta">Nuevo Proveedor</a>
+                </div>
+            </div>
+
+
             <div class="separator"></div>
             <table class="table table-striped">
                 <thead class="thead-dark">

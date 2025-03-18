@@ -1,11 +1,14 @@
 package com.vivero.viveroApp.service;
 
+import com.vivero.viveroApp.dto.VentaProyeccion;
 import com.vivero.viveroApp.model.Venta;
 import com.vivero.viveroApp.model.VentaProducto;
 import com.vivero.viveroApp.model.Producto;
+import com.vivero.viveroApp.model.enums.MetodoPago;
 import com.vivero.viveroApp.repository.ProductoRepository;
 import com.vivero.viveroApp.repository.VentaRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -121,4 +124,15 @@ public class VentaService {
             }
         }
     }
+
+    public List<VentaProyeccion> obtenerVentasPorMetodoPago(MetodoPago metodoPago) {
+        return ventaRepository.findByMetodoPago(metodoPago);
+    }
+
+    public List<Venta> obtenerVentasPorMesYAnio(int mes, int anio) {
+        String mesStr = String.format("%02d", mes); // Convierte 3 → "03"
+        String anioStr = String.valueOf(anio); // Convierte 2025 → "2025"
+        return ventaRepository.obtenerVentasPorMesYAnio(mesStr, anioStr);
+    }
+
 }

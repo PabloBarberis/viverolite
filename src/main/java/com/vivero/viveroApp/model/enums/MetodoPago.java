@@ -4,5 +4,6 @@ public enum MetodoPago {
     EFECTIVO,
     DEBITO,
     CREDITO,
-    MERCADOPAGO
+    MERCADOPAGO_VAL,
+    MERCADOPAGO_SAC  
 }

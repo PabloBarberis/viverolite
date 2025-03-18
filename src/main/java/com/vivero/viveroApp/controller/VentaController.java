@@ -1,6 +1,8 @@
 package com.vivero.viveroApp.controller;
 
+import com.vivero.viveroApp.dto.VentaProyeccion;
 import com.vivero.viveroApp.model.Cliente;
+import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.Venta;
 import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.model.enums.Descuento;
@@ -9,6 +11,7 @@ import com.vivero.viveroApp.repository.VentaRepository;
 import com.vivero.viveroApp.service.VentaService;
 import com.vivero.viveroApp.service.ProductoService;
 import com.vivero.viveroApp.service.ClienteService;
+import com.vivero.viveroApp.service.IngresoEgresoService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -39,6 +42,8 @@ public class VentaController {
 
     private final ClienteService clienteService;
 
+    private final IngresoEgresoService ingresoEgresoService;
+
     // Mostrar formulario para crear una nueva venta
     @GetMapping("/crear")
     public String mostrarFormularioCrear(Model model) {
@@ -61,7 +66,7 @@ public class VentaController {
     public String crearVenta(@ModelAttribute Venta venta, @RequestParam List<Long> productoIds, @RequestParam List<Integer> cantidades,
             @RequestParam Descuento descuento, @RequestParam MetodoPago metodoPago, @RequestParam(required = false) Long clienteId,
             @RequestParam double total, Model model) {
-        
+
         venta.setFecha(LocalDateTime.now());
         venta.setDescuento(descuento);
         venta.setMetodoPago(metodoPago);
@@ -121,61 +126,60 @@ public class VentaController {
     }
 
     @PostMapping("/actualizar")
-public String actualizarVenta(@RequestParam Long id, 
-                              @RequestParam String fecha, 
-                              @RequestParam String hora, 
-                              @RequestParam List<Long> productoIds, 
-                              @RequestParam List<Integer> cantidades,
-                              @RequestParam Descuento descuento, 
-                              @RequestParam MetodoPago metodoPago, 
-                              @RequestParam(required = false) Long clienteId,
-                              @RequestParam String total, 
-                              Model model) {
-    try {
-        double totalDouble = Double.parseDouble(total.replace(",", "."));
-        
-        // Buscar la venta existente
-        Venta ventaExistente = ventaService.getVentaById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Venta no encontrada con id: " + id));
+    public String actualizarVenta(@RequestParam Long id,
+            @RequestParam String fecha,
+            @RequestParam String hora,
+            @RequestParam List<Long> productoIds,
+            @RequestParam List<Integer> cantidades,
+            @RequestParam Descuento descuento,
+            @RequestParam MetodoPago metodoPago,
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam String total,
+            Model model) {
+        try {
+            double totalDouble = Double.parseDouble(total.replace(",", "."));
 
-        // Convertir fecha y hora a LocalDateTime
-        LocalDateTime fechaHora = LocalDateTime.of(LocalDate.parse(fecha), LocalTime.parse(hora));
-        ventaExistente.setFecha(fechaHora);
-        ventaExistente.setTotal(totalDouble);
-        ventaExistente.setDescuento(descuento);
-        ventaExistente.setMetodoPago(metodoPago);
+            // Buscar la venta existente
+            Venta ventaExistente = ventaService.getVentaById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Venta no encontrada con id: " + id));
 
-        // Actualizar cliente si existe
-        if (clienteId != null) {
-            Cliente cliente = clienteService.getClienteById(clienteId).orElse(null);
-            if (cliente != null) {
-                ventaExistente.setCliente(cliente);
+            // Convertir fecha y hora a LocalDateTime
+            LocalDateTime fechaHora = LocalDateTime.of(LocalDate.parse(fecha), LocalTime.parse(hora));
+            ventaExistente.setFecha(fechaHora);
+            ventaExistente.setTotal(totalDouble);
+            ventaExistente.setDescuento(descuento);
+            ventaExistente.setMetodoPago(metodoPago);
+
+            // Actualizar cliente si existe
+            if (clienteId != null) {
+                Cliente cliente = clienteService.getClienteById(clienteId).orElse(null);
+                if (cliente != null) {
+                    ventaExistente.setCliente(cliente);
+                }
             }
+
+            // Limpiar y actualizar productos
+            ventaExistente.getProductos().clear();
+            for (int i = 0; i < productoIds.size(); i++) {
+                Producto producto = productoService.getProductoById(productoIds.get(i)).orElse(null);
+                if (producto != null) {
+                    ventaExistente.agregarProducto(producto, cantidades.get(i));
+                }
+            }
+
+            // Guardar la venta actualizada
+            ventaService.updateVenta(ventaExistente);
+
+        } catch (NumberFormatException e) {
+            model.addAttribute("errorMessage", "El formato del total no es válido.");
+            return "ventas/editar-venta";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "ventas/editar-venta";
         }
 
-        // Limpiar y actualizar productos
-        ventaExistente.getProductos().clear();
-        for (int i = 0; i < productoIds.size(); i++) {
-            Producto producto = productoService.getProductoById(productoIds.get(i)).orElse(null);
-            if (producto != null) {
-                ventaExistente.agregarProducto(producto, cantidades.get(i));
-            }
-        }
-
-        // Guardar la venta actualizada
-        ventaService.updateVenta(ventaExistente);
-
-    } catch (NumberFormatException e) {
-        model.addAttribute("errorMessage", "El formato del total no es válido.");
-        return "ventas/editar-venta";
-    } catch (IllegalArgumentException e) {
-        model.addAttribute("errorMessage", e.getMessage());
-        return "ventas/editar-venta";
+        return "redirect:/ventas/listar";
     }
-
-    return "redirect:/ventas/listar";
-}
-
 
     // Eliminar venta
     @PostMapping("/eliminar/{id}")
@@ -189,40 +193,78 @@ public String actualizarVenta(@RequestParam Long id,
     }
 
     @GetMapping("/fechas")
-public ResponseEntity<Map<String, Object>> obtenerTotalesPorFecha(
-        @RequestParam(name = "fecha", required = false) String fechaStr) {
+    public ResponseEntity<Map<String, Object>> obtenerTotalesPorFecha(
+            @RequestParam(name = "fecha", required = false) String fechaStr) {
 
-    // Si no se pasa fecha, usamos la fecha actual
-    LocalDate fechaLocal = (fechaStr == null) ? LocalDate.now() : LocalDate.parse(fechaStr);
+        // Si no se pasa fecha, usamos la fecha actual
+        LocalDate fechaLocal = (fechaStr == null) ? LocalDate.now() : LocalDate.parse(fechaStr);
 
-    // Convertimos LocalDate a LocalDateTime para la hora 00:00:00 (inicio del día)
-    LocalDateTime inicioFecha = fechaLocal.atStartOfDay();
+        // Convertimos LocalDate a LocalDateTime para la hora 00:00:00 (inicio del día)
+        LocalDateTime inicioFecha = fechaLocal.atStartOfDay();
 
-    // Convertimos LocalDate a LocalDateTime para la hora 23:59:59 (fin del día)
-    LocalDateTime finFecha = fechaLocal.atTime(23, 59, 59);
+        // Convertimos LocalDate a LocalDateTime para la hora 23:59:59 (fin del día)
+        LocalDateTime finFecha = fechaLocal.atTime(23, 59, 59);
 
-    // Buscamos las ventas en ese rango de fechas
-    List<Venta> ventas = ventaRepository.findByFechaBetween(inicioFecha, finFecha);
+        // Buscamos las ventas en ese rango de fechas
+        List<Venta> ventas = ventaRepository.findByFechaBetween(inicioFecha, finFecha);
 
-    // Calcular los totales por método de pago
-    Map<MetodoPago, Double> totales = new HashMap<>();
-    for (MetodoPago metodo : MetodoPago.values()) {
-        double total = ventas.stream()
-                .filter(v -> v.getMetodoPago() == metodo)
-                .mapToDouble(Venta::getTotal)
-                .sum();
-        totales.put(metodo, total);
+        // Calcular los totales por método de pago
+        Map<MetodoPago, Double> totales = new HashMap<>();
+        for (MetodoPago metodo : MetodoPago.values()) {
+            double total = ventas.stream()
+                    .filter(v -> v.getMetodoPago() == metodo)
+                    .mapToDouble(Venta::getTotal)
+                    .sum();
+            totales.put(metodo, total);
+        }
+
+        // Construir la respuesta con los nuevos métodos de pago
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalEfectivo", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0));
+        response.put("totalCredito", totales.getOrDefault(MetodoPago.CREDITO, 0.0));
+        response.put("totalDebito", totales.getOrDefault(MetodoPago.DEBITO, 0.0));
+        response.put("totalMercadoPagoVal", totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0));
+        response.put("totalMercadoPagoSac", totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0));
+        response.put("totalGeneral", ventas.stream().mapToDouble(Venta::getTotal).sum());
+
+        return ResponseEntity.ok(response); // Devolvemos la respuesta en formato JSON
     }
 
-    // Construir la respuesta como un Map
-    Map<String, Object> response = new HashMap<>();
-    response.put("totalEfectivo", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0));
-    response.put("totalCredito", totales.getOrDefault(MetodoPago.CREDITO, 0.0));
-    response.put("totalDebito", totales.getOrDefault(MetodoPago.DEBITO, 0.0));
-    response.put("totalMercadoPago", totales.getOrDefault(MetodoPago.MERCADOPAGO, 0.0));
-    response.put("totalGeneral", ventas.stream().mapToDouble(Venta::getTotal).sum());
+    @GetMapping("/entrada-salida")
+    public String mostrarEntradaSalida() {
+        return "ventas/entrada-salida";  // Esto devolverá la plantilla de HTML ubicada en resources/templates/venta/entrada-salida.html
+    }
 
-    return ResponseEntity.ok(response); // Devolvemos la respuesta en formato JSON
-}
+    @GetMapping("/efectivo")
+    public List<VentaProyeccion> obtenerVentasEfectivo() {
+        return ventaService.obtenerVentasPorMetodoPago(MetodoPago.EFECTIVO);
+    }
+
+    @GetMapping("/ventas-gastos")
+    @ResponseBody
+    public Map<String, Object> obtenerVentasYGastos(@RequestParam int mes, @RequestParam int anio) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Obtener ventas filtradas por mes y año
+        List<Venta> ventas = ventaService.obtenerVentasPorMesYAnio(mes, anio);
+        System.out.println("");
+        System.out.println("TAMAÑO VENTAS" + ventas.size());
+        for (Venta venta : ventas) {
+            System.out.println(venta.getTotal() + " " + venta.getMetodoPago());
+        }
+        System.out.println("");
+        // Obtener ingresos y egresos filtrados por mes y año
+        List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
+        System.out.println("");
+        System.out.println("TAMAÑO INGRESOS" + ingresosEgresos.size());
+        for (IngresoEgreso ingresosEgreso : ingresosEgresos) {
+            System.out.println(ingresosEgreso.getMonto() + " " + ingresosEgreso.getMetodoPago());;
+        }
+        System.out.println("");
+        response.put("ventas", ventas);
+        response.put("ingresosEgresos", ingresosEgresos);
+
+        return response;
+    }
 
 }

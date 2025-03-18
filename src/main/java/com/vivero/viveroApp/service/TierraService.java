@@ -27,23 +27,11 @@ public class TierraService {
         return tierraRepository.findByActivoTrue(pageable);
     }
 
-    // Obtener todas las tierras con paginación (activas e inactivas)
-    @Transactional(readOnly = true)
-    public Page<Tierra> getAllTierrasPaginadas(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return tierraRepository.findAll(pageable);
-    }
-
+    
     // Obtener una tierra por ID si está activa
     @Transactional(readOnly = true)
     public Optional<Tierra> getTierraById(Long id) {
         return tierraRepository.findByIdAndActivoTrue(id);
-    }
-
-    // Obtener una tierra por ID (incluso si está inactiva)
-    @Transactional(readOnly = true)
-    public Optional<Tierra> getTierraByIdIncluyendoInactivas(Long id) {
-        return tierraRepository.findById(id);
     }
 
     // Crear una nueva tierra

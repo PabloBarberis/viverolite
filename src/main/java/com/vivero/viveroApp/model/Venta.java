@@ -1,5 +1,6 @@
 package com.vivero.viveroApp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vivero.viveroApp.model.enums.Descuento;
 import com.vivero.viveroApp.model.enums.MetodoPago;
 import lombok.Data;
@@ -20,8 +21,10 @@ public class Venta {
     private Long id;
 
     @ManyToOne(optional = true) // Relación con Cliente
+    @JsonIgnore
     private Cliente cliente;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true) // Relación con VentaProducto
     private List<VentaProducto> productos = new ArrayList<>();
 
@@ -60,23 +63,23 @@ public class Venta {
 
     // Método para calcular el total de la venta
     public void calcularTotal() {
-    System.out.println("El total que recibe calcularTotal() es de " + this.total);
+        System.out.println("El total que recibe calcularTotal() es de " + this.total);
 
-    // Calcular el total inicial basado en los productos y sus cantidades
-    this.total = productos.stream()
-            .mapToDouble(ventaProducto -> ventaProducto.getProducto().getPrecio() * ventaProducto.getCantidad())
-            .sum();
-    
-    // Aplicar el costo adicional si el método de pago es crédito
-    if (metodoPago == MetodoPago.CREDITO) {
-        this.total *= 1.15; // Aumenta el precio en un 15%
-    }
+        // Calcular el total inicial basado en los productos y sus cantidades
+        this.total = productos.stream()
+                .mapToDouble(ventaProducto -> ventaProducto.getProducto().getPrecio() * ventaProducto.getCantidad())
+                .sum();
 
-    // Aplicar el descuento si existe
-    if (descuento != null) {
-        this.total -= (this.total * (descuento.getPorcentaje() / 100.0)); // Aplica el descuento
+        // Aplicar el costo adicional si el método de pago es crédito
+        if (metodoPago == MetodoPago.CREDITO) {
+            this.total *= 1.15; // Aumenta el precio en un 15%
+        }
+
+        // Aplicar el descuento si existe
+        if (descuento != null) {
+            this.total -= (this.total * (descuento.getPorcentaje() / 100.0)); // Aplica el descuento
+        }
+
     }
-    
-}
 
 }

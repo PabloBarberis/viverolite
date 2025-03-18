@@ -16,13 +16,17 @@
             <!-- Navbar se carga con th:replace -->
             <div th:replace="~{navbar :: navbar}"></div>
 
-            <!-- Botones específicos para cada página -->
-            <div class="nuevo-retroceder">
-                <a th:href="@{/plantas/crear}" class="btn btn-nueva-venta">Nueva Planta</a>
-            </div>
         </div>
         <div class="container-fluid mt-5" style="max-width: 90%;">
-            <h1>Plantas</h1>
+
+            <div class="row align-items-center justify-content-between">
+                <h1>Plantas</h1>
+                <div>
+                    <a th:href="@{/plantas/crear}" class="btn btn-nueva-venta">Nueva Planta</a>
+                </div>
+            </div>
+
+
             <div class="separator"></div>
             <!-- Formulario de Búsqueda -->
             <form th:action="@{/plantas/listar}" method="get" class="mb-3">
@@ -131,6 +135,9 @@
                     </ul>
 
                 </nav>
+                <div class="d-flex justify-content-end mb-3">
+                    <button id="generarPDFPlanta" class="btn btn-primary">Generar PDF</button>
+                </div>
 
             </div>
 
@@ -139,9 +146,7 @@
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
             <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-            <div class="d-flex justify-content-end mb-3">
-                <button id="generarPDFPlanta" class="btn btn-primary">Generar PDF</button>
-            </div>
+
 
             <script>
                                                 document.getElementById("generarPDFPlanta").addEventListener("click", function () {

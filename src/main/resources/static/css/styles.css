@@ -326,3 +326,15 @@ input[type="number"] {
     color: #16d016; /* Opcional: cambia el color */
     text-align: center;
 }
+
+.contenedorTabla{
+    
+    border: 2px solid green;
+    padding: 20px;
+    width: 48%;
+    overflow-x: auto;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    
+}

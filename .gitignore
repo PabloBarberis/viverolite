@@ -1,2 +1,10 @@
 /target
 *.db
+.env
+
+*.log
+logs/
+log/
+
+.mvn/
+

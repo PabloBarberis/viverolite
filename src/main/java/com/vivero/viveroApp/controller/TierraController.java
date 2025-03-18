@@ -87,7 +87,7 @@ public class TierraController {
     // Mostrar formulario para editar una tierra
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
-        Optional<Tierra> tierraOpt = tierraService.getTierraByIdIncluyendoInactivas(id);
+        Optional<Tierra> tierraOpt = tierraService.getTierraById(id);
         if (tierraOpt.isPresent()) {
             model.addAttribute("tierra", tierraOpt.get());
             model.addAttribute("tiposTierra", TipoTierra.values());
