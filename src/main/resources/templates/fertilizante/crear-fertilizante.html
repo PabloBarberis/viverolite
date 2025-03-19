@@ -1,63 +1,64 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Crear Fertilizante</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Crear Fertilizante</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/styles.css">
+    </head>
 
-<body>
-    <div class="navbar-container d-flex justify-content-between align-items-center">
-        <div th:replace="~{navbar :: navbar}"></div>
-    </div>
+    <body>
+        <div class="navbar-container d-flex justify-content-between align-items-center">
+            <div th:replace="~{navbar :: navbar}"></div>
+        </div>
 
-    <div class="container-fluid mt-5" style="max-width: 90%;">
-        <h1>Crear Fertilizante</h1>
-        <div class="separator"></div>
-        <form th:action="@{/fertilizante/crear}" th:object="${fertilizante}" method="post">
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Marca</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Descripción</th>
-                        <th>Proveedores</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" th:field="*{nombre}" class="form-control" required /></td>
-                        <td><input type="text" th:field="*{marca}" class="form-control" required /></td>
-                        <td><input type="number" th:field="*{precio}" class="form-control" step="0.01" required /></td>
-                        <td><input type="number" th:field="*{stock}" class="form-control" required /></td>
-                        <td><textarea th:field="*{descripcion}" class="form-control" rows="2"></textarea></td>
-                        <td>
-                            <div th:each="proveedor : ${proveedores}" class="form-check">
-                                <input class="form-check-input" type="checkbox" 
-                                       th:id="'proveedor-' + ${proveedor.id}" 
-                                       th:value="${proveedor.id}" 
-                                       name="proveedoresIds" />
-                                <label class="form-check-label" th:for="'proveedor-' + ${proveedor.id}" 
-                                       th:text="${proveedor.nombre}"></label>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
+        <div class="container-fluid mt-5" style="max-width: 90%;">
+            <h1>Crear Fertilizante</h1>
             <div class="separator"></div>
-            <button type="submit" class="btn btn-success">Aceptar</button>
-            <a th:href="@{/fertilizante/listar}" class="btn btn-danger">Cancelar</a>
-        </form>
-    </div>
+            <form th:action="@{/fertilizante/crear}" th:object="${fertilizante}" method="post">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Marca</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Descripción</th>
+                            <th>Proveedores</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" th:field="*{nombre}" class="form-control" required /></td>
+                            <td><input type="text" th:field="*{marca}" class="form-control" required /></td>
+                            <td><input type="number" th:field="*{precio}" class="form-control" step="0.01" required /></td>
+                            <td><input type="number" th:field="*{stock}" class="form-control" required /></td>
+                            <td><textarea th:field="*{descripcion}" class="form-control" rows="2"></textarea></td>
+                            <td>
+                                <div th:each="proveedor : ${proveedores}" class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           th:id="'proveedor-' + ${proveedor.id}" 
+                                           th:value="${proveedor.id}" 
+                                           name="proveedoresIds" />
+                                    <label class="form-check-label" th:for="'proveedor-' + ${proveedor.id}" 
+                                           th:text="${proveedor.nombre}"></label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+                <div class="separator"></div>
+                <button type="submit" class="btn btn-success">Aceptar</button>
+                <a th:href="@{/fertilizante/listar}" class="btn btn-danger">Cancelar</a>
+            </form>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        
+    </body>
 
 </html>

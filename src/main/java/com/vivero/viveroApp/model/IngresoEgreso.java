@@ -34,5 +34,9 @@ public class IngresoEgreso {
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false) // Clave foránea
     private Usuario usuario;
+    
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+private boolean adelanto;
+
 
 }

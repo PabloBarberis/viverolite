@@ -129,37 +129,38 @@
                 </ul>
             </nav>
             <div class="d-flex justify-content-end mb-3">
-            <button id="generarPDFGrow" class="btn btn-primary">Generar PDF</button>
+                <button id="generarPDFGrow" class="btn btn-primary">Generar PDF</button>
+            </div>
         </div>
-        </div>
 
 
-</body>
+    </body>
 
-<script>
-    document.getElementById("generarPDFGrow").addEventListener("click", function () {
-        // Solicitar generación del PDF al backend
-        fetch("/grow/pdf", {method: 'GET'})
-                .then(response => {
-                    if (!response.ok)
-                        throw new Error("Error al generar el PDF");
-                    return response.blob(); // Descargar el contenido del PDF
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'grow-completa.pdf'; // Nombre del archivo descargado
-                    link.click();
-                })
-                .catch(error => {
-                    console.error("Error al generar el PDF:", error);
-                    alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
-                });
-    });
-</script>
+    <script>
+        document.getElementById("generarPDFGrow").addEventListener("click", function () {
+            // Solicitar generación del PDF al backend
+            fetch("/grow/pdf", {method: 'GET'})
+                    .then(response => {
+                        if (!response.ok)
+                            throw new Error("Error al generar el PDF");
+                        return response.blob(); // Descargar el contenido del PDF
+                    })
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = 'grow-completa.pdf'; // Nombre del archivo descargado
+                        link.click();
+                    })
+                    .catch(error => {
+                        console.error("Error al generar el PDF:", error);
+                        alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
+                    });
+        });
+    </script>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
 </html>

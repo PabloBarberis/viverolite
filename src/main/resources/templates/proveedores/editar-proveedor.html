@@ -1,57 +1,58 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Proveedor</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Editar Proveedor</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/styles.css">
+    </head>
 
-<body>
-    <!-- Contenedor principal para navbar y botones -->
-    <div class="navbar-container d-flex justify-content-between align-items-center">
-        <!-- Navbar se carga con th:replace -->
-        <div th:replace="~{navbar :: navbar}"></div>
-        <!-- Botones específicos para cada página -->
-    </div>
+    <body>
+        <!-- Contenedor principal para navbar y botones -->
+        <div class="navbar-container d-flex justify-content-between align-items-center">
+            <!-- Navbar se carga con th:replace -->
+            <div th:replace="~{navbar :: navbar}"></div>
+            <!-- Botones específicos para cada página -->
+        </div>
 
-    <div class="container-fluid mt-5" style="max-width: 90%;">
-        <h1>Editar Proveedor</h1>
-        <div class="separator"></div>
-        <form th:action="@{/proveedores/editar/{id}(id=${proveedor.id})}" method="post" th:object="${proveedor}">
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Dirección</th>
-                        <th>Cuil</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" th:field="*{nombre}" class="form-control" required /></td>
-                        <td><input type="email" th:field="*{email}" class="form-control" required /></td>
-                        <td><input type="text" th:field="*{telefono}" class="form-control" required /></td>
-                        <td><input type="text" th:field="*{direccion}" class="form-control" required /></td>
-                        <td><input type="text" th:field="*{cuil}" class="form-control" required /></td>
-                    </tr>
-                </tbody>
-            </table>
-            
+        <div class="container-fluid mt-5" style="max-width: 90%;">
+            <h1>Editar Proveedor</h1>
             <div class="separator"></div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-success">Aceptar</button>
-                <a th:href="@{/proveedores/listar}" class="btn btn-danger">Cancelar</a>
-            </div>
-        </form>
-    </div>
+            <form th:action="@{/proveedores/editar/{id}(id=${proveedor.id})}" method="post" th:object="${proveedor}">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Cuil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" th:field="*{nombre}" class="form-control" required /></td>
+                            <td><input type="email" th:field="*{email}" class="form-control" required /></td>
+                            <td><input type="text" th:field="*{telefono}" class="form-control" required /></td>
+                            <td><input type="text" th:field="*{direccion}" class="form-control" required /></td>
+                            <td><input type="text" th:field="*{cuil}" class="form-control" required /></td>
+                        </tr>
+                    </tbody>
+                </table>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrap.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+                <div class="separator"></div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Aceptar</button>
+                    <a th:href="@{/proveedores/listar}" class="btn btn-danger">Cancelar</a>
+                </div>
+            </form>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    </body>
 
 </html>

@@ -18,7 +18,7 @@ public class PrecioController {
 
     @GetMapping
     public String actualizarPrecios() {
-        return "/precios/precios";
+        return "precios/precios";
     }
 
     @PostMapping("/aumentar")

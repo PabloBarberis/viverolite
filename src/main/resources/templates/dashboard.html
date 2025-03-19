@@ -11,30 +11,30 @@
         </style>
     </head>
     <body>
-            
-               <!-- Contenedor principal para navbar y botones -->
+
+        <!-- Contenedor principal para navbar y botones -->
         <div class="navbar-container d-flex justify-content-between align-items-center">
             <!-- Navbar se carga con th:replace -->
             <div th:replace="~{navbar :: navbar}"></div>
 
             <!-- Botones específicos para cada página -->
             <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <form th:action="@{/logout}" method="post" style="display:inline;">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <button type="submit" class="btn btn-danger" style="cursor: pointer;">Salir</button>
-                        </form>
-                    </li>
-                </ul>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-danger" style="cursor: pointer;">Salir</button>
+                    </form>
+                </li>
+            </ul>
         </div>
-        
+
 
         <!-- Imagen del logo -->
         <img src="/images/logo.png" alt="Logo" class="logo">    
 
-        <!-- Bootstrap JS and dependencies -->
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     </body>
 </html>

@@ -44,14 +44,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     .then(response => response.json())
                     .then(data => {
                         console.log("Datos recibidos:", data);
-                        document.getElementById("totalEfectivo").textContent = `$ ${data.totalEfectivo.toFixed(2)}`;
-                        document.getElementById("totalCredito").textContent = `$ ${data.totalCredito.toFixed(2)}`;
-                        document.getElementById("totalDebito").textContent = `$ ${data.totalDebito.toFixed(2)}`;
-                        document.getElementById("totalMercadoPago").textContent = `$ ${data.totalMercadoPago.toFixed(2)}`;
-                        document.getElementById("totalGeneral").textContent = `$ ${data.totalGeneral.toFixed(2)}`;
+                        document.getElementById("totalEfectivo").textContent = `$ ${(data.totalEfectivo || 0).toFixed(2)}`;
+                        document.getElementById("totalCredito").textContent = `$ ${(data.totalCredito || 0).toFixed(2)}`;
+                        document.getElementById("totalDebito").textContent = `$ ${(data.totalDebito || 0).toFixed(2)}`;
+                        document.getElementById("totalMercadoPago").textContent = `$ ${(data.totalMercadoPago || 0).toFixed(2)}`;
+                        document.getElementById("totalGeneral").textContent = `$ ${(data.totalGeneral || 0).toFixed(2)}`;
                     })
                     .catch(error => console.error("Error al obtener las ventas:", error));
         }
+
     }
 
     // ===========================

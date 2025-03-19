@@ -1,9 +1,11 @@
 package com.vivero.viveroApp.controller;
 
 import com.vivero.viveroApp.model.IngresoEgreso;
+import com.vivero.viveroApp.model.RegistroHorario;
 import com.vivero.viveroApp.model.Usuario;
 import com.vivero.viveroApp.model.enums.MetodoPago;
 import com.vivero.viveroApp.service.IngresoEgresoService;
+import com.vivero.viveroApp.service.RegistroHorarioService;
 import com.vivero.viveroApp.service.UsuarioService;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Controller;
@@ -26,7 +28,9 @@ public class IngresoEgresoController {
 
     private final UsuarioService usuarioService;
 
+    private final RegistroHorarioService registroHorarioService;
     // Cargar la vista de ingresos/egresos
+    
     @GetMapping
     public String mostrarVistaIngresoEgreso() {
         return "ventas/entrada-salida"; // Nombre del archivo HTML en templates
@@ -47,14 +51,16 @@ public class IngresoEgresoController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-
+            // Capturar datos del request
             boolean ingreso = (boolean) requestData.get("ingreso");
             String metodoPagoStr = (String) requestData.get("metodoPago");
             Long usuarioId = Long.valueOf(requestData.get("usuarioId").toString());
             String fechaStr = (String) requestData.get("fecha");
             String descripcion = (String) requestData.get("descripcion");
             double monto = Double.parseDouble(requestData.get("monto").toString());
+            boolean esAdelanto = (boolean) requestData.get("adelanto"); // Capturar el estado de 'adelanto'
 
+            // Validar usuario
             Optional<Usuario> usuarioOptional = usuarioService.getUsuarioById(usuarioId);
             if (usuarioOptional.isEmpty()) {
                 response.put("success", false);
@@ -62,6 +68,7 @@ public class IngresoEgresoController {
                 return response;
             }
 
+            // Validar método de pago
             MetodoPago metodoPago = MetodoPago.valueOf(metodoPagoStr.toUpperCase());
 
             // Convertir la fecha de String a LocalDateTime
@@ -74,17 +81,20 @@ public class IngresoEgresoController {
                 return response;
             }
 
+            // Crear entidad y asignar valores
             IngresoEgreso movimiento = new IngresoEgreso();
-            movimiento.setIngreso(ingreso);
+            if (esAdelanto) {
+                movimiento.setIngreso(false);
+            }
             movimiento.setMetodoPago(metodoPago);
             movimiento.setUsuario(usuarioOptional.get());
             movimiento.setFecha(fecha);
             movimiento.setDescripcion(descripcion);
             movimiento.setMonto(monto);
-            
-            System.out.println("movimiento :" + movimiento);
+            movimiento.setAdelanto(esAdelanto); // Asignar el valor del checkbox
 
-            ingresoEgresoService.createIngresoEgreso(movimiento); // Llamamos a createIngresoEgreso
+            // Guardar movimiento en la base de datos
+            ingresoEgresoService.createIngresoEgreso(movimiento);
             response.put("success", true);
         } catch (Exception e) {
             e.printStackTrace(); // 🔍 Ver el error exacto en la consola
@@ -95,4 +105,40 @@ public class IngresoEgresoController {
         return response;
     }
 
+    
+    @GetMapping("/totales")
+    @ResponseBody
+    public Map<String, Object> obtenerTotales(@RequestParam("usuarioId") Long usuarioId, @RequestParam("mes") int mes, @RequestParam("año") int año) {
+        Map<String, Object> response = new HashMap<>();
+        Usuario usuario = usuarioService.getUsuarioById(usuarioId).orElse(null);
+
+        if (usuario == null) {
+            response.put("success", false);
+            response.put("message", "Usuario no encontrado");
+            return response;
+        }
+
+        // Obtener total ganado
+        List<RegistroHorario> registros = registroHorarioService.getRegistrosByUsuarioAndMesAndAño(usuario, mes, año);
+        double totalGanado = registros.stream()
+                .mapToDouble(registro -> registro.getTotalHoras() * registro.getPrecioHora())
+                .sum();
+
+        // Obtener total de adelantos
+        List<IngresoEgreso> adelantos = ingresoEgresoService.getAllAdelantos(usuario, mes, año);
+        double totalAdelantos = adelantos.stream()
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        double totalNeto = totalGanado  - totalAdelantos;
+
+        response.put("success", true);
+        response.put("totalGanado", totalGanado);
+        response.put("totalAdelantos", totalAdelantos);
+        response.put("totalNeto", totalNeto);
+        response.put("adelantos", adelantos);
+
+        return response;
+    }
+    
 }

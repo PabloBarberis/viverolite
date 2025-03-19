@@ -19,4 +19,18 @@ public interface IngresoEgresoRepository extends JpaRepository<IngresoEgreso, Lo
             nativeQuery = true)
     List<IngresoEgreso> obtenerIngresosEgresosPorMesYAnio(@Param("mes") String mes, @Param("anio") String anio);
 
+    @Query(value = "SELECT * FROM ingreso_egreso "
+            + "WHERE strftime('%Y', datetime(fecha / 1000, 'unixepoch')) = :anio "
+            + "AND strftime('%m', datetime(fecha / 1000, 'unixepoch')) = :mes "
+            + "AND usuario_id = :usuarioId "
+            + "AND adelanto = :esAdelanto",
+            nativeQuery = true)
+List<IngresoEgreso> obtenerIngresosEgresosPorUsuarioMesAnioYAdelanto(
+    @Param("mes") String mes,
+    @Param("anio") String anio,
+    @Param("usuarioId") Long usuarioId,
+    @Param("esAdelanto") boolean esAdelanto
+);
+
+
 }

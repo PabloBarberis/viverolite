@@ -153,11 +153,22 @@
                     </div>
                 </div>
 
-
-
-
-
                 <div class="separator"></div>
+
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAdelantos">
+                        <!-- Las filas de datos se generarán dinámicamente -->
+                    </tbody>
+                </table>
+
             </div>
         </div>
 
@@ -224,4 +235,9 @@
 
         <script type="module" src="/js/script.js"></script>
     </body>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </html>

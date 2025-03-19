@@ -2,6 +2,7 @@ package com.vivero.viveroApp.service;
 
 import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.Repository.IngresoEgresoRepository;
+import com.vivero.viveroApp.model.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,13 @@ public class IngresoEgresoService {
         String mesStr = String.format("%02d", mes); // Convierte 3 → "03"
         String anioStr = String.valueOf(anio); // Convierte 2025 → "2025"
         return ingresoEgresoRepository.obtenerIngresosEgresosPorMesYAnio(mesStr, anioStr);
+    }
+
+    public List<IngresoEgreso> getAllAdelantos(Usuario usuario, int mes, int anio) {
+        String mesStr = String.format("%02d", mes); // Convierte 3 → "03"
+        String anioStr = String.valueOf(anio); // Convierte 2025 → "2025"
+        
+        return ingresoEgresoRepository.obtenerIngresosEgresosPorUsuarioMesAnioYAdelanto(mesStr, anioStr, usuario.getId(), true);
     }
 
 }

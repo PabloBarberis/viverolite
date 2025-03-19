@@ -237,22 +237,40 @@ function obtenerTotales() {
     var mes = document.getElementById('mes').value;
     var año = document.getElementById('año').value;
 
-    fetch(`${BASE_URL}/adelantos/totales?usuarioId=${usuarioId}&mes=${mes}&año=${año}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('totalGanado').value = data.totalGanado.toFixed(2);
-                    document.getElementById('totalAdelantos').value = data.totalAdelantos.toFixed(2);
-                    document.getElementById('totalNeto').value = data.totalNeto.toFixed(2);
-                } else {
-                    alert('Error al obtener los totales.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al obtener los totales.');
-            });
+    fetch(`${BASE_URL}/ingresoegreso/totales?usuarioId=${usuarioId}&mes=${mes}&año=${año}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar totales
+                document.getElementById('totalGanado').value = data.totalGanado.toFixed(2);
+                document.getElementById('totalAdelantos').value = data.totalAdelantos.toFixed(2);
+                document.getElementById('totalNeto').value = data.totalNeto.toFixed(2);
+
+                // Limpiar la tabla de adelantos antes de agregar nuevos datos
+                const tablaAdelantos = document.getElementById('tablaAdelantos');
+                tablaAdelantos.innerHTML = ''; // Eliminar filas anteriores
+
+                // Agregar adelantos a la tabla
+                data.adelantos.forEach(adelanto => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${adelanto.id}</td>
+                        <td>${new Date(adelanto.fecha).toLocaleString()}</td> <!-- Formato legible para la fecha -->
+                        <td>${adelanto.descripcion}</td>
+                        <td>${adelanto.monto.toFixed(2)}</td>
+                    `;
+                    tablaAdelantos.appendChild(fila);
+                });
+            } else {
+                alert('Error al obtener los totales y los adelantos.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al obtener los totales y los adelantos.');
+        });
 }
+
 
 function guardarNuevoUsuario() {
     var nombre = document.getElementById('nombreUsuario').value;

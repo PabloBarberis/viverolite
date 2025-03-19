@@ -52,11 +52,18 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        String adminUsername = dotenv.get("ADMIN_USER", "admin");
-        String adminPassword = dotenv.get("ADMIN_PASSWORD", "admin123");
-        String ventaUsername = dotenv.get("VENTA_USER", "venta");
-        String ventaPassword = dotenv.get("VENTA_PASSWORD", "venta123");
+        // Obtener variables del entorno
+        String adminUsername = dotenv.get("ADMIN_USER");
+        String adminPassword = dotenv.get("ADMIN_PASSWORD");
+        String ventaUsername = dotenv.get("VENTA_USER");
+        String ventaPassword = dotenv.get("VENTA_PASSWORD");
 
+        // Verificar que las variables del entorno existen
+        if (adminUsername == null || adminPassword == null || ventaUsername == null || ventaPassword == null) {
+            throw new IllegalStateException("Las variables de entorno necesarias no están configuradas correctamente.");
+        }
+
+        // Crear usuarios en memoria
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
         manager.createUser(User.withUsername(adminUsername)
                 .password(passwordEncoder().encode(adminPassword))

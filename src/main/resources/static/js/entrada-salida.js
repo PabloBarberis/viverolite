@@ -58,32 +58,38 @@ document.addEventListener("DOMContentLoaded", function () {
     // Manejo del formulario
     formIngresoEgreso.addEventListener("submit", function (event) {
         event.preventDefault();
-
+    
+        // Captura los valores del formulario
         const ingreso = document.getElementById("tipoMovimiento").value === "true";
-        const metodoPago = metodoPagoSelect.value;
-        const usuarioId = usuarioSelect.value;
+        const metodoPago = document.getElementById("metodoPago").value;
+        const usuarioId = document.getElementById("usuario").value;
         let fecha = document.getElementById("fecha").value;
         const descripcion = document.getElementById("descripcion").value;
         const monto = parseFloat(document.getElementById("monto").value);
-
+        const esAdelanto = document.getElementById("esAdelanto").checked; // Capturar estado del checkbox
+        console.log(esAdelanto);
+        
+    
         // 📌 Convertir fecha correctamente a LocalDateTime
         if (fecha) {
             const ahora = new Date(); // Obtener la hora actual
             const hora = ahora.getHours().toString().padStart(2, '0');   // HH
             const minutos = ahora.getMinutes().toString().padStart(2, '0'); // mm
             const segundos = ahora.getSeconds().toString().padStart(2, '0'); // ss
-
+    
             // Formato correcto: YYYY-MM-DDTHH:mm:ss
             fecha = `${fecha}T${hora}:${minutos}:${segundos}`;
         }
-
+    
+        // Construir el objeto con los datos del formulario
         const movimiento = {
             ingreso,
             metodoPago,
             usuarioId,
             fecha, // Ahora en formato LocalDateTime
             descripcion,
-            monto
+            monto,
+            adelanto: esAdelanto // Añadir si es un adelanto
         };
 
         console.log("Fecha enviada:", fecha); // 🔍 Verifica en consola
