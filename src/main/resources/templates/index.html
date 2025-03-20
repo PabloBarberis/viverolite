@@ -4,8 +4,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Bienvenidos a Vive Verde</title>
-        <link rel="stylesheet" href="/css/styles.css">
+        
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/css/styles.css">
         <style>
             /* Efecto gradual para el logo */
             .logo {
@@ -21,9 +22,12 @@
         </style>
     </head>
     <body>
-        <!-- Barra de navegación -->
-        <div th:replace="~{navbar}"></div>
-
+               <!-- Contenedor principal para navbar y botones -->
+        <div class="navbar-container d-flex justify-content-between align-items-center">
+            <!-- Navbar se carga con th:replace -->
+            <div th:replace="~{navbar :: navbar}"></div>
+          
+        </div>
         <!-- Contenido principal -->
         <div class="container mt-4 text-center">
             <!-- Logo de la página -->
