@@ -218,13 +218,15 @@ public class VentaController {
             totales.put(metodo, total);
         }
 
+        double totalMercadoPago = totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0) + 
+                totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0);
+        
         // Construir la respuesta con los nuevos métodos de pago
         Map<String, Object> response = new HashMap<>();
         response.put("totalEfectivo", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0));
         response.put("totalCredito", totales.getOrDefault(MetodoPago.CREDITO, 0.0));
         response.put("totalDebito", totales.getOrDefault(MetodoPago.DEBITO, 0.0));
-        response.put("totalMercadoPagoVal", totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0));
-        response.put("totalMercadoPagoSac", totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0));
+        response.put("totalMercadoPago",totalMercadoPago);
         response.put("totalGeneral", ventas.stream().mapToDouble(Venta::getTotal).sum());
 
         return ResponseEntity.ok(response); // Devolvemos la respuesta en formato JSON

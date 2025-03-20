@@ -59,7 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
     formIngresoEgreso.addEventListener("submit", function (event) {
         event.preventDefault();
     
-        // Captura los valores del formulario
+        
+         // Captura los valores del formulario
         const ingreso = document.getElementById("tipoMovimiento").value === "true";
         const metodoPago = document.getElementById("metodoPago").value;
         const usuarioId = document.getElementById("usuario").value;
@@ -68,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const monto = parseFloat(document.getElementById("monto").value);
         const esAdelanto = document.getElementById("esAdelanto").checked; // Capturar estado del checkbox
         console.log(esAdelanto);
-        
+        console.log(ingreso);
     
         // 📌 Convertir fecha correctamente a LocalDateTime
         if (fecha) {
@@ -80,6 +81,8 @@ document.addEventListener("DOMContentLoaded", function () {
             // Formato correcto: YYYY-MM-DDTHH:mm:ss
             fecha = `${fecha}T${hora}:${minutos}:${segundos}`;
         }
+        
+       
     
         // Construir el objeto con los datos del formulario
         const movimiento = {

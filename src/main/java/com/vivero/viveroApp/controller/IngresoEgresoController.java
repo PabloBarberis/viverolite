@@ -30,7 +30,7 @@ public class IngresoEgresoController {
 
     private final RegistroHorarioService registroHorarioService;
     // Cargar la vista de ingresos/egresos
-    
+
     @GetMapping
     public String mostrarVistaIngresoEgreso() {
         return "ventas/entrada-salida"; // Nombre del archivo HTML en templates
@@ -59,7 +59,10 @@ public class IngresoEgresoController {
             String descripcion = (String) requestData.get("descripcion");
             double monto = Double.parseDouble(requestData.get("monto").toString());
             boolean esAdelanto = (boolean) requestData.get("adelanto"); // Capturar el estado de 'adelanto'
-
+            System.out.println("////////////////////////////////////////////////////");
+            System.out.println("INGRESO : " + ingreso);
+            System.out.println("ADELANTO: " + esAdelanto);
+            System.out.println("////////////////////////////////////////////////////");
             // Validar usuario
             Optional<Usuario> usuarioOptional = usuarioService.getUsuarioById(usuarioId);
             if (usuarioOptional.isEmpty()) {
@@ -83,8 +86,12 @@ public class IngresoEgresoController {
 
             // Crear entidad y asignar valores
             IngresoEgreso movimiento = new IngresoEgreso();
+
+            System.out.println("VALOR ESADELANTO: " + esAdelanto);
+
+            movimiento.setIngreso(ingreso); // Primero, establecer el valor real de ingreso
             if (esAdelanto) {
-                movimiento.setIngreso(false);
+                movimiento.setIngreso(false); // Si es adelanto, forzar ingreso a false
             }
             movimiento.setMetodoPago(metodoPago);
             movimiento.setUsuario(usuarioOptional.get());
@@ -105,7 +112,6 @@ public class IngresoEgresoController {
         return response;
     }
 
-    
     @GetMapping("/totales")
     @ResponseBody
     public Map<String, Object> obtenerTotales(@RequestParam("usuarioId") Long usuarioId, @RequestParam("mes") int mes, @RequestParam("año") int año) {
@@ -130,7 +136,7 @@ public class IngresoEgresoController {
                 .mapToDouble(IngresoEgreso::getMonto)
                 .sum();
 
-        double totalNeto = totalGanado  - totalAdelantos;
+        double totalNeto = totalGanado - totalAdelantos;
 
         response.put("success", true);
         response.put("totalGanado", totalGanado);
@@ -140,5 +146,5 @@ public class IngresoEgresoController {
 
         return response;
     }
-    
+
 }
