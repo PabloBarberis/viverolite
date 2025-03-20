@@ -49,9 +49,7 @@ public class VentaController {
     public String mostrarFormularioCrear(Model model) {
 
         List<Producto> productos = productoService.getAllProductosActivos();
-        for (Producto producto : productos) {
-            System.out.println(producto);
-        }
+
         List<Cliente> clientes = clienteService.getAllClientesActivos();
         model.addAttribute("productos", productos);
         model.addAttribute("clientes", clientes);
@@ -121,7 +119,7 @@ public class VentaController {
         model.addAttribute("metodosPago", MetodoPago.values());
         model.addAttribute("descuentos", Descuento.values());
         model.addAttribute("venta", venta);
-        System.out.println("ANTES DE CARGAR LA PAGINA EL ID DE LA VENTA ES: " + venta.getId());
+
         return "ventas/editar-venta";
     }
 
@@ -218,15 +216,15 @@ public class VentaController {
             totales.put(metodo, total);
         }
 
-        double totalMercadoPago = totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0) + 
-                totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0);
-        
+        double totalMercadoPago = totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0)
+                + totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0);
+
         // Construir la respuesta con los nuevos métodos de pago
         Map<String, Object> response = new HashMap<>();
         response.put("totalEfectivo", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0));
         response.put("totalCredito", totales.getOrDefault(MetodoPago.CREDITO, 0.0));
         response.put("totalDebito", totales.getOrDefault(MetodoPago.DEBITO, 0.0));
-        response.put("totalMercadoPago",totalMercadoPago);
+        response.put("totalMercadoPago", totalMercadoPago);
         response.put("totalGeneral", ventas.stream().mapToDouble(Venta::getTotal).sum());
 
         return ResponseEntity.ok(response); // Devolvemos la respuesta en formato JSON
@@ -249,20 +247,10 @@ public class VentaController {
 
         // Obtener ventas filtradas por mes y año
         List<Venta> ventas = ventaService.obtenerVentasPorMesYAnio(mes, anio);
-        System.out.println("");
-        System.out.println("TAMAÑO VENTAS" + ventas.size());
-        for (Venta venta : ventas) {
-            System.out.println(venta.getTotal() + " " + venta.getMetodoPago());
-        }
-        System.out.println("");
+
         // Obtener ingresos y egresos filtrados por mes y año
         List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
-        System.out.println("");
-        System.out.println("TAMAÑO INGRESOS" + ingresosEgresos.size());
-        for (IngresoEgreso ingresosEgreso : ingresosEgresos) {
-            System.out.println(ingresosEgreso.getMonto() + " " + ingresosEgreso.getMetodoPago());;
-        }
-        System.out.println("");
+
         response.put("ventas", ventas);
         response.put("ingresosEgresos", ingresosEgresos);
 

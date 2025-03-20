@@ -80,7 +80,7 @@ public class VentaService {
         if (venta.getTotal() == null || venta.getTotal() == 0) {
             venta.calcularTotal();
         }
-        System.out.println("EL ID ES: " + venta.getId());
+        
         // Guardar la venta actualizada
         return ventaRepository.save(venta);
     }

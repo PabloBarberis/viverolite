@@ -63,8 +63,7 @@ public class Venta {
 
     // Método para calcular el total de la venta
     public void calcularTotal() {
-        System.out.println("El total que recibe calcularTotal() es de " + this.total);
-
+        
         // Calcular el total inicial basado en los productos y sus cantidades
         this.total = productos.stream()
                 .mapToDouble(ventaProducto -> ventaProducto.getProducto().getPrecio() * ventaProducto.getCantidad())
