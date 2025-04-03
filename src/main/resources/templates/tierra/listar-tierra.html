@@ -1,173 +1,147 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Tierra</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/styles.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Tierra</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
 
-    <body>
+<body>
 
-        <!-- Contenedor principal para navbar y botones -->
-        <div class="navbar-container d-flex justify-content-between align-items-center">
-            <!-- Navbar se carga con th:replace -->
-            <div th:replace="~{navbar :: navbar}"></div>
+    <!-- Contenedor principal para navbar y botones -->
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <!-- Navbar se carga con th:replace -->
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div>
+
+    <div class="container-fluid mt-5" style="max-width: 90%;">
+        <div class="row align-items-center justify-content-between">
+            <h1>Tierra</h1>
+            <div>
+                <a th:href="@{/tierra/crear}" class="btn btn-nueva-venta">Nueva Tierra</a>
+            </div>
         </div>
 
-        <div class="container-fluid mt-5" style="max-width: 90%;">
-            <div class="row align-items-center justify-content-between">
-                <h1>Tierra</h1>
-                <div>
-                    <a th:href="@{/tierra/crear}" class="btn btn-nueva-venta">Nueva Tierra</a>
+        <div class="separator"></div>
+
+        <!-- Formulario de Búsqueda -->
+        <form th:action="@{/tierra/listar}" method="get" class="mb-3">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre"
+                        aria-label="Buscar por nombre" th:value="${nombre}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="marca" class="form-control" placeholder="Buscar por marca"
+                        aria-label="Buscar por marca" th:value="${marca}">
                 </div>
             </div>
-
-            <div class="separator"></div>
-
-            <!-- Formulario de Búsqueda -->
-            <form th:action="@{/tierra/listar}" method="get" class="mb-3">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre"
-                               aria-label="Buscar por nombre" th:value="${nombre}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <input type="text" name="marca" class="form-control" placeholder="Buscar por marca"
-                               aria-label="Buscar por marca" th:value="${marca}">
-                    </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <select name="tipo" class="form-control" aria-label="Buscar por tipo">
+                        <option value="">Seleccionar tipo de tierra</option>
+                        <option th:each="tipo : ${tiposTierra}" th:value="${tipo}" th:text="${tipo}"
+                            th:selected="${tipo == selectedTipo}"></option>
+                    </select>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <select name="tipo" class="form-control" aria-label="Buscar por tipo">
-                            <option value="">Seleccionar tipo de tierra</option>
-                            <option th:each="tipo : ${tiposTierra}" th:value="${tipo}" th:text="${tipo}"
-                                    th:selected="${tipo == selectedTipo}"></option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <input type="text" name="proveedor" class="form-control" placeholder="Buscar por proveedor"
-                               aria-label="Buscar por proveedor" th:value="${proveedor}">
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="proveedor" class="form-control" placeholder="Buscar por proveedor"
+                        aria-label="Buscar por proveedor" th:value="${proveedor}">
                 </div>
-                <div class="row justify-content-end">
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-outline-secondary btn-block">Buscar</button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="separator"></div>
-
-            <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/tierra/listar(page=${currentPage - 1}, size=15)}">Anterior</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/tierra/listar(page=${i}, size=15)}" th:text="${i + 1}"></a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/tierra/listar(page=${currentPage + 1}, size=15)}">Siguiente</a>
-                        </li>
-                    </ul>
-                </div>
-
             </div>
-
-            <table class="table table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Marca</th>
-                        <th>Tipo</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Descripción</th>
-                        <th>Proveedores</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="tierra : ${tierras}">
-                        <td th:text="${tierra.id}"></td>
-                        <td th:text="${tierra.nombre}"></td>
-                        <td th:text="${tierra.marca}"></td>
-                        <td th:text="${tierra.tipo}"></td>
-                        <td th:text="${tierra.precio}"></td>
-                        <td th:text="${tierra.stock}"></td>
-                        <td th:text="${tierra.descripcion}"></td>
-                        <td>
-                            <span th:each="proveedor, iterStat : ${tierra.proveedores}">
-                                <span th:text="${proveedor.nombre}"></span>
-                                <span th:if="${!iterStat.last}">, </span>
-                            </span>
-                        </td>
-                        <td>
-                            <a th:href="@{/tierra/editar/{id}(id=${tierra.id})}" class="btn btn-warning btn-sm">Editar</a>
-                            <form th:action="@{/tierra/dar-de-baja}" method="post" style="display:inline;">
-                                <input type="hidden" name="tierraSeleccionada" th:value="${tierra.id}" />
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('¿Estás seguro de que quieres dar de baja a esta tierra?');">
-                                    Dar de Baja
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Paginación -->
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/tierra/listar(page=${currentPage - 1}, size=15)}">Anterior</a>
-                    </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" th:href="@{/tierra/listar(page=${i}, size=15)}" th:text="${i + 1}"></a>
-                    </li>
-                    <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                        <a class="page-link" th:href="@{/tierra/listar(page=${currentPage + 1}, size=15)}">Siguiente</a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="d-flex justify-content-end mb-3">
-                <button id="generarPDFTierra" class="btn btn-primary">Generar PDF</button>
+            <div class="row justify-content-end">
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-secondary btn-block">Buscar</button>
+                </div>
             </div>
+        </form>
 
+        <div class="separator"></div>
+
+        <div
+            th:replace="~{paginacion :: paginationFragment(endpoint='/tierra/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
         </div>
-        
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        
-    </body>
-    <script>
-                                            document.getElementById("generarPDFTierra").addEventListener("click", function () {
-                                                // Solicitar generación del PDF al backend
-                                                fetch("/tierra/pdf", {method: 'GET'})
-                                                        .then(response => {
-                                                            if (!response.ok)
-                                                                throw new Error("Error al generar el PDF");
-                                                            return response.blob(); // Descargar el contenido del PDF
-                                                        })
-                                                        .then(blob => {
-                                                            const url = window.URL.createObjectURL(blob);
-                                                            const link = document.createElement('a');
-                                                            link.href = url;
-                                                            link.download = 'tierra-completa.pdf'; // Nombre del archivo descargado
-                                                            link.click();
-                                                        })
-                                                        .catch(error => {
-                                                            console.error("Error al generar el PDF:", error);
-                                                            alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
-                                                        });
-                                            });
-    </script>
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Marca</th>
+                    <th>Tipo</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Descripción</th>
+                    <th>Proveedores</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tierra : ${tierras}">
+                    <td th:text="${tierra.id}"></td>
+                    <td th:text="${tierra.nombre}"></td>
+                    <td th:text="${tierra.marca}"></td>
+                    <td th:text="${tierra.tipo}"></td>
+                    <td th:text="${tierra.precio}"></td>
+                    <td th:text="${tierra.stock}"></td>
+                    <td th:text="${tierra.descripcion}"></td>
+                    <td>
+                        <span th:each="proveedor, iterStat : ${tierra.proveedores}">
+                            <span th:text="${proveedor.nombre}"></span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/tierra/editar/{id}(id=${tierra.id})}" class="btn btn-warning btn-sm">Editar</a>
+                        <form th:action="@{/tierra/dar-de-baja}" method="post" style="display:inline;">
+                            <input type="hidden" name="tierraSeleccionada" th:value="${tierra.id}" />
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('¿Estás seguro de que quieres dar de baja a esta tierra?');">
+                                Dar de Baja
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div
+            th:replace="~{paginacion :: paginationFragment(endpoint='/tierra/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+            <button id="generarPDFTierra" class="btn btn-primary">Generar PDF</button>
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+<script>
+    document.getElementById("generarPDFTierra").addEventListener("click", function () {
+        // Solicitar generación del PDF al backend
+        fetch("/tierra/pdf", { method: 'GET' })
+            .then(response => {
+                if (!response.ok)
+                    throw new Error("Error al generar el PDF");
+                return response.blob(); // Descargar el contenido del PDF
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'tierra-completa.pdf'; // Nombre del archivo descargado
+                link.click();
+            })
+            .catch(error => {
+                console.error("Error al generar el PDF:", error);
+                alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
+            });
+    });
+</script>
 
 </html>

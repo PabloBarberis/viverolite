@@ -87,31 +87,9 @@
             <div class="separator"></div>
 
 
-
-            <!-- Botones de Nueva Venta y Retroceder junto a la barra de paginación -->
-            <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li th:classappend="${ventas.hasPrevious()} ? 'page-item' : 'page-item disabled'">
-                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number - 1})}"
-                               class="page-link">Anterior</a>
-                        </li>
-                        <li th:each="i : ${#numbers.sequence(0, ventas.totalPages - 1)}"
-                            th:classappend="${ventas.number == i} ? 'page-item active'">
-                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${i})}" class="page-link"
-                               th:text="${i + 1}">1</a>
-                        </li>
-                        <li th:classappend="${ventas.hasNext()} ? 'page-item' : 'page-item disabled'">
-                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number + 1})}"
-                               class="page-link">Siguiente</a>
-                        </li>
+            <div th:replace="~{paginacion :: paginationFragment(endpoint='/ventas/listar', currentPage=${currentPage}, totalPages=${totalPages}, size=10, sort='fecha,DESC')}"></div>
 
 
-                    </ul>
-
-                </div>
-
-            </div>
 
             <table class="table table-striped">
                 <thead class="thead-dark">
@@ -143,24 +121,7 @@
                 </tbody>
             </table>
             <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li th:classappend="${ventas.hasPrevious()} ? 'page-item' : 'page-item disabled'">
-                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number - 1})}"
-                               class="page-link">Anterior</a>
-                        </li>
-
-                        <li th:each="i : ${#numbers.sequence(0, ventas.totalPages - 1)}"
-                            th:classappend="${ventas.number == i} ? 'page-item active'">
-                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${i})}" class="page-link"
-                               th:text="${i + 1}">1</a>
-                        </li>
-                        <li th:classappend="${ventas.hasNext()} ? 'page-item' : 'page-item disabled'">
-                            <a th:href="@{/ventas/listar(size=${ventas.size}, page=${ventas.number + 1})}"
-                               class="page-link">Siguiente</a>
-                        </li>
-                    </ul>
-                </div>
+                <div th:replace="~{paginacion :: paginationFragment(endpoint='/ventas/listar', currentPage=${currentPage}, totalPages=${totalPages}, size=10, sort='fecha,DESC')}"></div>
             </div>
         </div>
 

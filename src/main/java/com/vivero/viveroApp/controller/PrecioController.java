@@ -1,6 +1,7 @@
 package com.vivero.viveroApp.controller;
 
 import com.vivero.viveroApp.service.ProductoService;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/precios")
 public class PrecioController {
 
-    
     private final ProductoService productoService;
 
     @GetMapping
@@ -24,9 +24,13 @@ public class PrecioController {
     @PostMapping("/aumentar")
     public ResponseEntity<String> aumentarPrecios(@RequestBody Map<String, Object> datos) {
         try {
+
             String tipoProducto = (String) datos.get("tipoProducto");
             double porcentaje = Double.parseDouble(datos.get("porcentaje").toString());
-            productoService.aumentarPrecios(tipoProducto, porcentaje);
+            String marca = (String) datos.get("marca");
+
+            productoService.aumentarPrecios(tipoProducto, porcentaje, marca);
+
             return ResponseEntity.ok("Precios actualizados con éxito");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -40,8 +44,9 @@ public class PrecioController {
         try {
             String tipoProducto = (String) datos.get("tipoProducto");
             double porcentaje = Double.parseDouble(datos.get("porcentaje").toString());
+            String marca = (String) datos.get("marca");
 
-            productoService.aplicarDescuento(tipoProducto, porcentaje);
+            productoService.aplicarDescuento(tipoProducto, porcentaje, marca);
             return ResponseEntity.ok("Descuento aplicado con éxito");
         } catch (Exception e) {
 
@@ -49,4 +54,12 @@ public class PrecioController {
         }
 
     }
+
+    @GetMapping("/marcas")
+    @ResponseBody
+    public List<String> obtenerMarcas(@RequestParam String tipo) {
+
+        return productoService.mostrarMarcaPorProducto(tipo);
+    }
+
 }

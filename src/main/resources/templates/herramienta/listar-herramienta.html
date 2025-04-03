@@ -49,22 +49,7 @@
 
             <div class="separator"></div>
 
-            <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/herramienta/listar(page=${currentPage - 1}, size=15)}">Anterior</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/herramienta/listar(page=${i}, size=15)}" th:text="${i + 1}"></a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/herramienta/listar(page=${currentPage + 1}, size=15)}">Siguiente</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+            <div th:replace="~{paginacion :: paginationFragment(endpoint='/herramienta/listar', currentPage=${currentPage}, totalPages=${totalPages})}"></div>
 
             <table class="table table-striped">
                 <thead class="thead-dark">
@@ -108,20 +93,7 @@
             </table>
 
             <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/herramienta/listar(page=${currentPage - 1}, size=15)}">Anterior</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/herramienta/listar(page=${i}, size=15)}" th:text="${i + 1}"></a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/herramienta/listar(page=${currentPage + 1}, size=15)}">Siguiente</a>
-                        </li>
-                    </ul>
-                </div>
+                <div th:replace="~{paginacion :: paginationFragment(endpoint='/herramienta/listar', currentPage=${currentPage}, totalPages=${totalPages})}"></div>
             </div>
 
             <div class="d-flex justify-content-end mb-3">

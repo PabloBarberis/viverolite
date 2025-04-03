@@ -1,158 +1,139 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Insecticida</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/styles.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Insecticida</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
 
-    <body>
-        <div class="navbar-container d-flex justify-content-between align-items-center">
-            <div th:replace="~{navbar :: navbar}"></div>
+<body>
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <div th:replace="~{navbar :: navbar}"></div>
 
-        </div>
+    </div>
 
-        <div class="container-fluid mt-5" style="max-width: 90%;">
+    <div class="container-fluid mt-5" style="max-width: 90%;">
 
-            <div class="row align-items-center justify-content-between">
-                <h1>Insecticida</h1>
-                <div>
-                    <a th:href="@{/insecticida/crear}" class="btn btn-nueva-venta">Nuevo Insecticida</a>
-                </div>
-            </div>
-
-
-            <div class="separator"></div>
-
-            <form th:action="@{/insecticida/listar}" method="get" class="mb-3">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre" th:value="${nombre}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <input type="text" name="marca" class="form-control" placeholder="Buscar por marca" th:value="${marca}">
-                    </div>
-                </div>
-                <div class="row justify-content-end">
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-outline-secondary btn-block">Buscar</button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="separator"></div>
-
-            <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/insecticida/listar(page=${currentPage - 1}, size=15)}">Anterior</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/insecticida/listar(page=${i}, size=15)}" th:text="${i + 1}"></a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/insecticida/listar(page=${currentPage + 1}, size=15)}">Siguiente</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-
-            <table class="table table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Marca</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Descripción</th>
-                        <th>Proveedores</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="insecticida : ${insecticidas}">
-                        <td th:text="${insecticida.id}"></td>
-                        <td th:text="${insecticida.nombre}"></td>
-                        <td th:text="${insecticida.marca}"></td>
-                        <td th:text="${insecticida.precio}"></td>
-                        <td th:text="${insecticida.stock}"></td>
-                        <td th:text="${insecticida.descripcion}"></td>
-                        <td>
-                            <span th:each="proveedor, iterStat : ${insecticida.proveedores}">
-                                <span th:text="${proveedor.nombre}"></span>
-                                <span th:if="${!iterStat.last}">, </span>
-                            </span>
-                        </td>
-                        <td>
-                            <a th:href="@{/insecticida/editar/{id}(id=${insecticida.id})}" class="btn btn-warning btn-sm">Editar</a>
-                            <form th:action="@{/insecticida/dar-de-baja}" method="post" style="display:inline;">
-                                <input type="hidden" name="insecticidaSeleccionado" th:value="${insecticida.id}" />
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('¿Estás seguro de que quieres dar de baja a este insecticida?');">
-                                    Dar de Baja
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="mb-3 d-flex justify-content-between">
-                <div>
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/insecticida/listar(page=${currentPage - 1}, size=15)}">Anterior</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/insecticida/listar(page=${i}, size=15)}" th:text="${i + 1}"></a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                            <a class="page-link" th:href="@{/insecticida/listar(page=${currentPage + 1}, size=15)}">Siguiente</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-
-            <div class="d-flex justify-content-end mb-3">
-                <button id="generarPDFInsecticida" class="btn btn-primary">Generar PDF</button>
+        <div class="row align-items-center justify-content-between">
+            <h1>Insecticida</h1>
+            <div>
+                <a th:href="@{/insecticida/crear}" class="btn btn-nueva-venta">Nuevo Insecticida</a>
             </div>
         </div>
 
 
-        <script>
-            document.getElementById("generarPDFInsecticida").addEventListener("click", function () {
-                fetch("/insecticida/pdf", {method: 'GET'})
-                        .then(response => {
-                            if (!response.ok)
-                                throw new Error("Error al generar el PDF");
-                            return response.blob();
-                        })
-                        .then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = 'insecticida-completo.pdf';
-                            link.click();
-                        })
-                        .catch(error => {
-                            console.error("Error al generar el PDF:", error);
-                            alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
-                        });
-            });
-        </script>
-        
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        
-    </body>
+        <div class="separator"></div>
+
+        <form th:action="@{/insecticida/listar}" method="get" class="mb-3">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre"
+                        th:value="${nombre}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="marca" class="form-control" placeholder="Buscar por marca"
+                        th:value="${marca}">
+                </div>
+            </div>
+            <div class="row justify-content-end">
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-secondary btn-block">Buscar</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="separator"></div>
+
+        <div class="mb-3 d-flex justify-content-between">
+            <div
+                th:replace="~{paginacion :: paginationFragment(endpoint='/insecticida/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+            </div>
+        </div>
+
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Marca</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Descripción</th>
+                    <th>Proveedores</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="insecticida : ${insecticidas}">
+                    <td th:text="${insecticida.id}"></td>
+                    <td th:text="${insecticida.nombre}"></td>
+                    <td th:text="${insecticida.marca}"></td>
+                    <td th:text="${insecticida.precio}"></td>
+                    <td th:text="${insecticida.stock}"></td>
+                    <td th:text="${insecticida.descripcion}"></td>
+                    <td>
+                        <span th:each="proveedor, iterStat : ${insecticida.proveedores}">
+                            <span th:text="${proveedor.nombre}"></span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/insecticida/editar/{id}(id=${insecticida.id})}"
+                            class="btn btn-warning btn-sm">Editar</a>
+                        <form th:action="@{/insecticida/dar-de-baja}" method="post" style="display:inline;">
+                            <input type="hidden" name="insecticidaSeleccionado" th:value="${insecticida.id}" />
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('¿Estás seguro de que quieres dar de baja a este insecticida?');">
+                                Dar de Baja
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="mb-3 d-flex justify-content-between">
+            <div
+                th:replace="~{paginacion :: paginationFragment(endpoint='/insecticida/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+            </div>
+        </div>
+
+
+        <div class="d-flex justify-content-end mb-3">
+            <button id="generarPDFInsecticida" class="btn btn-primary">Generar PDF</button>
+        </div>
+    </div>
+
+
+    <script>
+        document.getElementById("generarPDFInsecticida").addEventListener("click", function () {
+            fetch("/insecticida/pdf", { method: 'GET' })
+                .then(response => {
+                    if (!response.ok)
+                        throw new Error("Error al generar el PDF");
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'insecticida-completo.pdf';
+                    link.click();
+                })
+                .catch(error => {
+                    console.error("Error al generar el PDF:", error);
+                    alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
+                });
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
 
 </html>

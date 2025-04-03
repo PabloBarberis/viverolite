@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="paginationFragment(endpoint, currentPage, totalPages)">
+        <nav aria-label="Page navigation" th:if="${totalPages > 0}">
+            <ul class="pagination">
+                <!-- Botón 'Anterior' -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{${endpoint}(page=${currentPage - 1}, size=${size}, sort=${sort})}">Anterior</a>
+                </li>
+        
+                <!-- Botones de página -->
+                <li class="page-item" 
+                    th:each="i : ${#numbers.sequence(
+                        currentPage <= 5 ? 0 : (currentPage >= totalPages - 5 ? totalPages - 10 : currentPage - 5),
+                        currentPage <= 5 ? (totalPages < 10 ? totalPages - 1 : 9) : (currentPage + 5 >= totalPages ? totalPages - 1 : currentPage + 4)
+                    )}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{${endpoint}(page=${i}, size=${size}, sort=${sort})}" th:text="${i + 1}"></a>
+                </li>
+        
+                <!-- Botón 'Siguiente' -->
+                <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{${endpoint}(page=${currentPage + 1}, size=${size}, sort=${sort})}">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>
