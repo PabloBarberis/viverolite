@@ -29,18 +29,15 @@
         <!-- Formulario de Búsqueda -->
         <form th:action="@{/decoracion/listar}" method="get" class="mb-3">
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre"
                         aria-label="Buscar por nombre" th:value="${nombre}">
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <input type="text" name="marca" class="form-control" placeholder="Buscar por marca"
                         aria-label="Buscar por marca" th:value="${marca}">
                 </div>
-                <div class="col-md-4 mb-3">
-                    <input type="text" name="proveedor" class="form-control" placeholder="Buscar por proveedor"
-                        aria-label="Buscar por proveedor" th:value="${proveedor}">
-                </div>
+
             </div>
             <div class="row justify-content-end">
                 <div class="col-md-2">
@@ -53,8 +50,10 @@
 
         <!-- Paginación -->
         <div
-            th:replace="~{paginacion :: paginationFragment(endpoint='/decoracion/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+            th:replace="~{paginacion :: paginationFragment(endpoint='/decoracion/listar', currentPage=${currentPage},
+               totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
         </div>
+
 
 
         <!-- Tabla mejorada -->
@@ -102,9 +101,11 @@
             </tbody>
         </table>
 
+
         <!-- Paginación -->
         <div
-            th:replace="~{paginacion :: paginationFragment(endpoint='/decoracion/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+            th:replace="~{paginacion :: paginationFragment(endpoint='/decoracion/listar', currentPage=${currentPage},
+               totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
         </div>
 
         <div class="d-flex justify-content-end mb-3">

@@ -46,10 +46,9 @@
 
         <div class="separator"></div>
 
-        <div class="mb-3 d-flex justify-content-between">
-            <div
-                th:replace="~{paginacion :: paginationFragment(endpoint='/insecticida/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
-            </div>
+        <!-- Paginación -->
+        <div th:replace="~{paginacion :: paginationFragment(endpoint='/insecticida/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo='')}">
         </div>
 
 
@@ -95,10 +94,9 @@
             </tbody>
         </table>
 
-        <div class="mb-3 d-flex justify-content-between">
-            <div
-                th:replace="~{paginacion :: paginationFragment(endpoint='/insecticida/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
-            </div>
+        <!-- Paginación -->
+        <div th:replace="~{paginacion :: paginationFragment(endpoint='/insecticida/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo='')}">
         </div>
 
 

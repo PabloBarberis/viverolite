@@ -25,6 +25,7 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>Nombre</th>
+                        <th>Marca</th>
                         <th>Tipo de Planta</th>
                         <th>Precio</th>
                         <th>Stock</th>
@@ -35,6 +36,7 @@
                 <tbody>
                     <tr>
                         <td><input type="text" th:field="*{nombre}" class="form-control" required /></td>
+                        <td><input type="text" th:field="*{marca}" class="form-control"/></td>
                         <td>
                             <select th:field="*{tipo}" class="form-control" required>
                                 <option value="" disabled selected>Seleccione Tipo</option>

@@ -24,17 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class DecoracionController {
 
     private final DecoracionService decoracionService;
-
     private final ProveedorService proveedorService;
-
     private final PdfService pdfService;
-
-    // Página de inicio de decoraciones
-    @GetMapping("/index")
-    public String index() {
-        return "index"; // Redirige a index.html
-    }
-
+    
     // Listar decoraciones con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarDecoraciones(@RequestParam(defaultValue = "0") int page,

@@ -47,9 +47,12 @@
 
         <div class="separator"></div>
 
-        <div
-            th:replace="~{paginacion :: paginationFragment(endpoint='/fertilizante/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+
+        <!-- Paginación -->
+        <div th:replace="~{paginacion :: paginationFragment(endpoint='/fertilizante/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo='')}">
         </div>
+
 
         <table class="table table-striped">
             <thead class="thead-dark">
@@ -92,9 +95,10 @@
                 </tr>
             </tbody>
         </table>
-        <div
-            th:replace="~{paginacion :: paginationFragment(endpoint='/fertilizante/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
-        </div>
+                <!-- Paginación -->
+                <div th:replace="~{paginacion :: paginationFragment(endpoint='/fertilizante/listar', currentPage=${currentPage},
+                totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo='')}">
+                </div>
 
         <div class="d-flex justify-content-end mb-3">
             <button id="generarPDFFertilizante" class="btn btn-primary">Generar PDF</button>

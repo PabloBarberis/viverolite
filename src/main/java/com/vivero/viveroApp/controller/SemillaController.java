@@ -31,18 +31,13 @@ public class SemillaController {
     private final ProveedorService proveedorService;
     private final PdfService pdfService;
 
-    @GetMapping("/index")
-    public String index() {
-        return "index";
-    }
-
     @GetMapping("/listar")
     public String listarSemillas(@RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "15") int size,
-                                 @RequestParam(required = false) String nombre,
-                                 @RequestParam(required = false) String marca,
-                                 @RequestParam(required = false) String proveedor,
-                                 Model model) {
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String proveedor,
+            Model model) {
         Page<Semilla> semillaPage = semillaService.buscarSemillaPaginado(nombre, marca, proveedor, page, size);
 
         model.addAttribute("semillas", semillaPage.getContent());
@@ -66,7 +61,7 @@ public class SemillaController {
 
     @PostMapping("/crear")
     public String crearSemillaDesdeVista(@ModelAttribute Semilla semilla,
-                                         @RequestParam(required = false) List<Long> proveedoresIds) {
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -97,8 +92,8 @@ public class SemillaController {
 
     @PostMapping("/editar/{id}")
     public String actualizarSemillaDesdeVista(@PathVariable Long id,
-                                              @ModelAttribute Semilla semillaDetails,
-                                              @RequestParam(required = false) List<Long> proveedoresIds) {
+            @ModelAttribute Semilla semillaDetails,
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -121,11 +116,11 @@ public class SemillaController {
         Function<Object, String[]> rowMapper = semilla -> {
             Semilla s = (Semilla) semilla;
             return new String[]{
-                    String.valueOf(s.getId()),
-                    s.getNombre(),
-                    s.getMarca(),
-                    String.valueOf(s.getPrecio()),
-                    String.valueOf(s.getStock())
+                String.valueOf(s.getId()),
+                s.getNombre(),
+                s.getMarca(),
+                String.valueOf(s.getPrecio()),
+                String.valueOf(s.getStock())
             };
         };
 

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class PerdidaInventarioController {
 
     private final PerdidaInventarioService perdidaInventarioService;
-
     private final ProductoService productoService;
 
     @GetMapping

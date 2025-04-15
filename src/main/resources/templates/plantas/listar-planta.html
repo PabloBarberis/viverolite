@@ -31,33 +31,41 @@
         <!-- Formulario de Búsqueda -->
         <form th:action="@{/plantas/listar}" method="get" class="mb-3">
             <div class="row">
-                <div class="col-md-5">
+                <div class="col-md-6 mb-3">
                     <div class="input-group">
                         <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre"
                             aria-label="Buscar por nombre" th:value="${nombre}">
                     </div>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-6 mb-3">
                     <div class="input-group">
-                        <select name="tipoPlanta" id="tipoPlanta" class="form-control" onchange="this.form.submit()">
+                        <select name="tipoPlanta" id="tipoPlanta" class="form-control">
                             <option value="">Buscar por Tipo</option>
                             <option th:each="tipo : ${tiposPlanta}" th:value="${tipo}" th:text="${tipo}"
                                 th:selected="${tipo == selectedTipo}"></option>
                         </select>
                     </div>
-                </div>
+                </div>                
+            </div>
+
+            <div class="row justify-content-end">
                 <div class="col-md-2">
                     <div class="input-group-append">
-                        <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+                        <button type="submit" class="btn btn-outline-secondary btn-block">Buscar</button>
                     </div>
                 </div>
             </div>
+
+
         </form>
         <div class="separator"></div>
 
         <div>
+
+            <!-- Paginación -->
             <div
-                th:replace="~{paginacion :: paginationFragment(endpoint='/plantas/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+                th:replace="~{paginacion :: paginationFragment(endpoint='/plantas/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
             </div>
 
             <table class="table table-striped">
@@ -65,6 +73,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
+                        <th>Marca</th>
                         <th>Tipo</th>
                         <th>Precio</th>
                         <th>Stock</th>
@@ -77,6 +86,7 @@
                     <tr th:each="planta : ${plantas}">
                         <td th:text="${planta.id}"></td>
                         <td th:text="${planta.nombre}"></td>
+                        <td th:text="${planta.marca}"></td>
                         <td th:text="${planta.tipo}"></td>
                         <td th:text="${planta.precio}"></td>
                         <td th:text="${planta.stock}"></td>
@@ -102,9 +112,13 @@
                 </tbody>
             </table>
 
+
+            <!-- Paginación -->
             <div
-                th:replace="~{paginacion :: paginationFragment(endpoint='/plantas/listar', currentPage=${currentPage}, totalPages=${totalPages})}">
+                th:replace="~{paginacion :: paginationFragment(endpoint='/plantas/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
             </div>
+
             <div class="d-flex justify-content-end mb-3">
                 <button id="generarPDFPlanta" class="btn btn-primary">Generar PDF</button>
             </div>

@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.vivero</groupId>
     <artifactId>viverolite</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>viverolite</name>
     <description>Proyecto de demostración para Spring Boot</description>
     <properties>

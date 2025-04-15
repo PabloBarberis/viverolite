@@ -1,4 +1,3 @@
-
 package com.vivero.viveroApp.controller;
 
 import com.vivero.viveroApp.model.Fertilizante;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/fertilizante")
@@ -33,20 +31,14 @@ public class FertilizanteController {
     private final ProveedorService proveedorService;
     private final PdfService pdfService;
 
-    // Página de inicio de fertilizantes
-    @GetMapping("/index")
-    public String index() {
-        return "index"; // Redirige a index.html
-    }
-
     // Listar fertilizantes con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarFertilizantes(@RequestParam(defaultValue = "0") int page,
-                                      @RequestParam(defaultValue = "15") int size,
-                                      @RequestParam(required = false) String nombre,
-                                      @RequestParam(required = false) String marca,
-                                      @RequestParam(required = false) String proveedor,
-                                      Model model) {
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String proveedor,
+            Model model) {
         Page<Fertilizante> fertilizantePage = fertilizanteService.buscarFertilizantePaginado(nombre, marca, proveedor, page, size);
 
         model.addAttribute("fertilizantes", fertilizantePage.getContent());
@@ -73,7 +65,7 @@ public class FertilizanteController {
     // Crear un nuevo fertilizante desde el formulario
     @PostMapping("/crear")
     public String crearFertilizanteDesdeVista(@ModelAttribute Fertilizante fertilizante,
-                                              @RequestParam(required = false) List<Long> proveedoresIds) {
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -107,8 +99,8 @@ public class FertilizanteController {
     // Actualizar fertilizante desde el formulario
     @PostMapping("/editar/{id}")
     public String actualizarFertilizanteDesdeVista(@PathVariable Long id,
-                                                   @ModelAttribute Fertilizante fertilizanteDetails,
-                                                   @RequestParam(required = false) List<Long> proveedoresIds) {
+            @ModelAttribute Fertilizante fertilizanteDetails,
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -133,11 +125,11 @@ public class FertilizanteController {
         Function<Object, String[]> rowMapper = fertilizante -> {
             Fertilizante f = (Fertilizante) fertilizante;
             return new String[]{
-                    String.valueOf(f.getId()),
-                    f.getNombre(),
-                    f.getMarca(),
-                    String.valueOf(f.getPrecio()),
-                    String.valueOf(f.getStock())
+                String.valueOf(f.getId()),
+                f.getNombre(),
+                f.getMarca(),
+                String.valueOf(f.getPrecio()),
+                String.valueOf(f.getStock())
             };
         };
 

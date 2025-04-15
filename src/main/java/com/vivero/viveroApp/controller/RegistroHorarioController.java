@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class RegistroHorarioController {
 
     private final RegistroHorarioService registroHorarioService;
-
     private final UsuarioService usuarioService;
 
     @GetMapping

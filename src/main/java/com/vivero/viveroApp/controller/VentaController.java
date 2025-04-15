@@ -35,13 +35,9 @@ import org.springframework.http.ResponseEntity;
 public class VentaController {
 
     private final VentaService ventaService;
-
     private final VentaRepository ventaRepository;
-
     private final ProductoService productoService;
-
     private final ClienteService clienteService;
-
     private final IngresoEgresoService ingresoEgresoService;
 
     // Mostrar formulario para crear una nueva venta
@@ -93,20 +89,19 @@ public class VentaController {
 
     // Listar ventas
 // Listar ventas
-   @GetMapping("/listar")
-public String listarVentas(Model model, @PageableDefault(size = 10, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
-    Page<Venta> ventas = ventaService.getAllVentas(pageable);
+    @GetMapping("/listar")
+    public String listarVentas(Model model, @PageableDefault(size = 10, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<Venta> ventas = ventaService.getAllVentas(pageable);
 
-    // Agregar datos de paginación al modelo
-    model.addAttribute("ventas", ventas);
-    model.addAttribute("currentPage", ventas.getNumber()); // Número de página actual
-    model.addAttribute("totalPages", ventas.getTotalPages()); // Total de páginas
-    model.addAttribute("size", pageable.getPageSize()); // Tamaño de la página
-    model.addAttribute("sort", pageable.getSort()); // Ordenamiento actual
+        // Agregar datos de paginación al modelo
+        model.addAttribute("ventas", ventas);
+        model.addAttribute("currentPage", ventas.getNumber()); // Número de página actual
+        model.addAttribute("totalPages", ventas.getTotalPages()); // Total de páginas
+        model.addAttribute("size", pageable.getPageSize()); // Tamaño de la página
+        model.addAttribute("sort", pageable.getSort()); // Ordenamiento actual
 
-    return "ventas/listar-venta";
-}
-
+        return "ventas/listar-venta";
+    }
 
     // Ver detalle de una venta
     @GetMapping("/detalle/{id}")

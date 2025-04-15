@@ -39,42 +39,30 @@ public class ProductoService {
     }
 
     @Transactional
-    public void aumentarPrecios(String tipoProducto, double porcentaje, String marca) {
+    public void actualizarPrecios(String accion, String productoStr, double porcentaje, String marca, String interiorExterior) {
+        Class<? extends Producto> claseProducto = obtenerClaseProducto(productoStr);
+        List<Producto> productos;
 
-        Class<? extends Producto> claseProducto = obtenerClaseProducto(tipoProducto);
-        List<Producto> productos = productoRepository.findByTipoAndMarca(claseProducto, marca);
-
-        for (Producto producto : productos) {
-            System.out.println(producto.getMarca());
+        // Si es planta, buscar por interior/exterior
+        if ("Planta".equalsIgnoreCase(productoStr)) {
+            productos = productoRepository.findPlantasPorTipo(interiorExterior, marca);
+        } else {
+            // Para otros productos, buscar por tipo y marca
+            productos = productoRepository.findByTipoAndMarca(claseProducto, marca);
         }
 
+        // Aplicar la lógica de actualización de precios
         for (Producto producto : productos) {
+            double nuevoPrecio;
 
-            // Calcular el nuevo precio
-            double nuevoPrecio = producto.getPrecio() * (1 + porcentaje / 100);
+            if ("Aumento".equalsIgnoreCase(accion)) {
+                nuevoPrecio = producto.getPrecio() * (1 + porcentaje / 100);
+            } else {
+                nuevoPrecio = producto.getPrecio() * (1 - porcentaje / 100);
+            }
 
-            // Redondear el precio según el tipo de producto
-            long precioRedondeado = redondearPrecio(tipoProducto, nuevoPrecio);
-
-            // Actualizar el precio
-            producto.setPrecio((double) precioRedondeado);
-            productoRepository.save(producto);
-        }
-    }
-
-    @Transactional
-    public void aplicarDescuento(String tipoProducto, double porcentaje, String marca) {
-        Class<? extends Producto> claseProducto = obtenerClaseProducto(tipoProducto);
-        List<Producto> productos = productoRepository.findByTipoAndMarca(claseProducto, marca);
-
-        for (Producto producto : productos) {
-            // Calcular el nuevo precio con el descuento
-            double nuevoPrecio = producto.getPrecio() * (1 - porcentaje / 100);
-
-            // Redondear el precio según el tipo de producto
-            long precioRedondeado = redondearPrecio(tipoProducto, nuevoPrecio);
-
-            // Actualizar el precio
+            // Redondear el precio
+            long precioRedondeado = redondearPrecio(productoStr, nuevoPrecio);
             producto.setPrecio((double) precioRedondeado);
             productoRepository.save(producto);
         }
@@ -104,26 +92,34 @@ public class ProductoService {
     @Transactional(readOnly = true)
     private Class<? extends Producto> obtenerClaseProducto(String tipoProducto) {
         switch (tipoProducto) {
-            case "Planta":
+            case "Planta" -> {
                 return Planta.class;
-            case "Maceta":
+            }
+            case "Maceta" -> {
                 return Maceta.class;
-            case "Decoracion":
+            }
+            case "Decoracion" -> {
                 return Decoracion.class;
-            case "Grow":
+            }
+            case "Grow" -> {
                 return Grow.class;
-            case "Tierra":
+            }
+            case "Tierra" -> {
                 return Tierra.class;
-            case "Herramienta":
+            }
+            case "Herramienta" -> {
                 return Herramienta.class;
-            case "Fertilizante":
+            }
+            case "Fertilizante" -> {
                 return Fertilizante.class;
-            case "Semilla":
+            }
+            case "Semilla" -> {
                 return Semilla.class;
-            case "Insecticida":
+            }
+            case "Insecticida" -> {
                 return Insecticida.class;
-            default:
-                throw new IllegalArgumentException("Tipo de producto no válido: " + tipoProducto);
+            }
+            default -> throw new IllegalArgumentException("Tipo de producto no válido: " + tipoProducto);
         }
     }
 

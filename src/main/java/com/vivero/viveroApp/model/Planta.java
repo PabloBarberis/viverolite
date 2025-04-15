@@ -1,5 +1,3 @@
-
-
 package com.vivero.viveroApp.model;
 
 import com.vivero.viveroApp.model.enums.TipoPlanta;

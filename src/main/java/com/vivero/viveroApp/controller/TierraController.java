@@ -25,16 +25,8 @@ import lombok.RequiredArgsConstructor;
 public class TierraController {
 
     private final TierraService tierraService;
-
     private final ProveedorService proveedorService;
-
     private final PdfService pdfService;
-
-    // Página de inicio de tierras
-    @GetMapping("/index")
-    public String index() {
-        return "index"; // Redirige a index.html
-    }
 
     // Listar tierras con búsqueda, filtro y paginación
     @GetMapping("/listar")

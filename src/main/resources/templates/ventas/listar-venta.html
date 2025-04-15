@@ -86,8 +86,10 @@
 
             <div class="separator"></div>
 
-
-            <div th:replace="~{paginacion :: paginationFragment(endpoint='/ventas/listar', currentPage=${currentPage}, totalPages=${totalPages}, size=10, sort='fecha,DESC')}"></div>
+        <!-- Paginación -->
+        <div th:replace="~{paginacion :: paginationFragment(endpoint='/ventas/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
+        </div>
 
 
 
@@ -120,9 +122,13 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="mb-3 d-flex justify-content-between">
-                <div th:replace="~{paginacion :: paginationFragment(endpoint='/ventas/listar', currentPage=${currentPage}, totalPages=${totalPages}, size=10, sort='fecha,DESC')}"></div>
-            </div>
+
+        <!-- Paginación -->
+        <div th:replace="~{paginacion :: paginationFragment(endpoint='/ventas/listar', currentPage=${currentPage},
+        totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
+        </div>
+
+
         </div>
 
 

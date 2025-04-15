@@ -116,6 +116,7 @@ public class MacetaService {
                 nombre != null && !nombre.isEmpty() ? nombre : null,
                 color != null && !color.isEmpty() ? color : null,
                 material != null && !material.isEmpty() ? material : null,
+                marca != null && !marca.isEmpty() ? marca : null,
                 pageable
         );
     }

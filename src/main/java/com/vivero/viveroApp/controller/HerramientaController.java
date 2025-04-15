@@ -1,4 +1,3 @@
-
 package com.vivero.viveroApp.controller;
 
 import com.vivero.viveroApp.model.Herramienta;
@@ -32,20 +31,14 @@ public class HerramientaController {
     private final ProveedorService proveedorService;
     private final PdfService pdfService;
 
-    // Página de inicio de herramientas
-    @GetMapping("/index")
-    public String index() {
-        return "index";
-    }
-
     // Listar herramientas con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarHerramientas(@RequestParam(defaultValue = "0") int page,
-                                     @RequestParam(defaultValue = "15") int size,
-                                     @RequestParam(required = false) String nombre,
-                                     @RequestParam(required = false) String marca,
-                                     @RequestParam(required = false) String proveedor,
-                                     Model model) {
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String proveedor,
+            Model model) {
         Page<Herramienta> herramientaPage = herramientaService.buscarHerramientaPaginada(nombre, marca, proveedor, page, size);
 
         model.addAttribute("herramientas", herramientaPage.getContent());
@@ -71,7 +64,7 @@ public class HerramientaController {
     // Crear una nueva herramienta desde el formulario
     @PostMapping("/crear")
     public String crearHerramientaDesdeVista(@ModelAttribute Herramienta herramienta,
-                                             @RequestParam(required = false) List<Long> proveedoresIds) {
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -104,8 +97,8 @@ public class HerramientaController {
     // Actualizar herramienta desde el formulario
     @PostMapping("/editar/{id}")
     public String actualizarHerramientaDesdeVista(@PathVariable Long id,
-                                                  @ModelAttribute Herramienta herramientaDetails,
-                                                  @RequestParam(required = false) List<Long> proveedoresIds) {
+            @ModelAttribute Herramienta herramientaDetails,
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -130,11 +123,11 @@ public class HerramientaController {
         Function<Object, String[]> rowMapper = herramienta -> {
             Herramienta h = (Herramienta) herramienta;
             return new String[]{
-                    String.valueOf(h.getId()),
-                    h.getNombre(),
-                    h.getMarca(),
-                    String.valueOf(h.getPrecio()),
-                    String.valueOf(h.getStock())
+                String.valueOf(h.getId()),
+                h.getNombre(),
+                h.getMarca(),
+                String.valueOf(h.getPrecio()),
+                String.valueOf(h.getStock())
             };
         };
 

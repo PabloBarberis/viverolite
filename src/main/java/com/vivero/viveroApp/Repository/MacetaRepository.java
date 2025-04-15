@@ -21,14 +21,17 @@ public interface MacetaRepository extends JpaRepository<Maceta, Long> {
     Optional<Maceta> findByIdAndActivoTrue(Long id);
 
     // Búsqueda personalizada para filtrar por nombre, color, marca, modelo y material, y solo traer macetas activas con paginación
-    @Query("SELECT m FROM Maceta m LEFT JOIN m.proveedores p WHERE "
-            + "m.activo = TRUE AND ("
+    @Query("SELECT m FROM Maceta m WHERE "
             + "(:nombre IS NULL OR LOWER(m.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))) AND "
             + "(:color IS NULL OR LOWER(m.color) LIKE LOWER(CONCAT('%', :color, '%'))) AND "
-            + "(:material IS NULL OR LOWER(m.material) LIKE LOWER(CONCAT('%', :material, '%'))))")
-    Page<Maceta> buscarMaceta(@Param("nombre") String nombre,
+            + "(:material IS NULL OR LOWER(m.material) LIKE LOWER(CONCAT('%', :material, '%'))) AND "
+            + "(:marca IS NULL OR LOWER(m.marca) LIKE LOWER(CONCAT('%', :marca, '%'))) AND "
+            + "m.activo = TRUE")
+    Page<Maceta> buscarMaceta(
+            @Param("nombre") String nombre,
             @Param("color") String color,
             @Param("material") String material,
+            @Param("marca") String marca,
             Pageable pageable);
 
     List<Maceta> findByActivoTrue();

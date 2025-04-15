@@ -26,9 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class MacetaController {
 
     private final MacetaService macetaService;
-
     private final ProveedorService proveedorService;
-
     private final PdfService pdfService;
 
     // Listar macetas con búsqueda, filtro y paginación
@@ -42,6 +40,7 @@ public class MacetaController {
             Model model) {
         String colorStr = color != null ? color.name() : null;
         String materialStr = material != null ? material.name() : null;
+        
         Page<Maceta> macetaPage = macetaService.buscarMacetaPaginado(nombre, colorStr, marca, materialStr, page, size);
 
         model.addAttribute("macetas", macetaPage.getContent());
@@ -50,6 +49,7 @@ public class MacetaController {
         model.addAttribute("nombre", nombre);
         model.addAttribute("color", color);
         model.addAttribute("material", material);
+        model.addAttribute("marca",marca);
         model.addAttribute("colores", ColorMaceta.values());
         model.addAttribute("materiales", MaterialMaceta.values());
         model.addAttribute("selectedColor", color);

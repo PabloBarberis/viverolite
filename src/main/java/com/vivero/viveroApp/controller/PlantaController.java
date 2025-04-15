@@ -25,22 +25,15 @@ import lombok.RequiredArgsConstructor;
 public class PlantaController {
 
     private final PlantaService plantaService;
-
     private final ProveedorService proveedorService;
-
     private final PdfService pdfService;
-
-    @GetMapping("/index")
-    public String index() {
-        return "index"; // Redirige a index.html
-    }
 
     // Listar plantas con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarPlantas(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size,
             @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) String tipoPlanta,
+            @RequestParam(required = false) String tipoPlanta,         
             Model model) {
         Page<Planta> plantaPage;
 

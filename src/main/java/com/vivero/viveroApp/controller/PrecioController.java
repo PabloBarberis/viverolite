@@ -21,15 +21,17 @@ public class PrecioController {
         return "precios/precios";
     }
 
-    @PostMapping("/aumentar")
-    public ResponseEntity<String> aumentarPrecios(@RequestBody Map<String, Object> datos) {
+    @PostMapping("/aumentoDescuento")
+    public ResponseEntity<String> aumentoDescuento(@RequestBody Map<String, Object> datos) {
         try {
-
-            String tipoProducto = (String) datos.get("tipoProducto");
+            
+            String accion = (String) datos.get("tipoAccion");
+            String productoStr = (String) datos.get("tipoProducto");
             double porcentaje = Double.parseDouble(datos.get("porcentaje").toString());
             String marca = (String) datos.get("marca");
-
-            productoService.aumentarPrecios(tipoProducto, porcentaje, marca);
+            String interiorExterior =(String) datos.get("interiorExterior");
+            
+            productoService.actualizarPrecios(accion, productoStr, porcentaje, marca, interiorExterior);
 
             return ResponseEntity.ok("Precios actualizados con éxito");
         } catch (Exception e) {
@@ -37,24 +39,7 @@ public class PrecioController {
                     .body("Error al procesar la solicitud: " + e.getMessage());
         }
     }
-
-    @PostMapping("/descuento")
-    public ResponseEntity<String> aplicarDescuento(@RequestBody Map<String, Object> datos) {
-
-        try {
-            String tipoProducto = (String) datos.get("tipoProducto");
-            double porcentaje = Double.parseDouble(datos.get("porcentaje").toString());
-            String marca = (String) datos.get("marca");
-
-            productoService.aplicarDescuento(tipoProducto, porcentaje, marca);
-            return ResponseEntity.ok("Descuento aplicado con éxito");
-        } catch (Exception e) {
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la solicitud: " + e.getMessage());
-        }
-
-    }
-
+    
     @GetMapping("/marcas")
     @ResponseBody
     public List<String> obtenerMarcas(@RequestParam String tipo) {

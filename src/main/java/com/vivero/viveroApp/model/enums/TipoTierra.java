@@ -8,5 +8,11 @@ public enum TipoTierra {
     PERLAS_GRUESAS,
     PINOCHA,
     RESACA_RIO,
-    TURBA
+    TURBA,
+    SUSTRATO,
+    HUMUS,
+    VERMICULITA,
+    ENMIENDA_ACIDA,
+    CHIPS,
+    POMETINA
 }

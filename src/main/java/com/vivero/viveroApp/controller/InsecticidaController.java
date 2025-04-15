@@ -26,18 +26,13 @@ public class InsecticidaController {
     private final ProveedorService proveedorService;
     private final PdfService pdfService;
 
-    @GetMapping("/index")
-    public String index() {
-        return "index";
-    }
-
     @GetMapping("/listar")
     public String listarInsecticidas(@RequestParam(defaultValue = "0") int page,
-                                     @RequestParam(defaultValue = "15") int size,
-                                     @RequestParam(required = false) String nombre,
-                                     @RequestParam(required = false) String marca,
-                                     @RequestParam(required = false) String proveedor,
-                                     Model model) {
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String proveedor,
+            Model model) {
         Page<Insecticida> insecticidaPage = insecticidaService.buscarInsecticidaPaginado(nombre, marca, proveedor, page, size);
 
         model.addAttribute("insecticidas", insecticidaPage.getContent());
@@ -59,7 +54,7 @@ public class InsecticidaController {
 
     @PostMapping("/crear")
     public String crearInsecticidaDesdeVista(@ModelAttribute Insecticida insecticida,
-                                             @RequestParam(required = false) List<Long> proveedoresIds) {
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -87,8 +82,8 @@ public class InsecticidaController {
 
     @PostMapping("/editar/{id}")
     public String actualizarInsecticidaDesdeVista(@PathVariable Long id,
-                                                  @ModelAttribute Insecticida insecticidaDetails,
-                                                  @RequestParam(required = false) List<Long> proveedoresIds) {
+            @ModelAttribute Insecticida insecticidaDetails,
+            @RequestParam(required = false) List<Long> proveedoresIds) {
         List<Proveedor> proveedoresSeleccionados = (proveedoresIds != null)
                 ? proveedorService.getProveedoresByIds(proveedoresIds)
                 : new ArrayList<>();
@@ -111,11 +106,11 @@ public class InsecticidaController {
         Function<Object, String[]> rowMapper = insecticida -> {
             Insecticida i = (Insecticida) insecticida;
             return new String[]{
-                    String.valueOf(i.getId()),
-                    i.getNombre(),
-                    i.getMarca(),
-                    String.valueOf(i.getPrecio()),
-                    String.valueOf(i.getStock())
+                String.valueOf(i.getId()),
+                i.getNombre(),
+                i.getMarca(),
+                String.valueOf(i.getPrecio()),
+                String.valueOf(i.getStock())
             };
         };
 
