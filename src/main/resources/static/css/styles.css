@@ -225,20 +225,25 @@ label.form-check-label:focus,
 }
 
 .modal-body label {
-    color: #000; /* Negro para un buen contraste */
+    color: #000;
+    /* Negro para un buen contraste */
 }
 
 .modal-content {
-    background-color: #fff; /* Asegurarse de que el fondo sea blanco */
+    background-color: #fff;
+    /* Asegurarse de que el fondo sea blanco */
 }
 
-.modal-header, .modal-footer {
-    background-color: #f1f1f1; /* Fondo gris claro para contraste */
+.modal-header,
+.modal-footer {
+    background-color: #f1f1f1;
+    /* Fondo gris claro para contraste */
     border: none;
 }
 
 .modal-title {
-    color: #333; /* Texto del título del modal */
+    color: #333;
+    /* Texto del título del modal */
 }
 
 
@@ -246,38 +251,50 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
     -webkit-appearance: none;
 }
+
 input[type="time"] {
     width: 80px;
     text-align: center;
 }
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
 input[type="number"] {
     -moz-appearance: textfield;
     width: 100px;
     text-align: center;
 }
+
 /* Estilo del recuadro de inicio de sesión */
 .login-card {
-    background-color: #000000; /* Fondo negro */
-    border: 2px solid #16d016; /* Borde verde */
-    border-radius: 10px; /* Bordes redondeados */
+    background-color: #000000;
+    /* Fondo negro */
+    border: 2px solid #16d016;
+    /* Borde verde */
+    border-radius: 10px;
+    /* Bordes redondeados */
 }
 
 /* Títulos y etiquetas */
 .text-success {
-    color: #16d016 !important; /* Verde */
+    color: #16d016 !important;
+    /* Verde */
 }
 
 /* Estilo para los campos de entrada */
 .login-card .form-control {
-    background-color: #ffffff; /* Fondo blanco */
-    color: #16d016; /* Texto verde */
-    border: 2px solid #16d016; /* Borde verde */
-    border-radius: 5px; /* Bordes redondeados */
+    background-color: #ffffff;
+    /* Fondo blanco */
+    color: #16d016;
+    /* Texto verde */
+    border: 2px solid #16d016;
+    /* Borde verde */
+    border-radius: 5px;
+    /* Bordes redondeados */
 }
 
 /* Placeholder en color verde */
@@ -288,17 +305,23 @@ input[type="number"] {
 
 /* Estilo del botón */
 .btn-success {
-    background-color: #16d016 !important; /* Fondo verde */
-    color: #000000 !important; /* Texto negro */
-    border: 2px solid #16d016 !important; /* Borde verde */
-    border-radius: 5px; /* Bordes redondeados */
+    background-color: #16d016 !important;
+    /* Fondo verde */
+    color: #000000 !important;
+    /* Texto negro */
+    border: 2px solid #16d016 !important;
+    /* Borde verde */
+    border-radius: 5px;
+    /* Bordes redondeados */
     transition: transform 0.2s ease;
 }
 
 /* Efecto hover en el botón */
 .btn-success:hover {
-    transform: scale(1.05); /* Efecto de aumento */
-    background-color: #13b113 !important; /* Verde más oscuro */
+    transform: scale(1.05);
+    /* Efecto de aumento */
+    background-color: #13b113 !important;
+    /* Verde más oscuro */
 }
 
 /* Aumentar el espaciado entre los campos */
@@ -310,24 +333,29 @@ input[type="number"] {
 /* Establecer un tamaño fijo para el carrusel */
 .carousel-inner {
     width: 100%;
-    height: 700px; /* Ajusta esta altura según tus necesidades */
+    height: 700px;
+    /* Ajusta esta altura según tus necesidades */
     overflow: hidden;
 }
 
 .carousel-inner img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Asegura que la imagen cubra el área sin deformarse */
+    object-fit: cover;
+    /* Asegura que la imagen cubra el área sin deformarse */
 }
 
 .saludo-texto {
-    font-size: 35px; /* Cambia el tamaño */
-    font-weight: bold; /* Opcional: pone en negrita */
-    color: #16d016; /* Opcional: cambia el color */
+    font-size: 35px;
+    /* Cambia el tamaño */
+    font-weight: bold;
+    /* Opcional: pone en negrita */
+    color: #16d016;
+    /* Opcional: cambia el color */
     text-align: center;
 }
 
-.contenedorTabla{
+.contenedorTabla {
 
     border: 2px solid green;
     padding: 20px;
@@ -345,10 +373,54 @@ input[type="number"] {
 }
 
 .navbar-toggler {
-    border: 1px #16d016 !important; /* Para que tenga borde */
+    border: 1px #16d016 !important;
+    /* Para que tenga borde */
 }
 
 .navbar-toggler-icon {
-    background-color: #16d016; /* Cambia a blanco si el fondo es oscuro */
-    border-radius: 5px; /* Redondea un poco */
+    background-color: #16d016;
+    /* Cambia a blanco si el fondo es oscuro */
+    border-radius: 5px;
+    /* Redondea un poco */
+}
+
+.editable{
+    background-color: none !important;
+}
+
+/* Cuando la celda está seleccionada (en foco) */
+.editable:focus {
+    background-color: #9de4ae !important;
+    /* Fondo verde claro */
+    color: #000000 !important;
+    /* Letras negras */
+    outline: none !important;
+    /* Elimina el borde por defecto */
+    border: 1px solid #ffffff !important;
+    /* Borde blanco */
+}
+
+.editable.guardado {
+    background-color: #34d834 !important;
+    /* Fondo verde */
+    color: #000000 !important;
+    /* Letras negras */
+    border: none !important;
+    /* Sin borde */
+    box-shadow: 0 0 8px 2px rgba(40, 167, 69, 0.6) !important;
+    /* Sombra verde difusa */
+    transition: background-color 0.2s ease, box-shadow 0.3s ease !important;
+}
+
+
+/* Cuando ocurre un error al guardar */
+.editable.error {
+    background-color: #c90606 !important;
+    /* Fondo blanco */
+    color: #000000 !important;
+    /* Letras rojas */
+    border: none !important;
+    /* Sin borde */
+    box-shadow: 0 0 8px 2px rgba(134, 24, 24, 0.6) !important;
+    transition: background-color 0.2s ease !important;
 }

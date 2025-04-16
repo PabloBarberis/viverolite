@@ -3,14 +3,10 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Insecticida;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.service.InsecticidaService;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -24,7 +20,6 @@ public class InsecticidaController {
 
     private final InsecticidaService insecticidaService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
 
     @GetMapping("/listar")
     public String listarInsecticidas(@RequestParam(defaultValue = "0") int page,
@@ -98,30 +93,4 @@ public class InsecticidaController {
         return "redirect:/insecticida/listar";
     }
 
-    @GetMapping("/pdf")
-    public void generarPDFInsecticida(HttpServletResponse response) throws Exception {
-        List<Insecticida> insecticidas = insecticidaService.getAllInsecticidas();
-
-        String[] headers = {"ID", "Nombre", "Marca", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = insecticida -> {
-            Insecticida i = (Insecticida) insecticida;
-            return new String[]{
-                String.valueOf(i.getId()),
-                i.getNombre(),
-                i.getMarca(),
-                String.valueOf(i.getPrecio()),
-                String.valueOf(i.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(insecticidas, headers, rowMapper, true);
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=insecticida.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
-    }
 }

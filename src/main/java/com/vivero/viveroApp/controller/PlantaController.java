@@ -3,20 +3,15 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Planta;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.model.enums.TipoPlanta;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.PlantaService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -26,8 +21,7 @@ public class PlantaController {
 
     private final PlantaService plantaService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
-
+    
     // Listar plantas con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarPlantas(@RequestParam(defaultValue = "0") int page,
@@ -128,31 +122,5 @@ public class PlantaController {
         return "redirect:/plantas/listar"; // Redirige a la lista de plantas activas
     }
 
-    @GetMapping("/pdf")
-    public void generarPDF(HttpServletResponse response) throws Exception {
-        List<Planta> plantas = plantaService.getAllPlantasSinPaginacion();
-
-        String[] headers = {"ID", "Nombre", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = planta -> {
-            Planta p = (Planta) planta;
-            return new String[]{
-                String.valueOf(p.getId()),
-                p.getNombre(),
-                String.valueOf(p.getPrecio()),
-                String.valueOf(p.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(plantas, headers, rowMapper, false);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=plantas.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
-    }
-
+   
 }

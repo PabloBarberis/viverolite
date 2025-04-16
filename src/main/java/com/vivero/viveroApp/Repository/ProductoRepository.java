@@ -23,7 +23,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     
     List<Producto> findByActivoTrue();
 
-    @Query(value = "SELECT DISTINCT marca FROM producto WHERE dtype = :tipo", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT marca FROM producto WHERE dtype = :tipo ORDER BY marca", nativeQuery = true)
     List<String> findDistinctMarcasByDtype(@Param("tipo") String tipo);
 
+        
 }

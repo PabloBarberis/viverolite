@@ -25,8 +25,7 @@ public class DecoracionController {
 
     private final DecoracionService decoracionService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
-    
+        
     // Listar decoraciones con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarDecoraciones(@RequestParam(defaultValue = "0") int page,
@@ -109,35 +108,6 @@ public class DecoracionController {
     public String darDeBajaDecoracionDesdeVista(@RequestParam("decoracionSeleccionada") Long id) {
         decoracionService.darDeBajaDecoracion(id);
         return "redirect:/decoracion/listar"; // Redirige a la lista de decoraciones activas
-    }
-
-    @GetMapping("/pdf")
-    public void generarPDFDecoracion(HttpServletResponse response) throws Exception {
-        List<Decoracion> decoraciones = decoracionService.getAllDecoraciones();
-
-        String[] headers = {"ID", "Nombre", "Marca", "Tamaño", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = decoracion -> {
-            Decoracion d = (Decoracion) decoracion;
-            return new String[]{
-                String.valueOf(d.getId()),
-                d.getNombre(),
-                d.getMarca(),
-                d.getTamaño(),
-                String.valueOf(d.getPrecio()),
-                String.valueOf(d.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(decoraciones, headers, rowMapper, true);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=decoracion.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
     }
 
 }

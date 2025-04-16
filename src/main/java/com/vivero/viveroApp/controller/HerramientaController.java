@@ -3,14 +3,10 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Herramienta;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.service.HerramientaService;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -29,7 +25,6 @@ public class HerramientaController {
 
     private final HerramientaService herramientaService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
 
     // Listar herramientas con búsqueda, filtro y paginación
     @GetMapping("/listar")
@@ -114,32 +109,4 @@ public class HerramientaController {
         return "redirect:/herramienta/listar";
     }
 
-    // Generar PDF de herramientas
-    @GetMapping("/pdf")
-    public void generarPDFHerramienta(HttpServletResponse response) throws Exception {
-        List<Herramienta> herramientas = herramientaService.getAllHerramientas();
-
-        String[] headers = {"ID", "Nombre", "Marca", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = herramienta -> {
-            Herramienta h = (Herramienta) herramienta;
-            return new String[]{
-                String.valueOf(h.getId()),
-                h.getNombre(),
-                h.getMarca(),
-                String.valueOf(h.getPrecio()),
-                String.valueOf(h.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(herramientas, headers, rowMapper, true);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=herramienta.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
-    }
 }

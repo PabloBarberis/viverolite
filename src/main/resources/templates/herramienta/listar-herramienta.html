@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Herramientas</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/styles.css">
@@ -72,8 +74,12 @@ totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}
                     <td th:text="${herramienta.id}"></td>
                     <td th:text="${herramienta.nombre}"></td>
                     <td th:text="${herramienta.marca}"></td>
-                    <td th:text="${herramienta.precio}"></td>
-                    <td th:text="${herramienta.stock}"></td>
+                    <td contenteditable="true" class="editable" 
+                    th:attr="data-id=${herramienta.id}, data-campo='precio'"
+                    th:text="${herramienta.precio}"></td>
+                    <td contenteditable="true" class="editable" 
+                    th:attr="data-id=${herramienta.id}, data-campo='stock'"
+                    th:text="${herramienta.stock}"></td>
                     <td th:text="${herramienta.descripcion}"></td>
                     <td>
                         <span th:each="proveedor, iterStat : ${herramienta.proveedores}">
@@ -102,36 +108,29 @@ totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}
         totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo='')}">
         </div>
 
-        <div class="d-flex justify-content-end mb-3">
-            <button id="generarPDFHerramienta" class="btn btn-primary">Generar PDF</button>
+ 
+        <div class="separator"></div>
+
+
+        <div class="row align-items-center mb-5">
+            <input type="hidden" id="tipoProducto" value="Herramienta">
+
+            <div class="col-auto">
+                <label for="marcaPDF" class="form-label mb-0">Marca:</label>
+                <select id="marcaPDF" name="marca" class="form-control">
+                    <option value="">Seleccionar Marca</option>
+                </select>
+            </div>
+
+            <div class="col-auto">
+                <button id="generarPDFGrow" class="btn btn-primary mt-4">Generar PDF</button>
+            </div>
         </div>
 
     </div>
 
-
-
-    <script>
-        document.getElementById("generarPDFHerramienta").addEventListener("click", function () {
-            fetch("/herramienta/pdf", { method: 'GET' })
-                .then(response => {
-                    if (!response.ok)
-                        throw new Error("Error al generar el PDF");
-                    return response.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'herramientas-completo.pdf';
-                    link.click();
-                })
-                .catch(error => {
-                    console.error("Error al generar el PDF:", error);
-                    alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
-                });
-        });
-    </script>
-
+    <script src="/js/pdf-generator.js"></script>
+    <script type="module" src="/js/editar-precios.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

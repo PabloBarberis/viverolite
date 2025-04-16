@@ -3,14 +3,10 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Fertilizante;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.service.FertilizanteService;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -29,8 +25,7 @@ public class FertilizanteController {
 
     private final FertilizanteService fertilizanteService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
-
+    
     // Listar fertilizantes con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarFertilizantes(@RequestParam(defaultValue = "0") int page,
@@ -115,33 +110,5 @@ public class FertilizanteController {
         fertilizanteService.darDeBajaFertilizante(id);
         return "redirect:/fertilizante/listar";
     }
-
-    // Generar PDF de fertilizantes
-    @GetMapping("/pdf")
-    public void generarPDFFertilizante(HttpServletResponse response) throws Exception {
-        List<Fertilizante> fertilizantes = fertilizanteService.getAllFertilizantes();
-
-        String[] headers = {"ID", "Nombre", "Marca", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = fertilizante -> {
-            Fertilizante f = (Fertilizante) fertilizante;
-            return new String[]{
-                String.valueOf(f.getId()),
-                f.getNombre(),
-                f.getMarca(),
-                String.valueOf(f.getPrecio()),
-                String.valueOf(f.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(fertilizantes, headers, rowMapper, true);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=fertilizante.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
-    }
+    
 }

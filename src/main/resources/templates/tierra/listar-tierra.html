@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Tierra</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/styles.css">
@@ -56,7 +58,7 @@
         </form>
 
         <div class="separator"></div>
-        
+
         <!-- Paginación -->
         <div th:replace="~{paginacion :: paginationFragment(
             endpoint='/tierra/listar', 
@@ -87,8 +89,12 @@
                     <td th:text="${tierra.nombre}"></td>
                     <td th:text="${tierra.marca}"></td>
                     <td th:text="${tierra.tipo}"></td>
-                    <td th:text="${tierra.precio}"></td>
-                    <td th:text="${tierra.stock}"></td>
+                    <td contenteditable="true" class="editable" 
+                    th:attr="data-id=${tierra.id}, data-campo='precio'"
+                    th:text="${tierra.precio}"></td>
+                    <td contenteditable="true" class="editable" 
+                    th:attr="data-id=${tierra.id}, data-campo='stock'"
+                    th:text="${tierra.stock}"></td>
                     <td th:text="${tierra.descripcion}"></td>
                     <td>
                         <span th:each="proveedor, iterStat : ${tierra.proveedores}">
@@ -119,38 +125,32 @@
     color='', material='', tipo=${tipo})}">
         </div>
 
-        <div class="d-flex justify-content-end mb-3">
-            <button id="generarPDFTierra" class="btn btn-primary">Generar PDF</button>
+        <div class="separator"></div>
+
+
+        <div class="row align-items-center mb-5">
+            <input type="hidden" id="tipoProducto" value="Tierra">
+
+            <div class="col-auto">
+                <label for="marcaPDF" class="form-label mb-0">Marca:</label>
+                <select id="marcaPDF" name="marca" class="form-control">
+                    <option value="">Seleccionar Marca</option>
+                </select>
+            </div>
+
+            <div class="col-auto">
+                <button id="generarPDFGrow" class="btn btn-primary mt-4">Generar PDF</button>
+            </div>
         </div>
 
     </div>
 
+    <script src="/js/pdf-generator.js"></script>
+    <script type="module" src="/js/editar-precios.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
-<script>
-    document.getElementById("generarPDFTierra").addEventListener("click", function () {
-        // Solicitar generación del PDF al backend
-        fetch("/tierra/pdf", { method: 'GET' })
-            .then(response => {
-                if (!response.ok)
-                    throw new Error("Error al generar el PDF");
-                return response.blob(); // Descargar el contenido del PDF
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'tierra-completa.pdf'; // Nombre del archivo descargado
-                link.click();
-            })
-            .catch(error => {
-                console.error("Error al generar el PDF:", error);
-                alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
-            });
-    });
-</script>
 
 </html>

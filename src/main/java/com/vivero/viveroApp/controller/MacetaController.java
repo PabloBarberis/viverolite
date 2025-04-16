@@ -5,19 +5,14 @@ import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.model.enums.ColorMaceta;
 import com.vivero.viveroApp.model.enums.MaterialMaceta;
 import com.vivero.viveroApp.service.MacetaService;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -27,7 +22,6 @@ public class MacetaController {
 
     private final MacetaService macetaService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
 
     // Listar macetas con búsqueda, filtro y paginación
     @GetMapping("/listar")
@@ -40,7 +34,7 @@ public class MacetaController {
             Model model) {
         String colorStr = color != null ? color.name() : null;
         String materialStr = material != null ? material.name() : null;
-        
+
         Page<Maceta> macetaPage = macetaService.buscarMacetaPaginado(nombre, colorStr, marca, materialStr, page, size);
 
         model.addAttribute("macetas", macetaPage.getContent());
@@ -49,7 +43,7 @@ public class MacetaController {
         model.addAttribute("nombre", nombre);
         model.addAttribute("color", color);
         model.addAttribute("material", material);
-        model.addAttribute("marca",marca);
+        model.addAttribute("marca", marca);
         model.addAttribute("colores", ColorMaceta.values());
         model.addAttribute("materiales", MaterialMaceta.values());
         model.addAttribute("selectedColor", color);
@@ -123,36 +117,6 @@ public class MacetaController {
     public String darDeBajaMacetaDesdeVista(@RequestParam("macetaSeleccionada") Long id) {
         macetaService.darDeBajaMaceta(id);
         return "redirect:/maceta/listar";
-    }
-
-    @GetMapping("/pdf")
-    public void generarPDFMaceta(HttpServletResponse response) throws Exception {
-        List<Maceta> macetas = macetaService.getAllMacetas();
-
-        String[] headers = {"ID", "Nombre", "Color", "Tamaño", "Material", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = maceta -> {
-            Maceta m = (Maceta) maceta;
-            return new String[]{
-                String.valueOf(m.getId()),
-                m.getNombre(),
-                String.valueOf(m.getColor()),
-                m.getTamaño(),
-                String.valueOf(m.getMaterial()),
-                String.valueOf(m.getPrecio()),
-                String.valueOf(m.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(macetas, headers, rowMapper, true);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=maceta.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
     }
 
 }

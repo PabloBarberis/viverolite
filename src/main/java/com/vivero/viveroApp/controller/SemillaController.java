@@ -3,14 +3,10 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Semilla;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.service.SemillaService;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -29,7 +25,6 @@ public class SemillaController {
 
     private final SemillaService semillaService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
 
     @GetMapping("/listar")
     public String listarSemillas(@RequestParam(defaultValue = "0") int page,
@@ -108,31 +103,4 @@ public class SemillaController {
         return "redirect:/semilla/listar";
     }
 
-    @GetMapping("/pdf")
-    public void generarPDFSemilla(HttpServletResponse response) throws Exception {
-        List<Semilla> semillas = semillaService.getAllSemillas();
-
-        String[] headers = {"ID", "Nombre", "Marca", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = semilla -> {
-            Semilla s = (Semilla) semilla;
-            return new String[]{
-                String.valueOf(s.getId()),
-                s.getNombre(),
-                s.getMarca(),
-                String.valueOf(s.getPrecio()),
-                String.valueOf(s.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(semillas, headers, rowMapper, true);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=semilla.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
-    }
 }

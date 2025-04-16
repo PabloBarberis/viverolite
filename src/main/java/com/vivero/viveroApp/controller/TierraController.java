@@ -3,20 +3,15 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.model.Tierra;
 import com.vivero.viveroApp.model.enums.TipoTierra;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
 import com.vivero.viveroApp.service.TierraService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -26,8 +21,7 @@ public class TierraController {
 
     private final TierraService tierraService;
     private final ProveedorService proveedorService;
-    private final PdfService pdfService;
-
+    
     // Listar tierras con búsqueda, filtro y paginación
     @GetMapping("/listar")
     public String listarTierras(@RequestParam(defaultValue = "0") int page,
@@ -116,35 +110,6 @@ public class TierraController {
     public String darDeBajaTierraDesdeVista(@RequestParam("tierraSeleccionada") Long id) {
         tierraService.darDeBajaTierra(id);
         return "redirect:/tierra/listar";
-    }
-
-    @GetMapping("/pdf")
-    public void generarPDFTierra(HttpServletResponse response) throws Exception {
-        List<Tierra> tierras = tierraService.getAllTierras();
-
-        String[] headers = {"ID", "Nombre", "Marca", "Tipo", "Precio", "Stock"};
-        Function<Object, String[]> rowMapper = tierra -> {
-            Tierra t = (Tierra) tierra;
-            return new String[]{
-                String.valueOf(t.getId()),
-                t.getNombre(),
-                t.getMarca(),
-                String.valueOf(t.getTipo()), // Convertir el enum a String
-                String.valueOf(t.getPrecio()),
-                String.valueOf(t.getStock())
-            };
-        };
-
-        try {
-            byte[] pdfBytes = pdfService.generarPDF(tierras, headers, rowMapper, true);
-
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=tierra.pdf");
-            response.getOutputStream().write(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF");
-        }
     }
 
 }

@@ -119,13 +119,25 @@ public class ProductoService {
             case "Insecticida" -> {
                 return Insecticida.class;
             }
-            default -> throw new IllegalArgumentException("Tipo de producto no válido: " + tipoProducto);
+            default ->
+                throw new IllegalArgumentException("Tipo de producto no válido: " + tipoProducto);
         }
     }
 
     @Transactional(readOnly = true)
     public List<String> mostrarMarcaPorProducto(String tipo) {
         return productoRepository.findDistinctMarcasByDtype(tipo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Producto> obtenerProductosPorMarca(String tipoProducto, String marca) {
+        Class<? extends Producto> clase = obtenerClaseProducto(tipoProducto);
+        
+        if (marca == null || marca.isEmpty()) {
+            return productoRepository.findByTipo(clase);
+        } else {
+            return productoRepository.findByTipoAndMarca(clase, marca);
+        }
     }
 
 }
