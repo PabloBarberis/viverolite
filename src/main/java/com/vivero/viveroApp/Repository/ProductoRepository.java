@@ -1,11 +1,14 @@
 package com.vivero.viveroApp.repository;
 
+import com.vivero.viveroApp.dto.ProductoDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.vivero.viveroApp.model.Producto;
 import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
@@ -25,6 +28,21 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     @Query(value = "SELECT DISTINCT marca FROM producto WHERE dtype = :tipo ORDER BY marca", nativeQuery = true)
     List<String> findDistinctMarcasByDtype(@Param("tipo") String tipo);
+
+    public List<Producto> findByNombreContainingIgnoreCase(String q);
+
+    @Query("SELECT new com.vivero.viveroApp.dto.ProductoDTO(p.id, p.nombre, p.precio, p.stock) FROM Producto p WHERE UPPER(p.nombre) LIKE UPPER(CONCAT('%', :q, '%'))")
+    public List<ProductoDTO> buscarProductoPorNombre(String q);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Producto p SET p.precio = :precio WHERE p.id = :id")
+    void actualizarPrecio(@Param("id") Long id, @Param("precio") Double precio);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Producto p SET p.stock = :stock WHERE p.id = :id")
+    void actualizarStock(@Param("id") Long id, @Param("stock") Integer stock);
 
         
 }

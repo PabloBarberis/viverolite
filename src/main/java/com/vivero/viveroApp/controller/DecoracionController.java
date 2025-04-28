@@ -3,19 +3,14 @@ package com.vivero.viveroApp.controller;
 import com.vivero.viveroApp.model.Decoracion;
 import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.service.DecoracionService;
-import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProveedorService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 @Controller

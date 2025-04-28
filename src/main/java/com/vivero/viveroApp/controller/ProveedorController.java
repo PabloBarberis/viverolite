@@ -5,7 +5,6 @@ import com.vivero.viveroApp.service.ProveedorService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +13,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/proveedores")
 public class ProveedorController {
-
-    
+  
     private final ProveedorService proveedorService;
-
     
     // Obtener todos los proveedores activos para mostrar en la vista
     @GetMapping("/listar")

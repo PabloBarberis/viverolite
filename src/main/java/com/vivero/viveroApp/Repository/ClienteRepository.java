@@ -9,9 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
-    // Buscar todos los clientes activos
+    
     List<Cliente> findByActivoTrue();
 
-    // Buscar cliente por ID solo si está activo
     Optional<Cliente> findByIdAndActivoTrue(Long id);
 }

@@ -10,7 +10,7 @@ public class ViveroController {
 
     @GetMapping("/")
     public String index() {
-        return "contacto";  // Página principal
+        return "contacto"; 
     }
     
     @GetMapping("/fotos")

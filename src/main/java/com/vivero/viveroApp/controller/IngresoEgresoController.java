@@ -1,5 +1,6 @@
 package com.vivero.viveroApp.controller;
 
+import com.vivero.viveroApp.Repository.IngresoEgresoRepository;
 import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.RegistroHorario;
 import com.vivero.viveroApp.model.Usuario;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class IngresoEgresoController {
 
     private final IngresoEgresoService ingresoEgresoService;
+
+    private final IngresoEgresoRepository ingresoEgresoRepository;
 
     private final UsuarioService usuarioService;
 
@@ -140,6 +144,23 @@ public class IngresoEgresoController {
         response.put("adelantos", adelantos);
 
         return response;
+    }
+
+    @PostMapping("/eliminar")
+    @Transactional
+    @ResponseBody
+    public void eliminarIngresoeGreso(@RequestBody Map<String, Long> payload) throws Exception {
+        Long id = payload.get("id");
+        System.out.println("ID RECIBIDO EN CONTROLLER: " + id);
+        try {
+            if (id != null || id != 0) {
+                ingresoEgresoRepository.deleteById(id);
+            } else {
+                throw new Exception(" IngresoEgresoiD null");
+            }
+        } catch (Exception e) {
+        }
+
     }
 
 }

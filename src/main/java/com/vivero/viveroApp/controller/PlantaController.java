@@ -46,23 +46,23 @@ public class PlantaController {
         model.addAttribute("plantas", plantaPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", plantaPage.getTotalPages());
-        model.addAttribute("tiposPlanta", TipoPlanta.values()); // Para el menú desplegable de filtrado
-        model.addAttribute("nombre", nombre); // Para mantener el valor de búsqueda
-        model.addAttribute("selectedTipo", tipoPlanta); // Para mantener el tipo seleccionado
+        model.addAttribute("tiposPlanta", TipoPlanta.values()); 
+        model.addAttribute("nombre", nombre); 
+        model.addAttribute("selectedTipo", tipoPlanta); 
 
-        return "plantas/listar-planta"; // Asegúrate de que este sea el nombre correcto de tu vista
+        return "plantas/listar-planta"; 
     }
 
     @GetMapping("/crear")
     public String mostrarFormularioCrear(Model model) {
         model.addAttribute("planta", new Planta());
-        model.addAttribute("tiposPlanta", TipoPlanta.values()); // Menú desplegable para TipoPlanta
+        model.addAttribute("tiposPlanta", TipoPlanta.values()); 
 
         // Agregar la lista de proveedores para seleccionar en el formulario
         List<Proveedor> proveedores = proveedorService.getAllProveedoresActivos();
         model.addAttribute("proveedores", proveedores);
 
-        return "plantas/crear-planta"; // Vista para crear planta
+        return "plantas/crear-planta"; 
     }
 
     @PostMapping("/crear")
@@ -83,7 +83,7 @@ public class PlantaController {
         Optional<Planta> plantaOpt = plantaService.getPlantaByIdIncluyendoInactivas(id);
         if (plantaOpt.isPresent()) {
             model.addAttribute("planta", plantaOpt.get());
-            model.addAttribute("tiposPlanta", TipoPlanta.values()); // Menú desplegable para TipoPlanta
+            model.addAttribute("tiposPlanta", TipoPlanta.values());
 
             // Agregar la lista de proveedores para seleccionar en el formulario
             List<Proveedor> proveedores = proveedorService.getAllProveedoresActivos();
@@ -95,9 +95,9 @@ public class PlantaController {
                     .toList();
             model.addAttribute("proveedoresSeleccionados", proveedoresSeleccionados);
 
-            return "plantas/editar-planta"; // Vista para editar planta
+            return "plantas/editar-planta"; 
         } else {
-            return "redirect:/plantas/listar"; // Redirige si no se encuentra la planta
+            return "redirect:/plantas/listar"; 
         }
     }
 
@@ -119,7 +119,7 @@ public class PlantaController {
     @PostMapping("/dar-de-baja")
     public String darDeBajaPlantaDesdeVista(@RequestParam("plantaSeleccionada") Long id) {
         plantaService.darDeBajaPlanta(id);
-        return "redirect:/plantas/listar"; // Redirige a la lista de plantas activas
+        return "redirect:/plantas/listar";
     }
 
    

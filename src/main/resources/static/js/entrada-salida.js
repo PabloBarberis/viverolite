@@ -1,495 +1,919 @@
+// Variables globales
 import BASE_URL from '/js/config.js';
-
-// Obtener los tokens CSRF de las meta etiquetas
+let ventas = [];
+let ingresosEgresos = [];
+let ventasMesAnterior = [];
+let ingresosEgresosMesAnterior = [];
+const usuarioSelect = document.getElementById("usuario");
 const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
 const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
 const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute("content") : null;
 const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.getAttribute("content") : null;
 
-document.addEventListener("DOMContentLoaded", function () {
+
+// Llenar los selects al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    cargarMeses();
+    cargarAnios();
+    seleccionarMesYAnioActual();
+    obtenerDatos(); // Llamar apenas carga la página
+
+    document.getElementById("mes").addEventListener("change", obtenerDatos);
+    document.getElementById("anio").addEventListener("change", obtenerDatos);
+});
+
+// Cargar usuarios
+fetch(`${BASE_URL}/usuarios/listar`, {
+    method: "GET"
+
+})
+    .then(response => response.json())
+    .then(data => {
+        usuarioSelect.innerHTML = data.map(user => `<option value="${user.id}">${user.nombre}</option>`).join("");
+    })
+    .catch(error => console.error("Error cargando usuarios:", error));
 
 
-    const fechaInput = document.getElementById("fecha");
-
-    // 📌 Obtener la fecha actual en formato YYYY-MM-DD
-    const hoy = new Date();
-    const year = hoy.getFullYear();
-    const month = (hoy.getMonth() + 1).toString().padStart(2, "0"); // Mes en 2 dígitos
-    const day = hoy.getDate().toString().padStart(2, "0"); // Día en 2 dígitos
-
-    const fechaActual = `${year}-${month}-${day}`;
-    fechaInput.value = fechaActual; // ✅ Asignar la fecha actual al input
-
-    console.log("Fecha preseleccionada:", fechaActual); // 🔍 Verifica en consola
+formIngresoEgreso.addEventListener("submit", function (event) {
+    event.preventDefault();
 
 
-    const metodoPagoSelect = document.getElementById("metodoPago");
-    const usuarioSelect = document.getElementById("usuario");
-    const formIngresoEgreso = document.getElementById("formIngresoEgreso");
+    // Captura los valores del formulario
+    const ingreso = document.getElementById("tipoMovimiento").value === "true";
+    const metodoPago = document.getElementById("metodoPago").value;
+    const usuarioId = document.getElementById("usuario").value;
+    let fecha = document.getElementById("fecha").value;
+    const descripcion = document.getElementById("descripcion").value;
+    const monto = parseFloat(document.getElementById("monto").value);
+    const esAdelanto = document.getElementById("esAdelanto").checked; // Capturar estado del checkbox
 
-    if (!csrfToken || !csrfHeader) {
-        console.error("CSRF token o header no encontrados.");
-        return;
+    // 📌 Convertir fecha correctamente a LocalDateTime
+    if (fecha) {
+        const ahora = new Date(); // Obtener la hora actual
+        const hora = ahora.getHours().toString().padStart(2, '0');   // HH
+        const minutos = ahora.getMinutes().toString().padStart(2, '0'); // mm
+        const segundos = ahora.getSeconds().toString().padStart(2, '0'); // ss
+
+        // Formato correcto: YYYY-MM-DDTHH:mm:ss
+        fecha = `${fecha}T${hora}:${minutos}:${segundos}`;
     }
 
-    // Cargar métodos de pago
-    fetch(`${BASE_URL}/ingresoegreso/metodos-pago`, {
-        method: "GET",
-        headers: { [csrfHeader]: csrfToken }
+
+
+    // Construir el objeto con los datos del formulario
+    const movimiento = {
+        ingreso,
+        metodoPago,
+        usuarioId,
+        fecha, // Ahora en formato LocalDateTime
+        descripcion,
+        monto,
+        adelanto: esAdelanto // Añadir si es un adelanto
+    };
+
+    fetch(`${BASE_URL}/ingresoegreso/guardar`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            [csrfHeader]: csrfToken
+        },
+        body: JSON.stringify(movimiento)
     })
         .then(response => response.json())
         .then(data => {
-            metodoPagoSelect.innerHTML = data.map(mp => `<option value="${mp}">${mp}</option>`).join("");
+            if (data.success) {
+                alert("Ingreso/Egreso guardado correctamente.");
+                formIngresoEgreso.reset();
+                location.reload();
+            } else {
+                alert("Error: " + data.message);
+            }
         })
-        .catch(error => console.error("Error cargando métodos de pago:", error));
+        .catch(error => console.error("Error al guardar movimiento:", error));
+});
 
-    // Cargar usuarios
-    fetch(`${BASE_URL}/usuarios/listar`, {
-        method: "GET",
-        headers: { [csrfHeader]: csrfToken }
-    })
-        .then(response => response.json())
+// Llenar los meses
+function cargarMeses() {
+    const selectMes = document.getElementById("mes");
+    const meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    meses.forEach((mes, index) => {
+        const option = document.createElement("option");
+        option.value = index + 1; // Mes en formato numérico (1-12)
+        option.textContent = mes;
+        selectMes.appendChild(option);
+    });
+}
+
+// Llenar los años (2025 - 2030)
+function cargarAnios() {
+    const selectAnio = document.getElementById("anio");
+    for (let anio = 2025; anio <= 2030; anio++) {
+        const option = document.createElement("option");
+        option.value = anio;
+        option.textContent = anio;
+        selectAnio.appendChild(option);
+    }
+}
+
+// Seleccionar el mes y año actuales por defecto
+function seleccionarMesYAnioActual() {
+    const fechaActual = new Date();
+    document.getElementById("mes").value = fechaActual.getMonth() + 1; // getMonth() devuelve 0-11
+    document.getElementById("anio").value = fechaActual.getFullYear();
+}
+
+// Obtener datos desde el backend y asignar a las variables globales
+function obtenerDatos() {
+    const mes = document.getElementById("mes").value;
+    const anio = document.getElementById("anio").value;
+
+    if (!mes || !anio) return;
+
+    fetch(`${BASE_URL}/ventas/movimientos?mes=${mes}&anio=${anio}`)
+        .then(res => res.json())
         .then(data => {
-            usuarioSelect.innerHTML = data.map(user => `<option value="${user.id}">${user.nombre}</option>`).join("");
-        })
-        .catch(error => console.error("Error cargando usuarios:", error));
+            // Asignar las listas recibidas a las variables globales
+            ventas = data.ventas || [];
+            ingresosEgresos = data.ingresosEgresos || [];
+            ventasMesAnterior = data.ventasMesAnterior || [];
+            ingresosEgresosMesAnterior = data.ingresosEgresosMesAnterior || [];
 
-    // Manejo del formulario
-    formIngresoEgreso.addEventListener("submit", function (event) {
-        event.preventDefault();
-    
-        
-         // Captura los valores del formulario
-        const ingreso = document.getElementById("tipoMovimiento").value === "true";
-        const metodoPago = document.getElementById("metodoPago").value;
-        const usuarioId = document.getElementById("usuario").value;
-        let fecha = document.getElementById("fecha").value;
-        const descripcion = document.getElementById("descripcion").value;
-        const monto = parseFloat(document.getElementById("monto").value);
-        const esAdelanto = document.getElementById("esAdelanto").checked; // Capturar estado del checkbox
-        console.log(esAdelanto);
-        console.log(ingreso);
-    
-        // 📌 Convertir fecha correctamente a LocalDateTime
-        if (fecha) {
-            const ahora = new Date(); // Obtener la hora actual
-            const hora = ahora.getHours().toString().padStart(2, '0');   // HH
-            const minutos = ahora.getMinutes().toString().padStart(2, '0'); // mm
-            const segundos = ahora.getSeconds().toString().padStart(2, '0'); // ss
-    
-            // Formato correcto: YYYY-MM-DDTHH:mm:ss
-            fecha = `${fecha}T${hora}:${minutos}:${segundos}`;
+            // Procesar los datos y actualizar las tablas
+            const { efectivoMesActual, movimientosEfectivo } = procesarDatosEfectivo(
+                ventas,
+                ingresosEgresos,
+                ventasMesAnterior,
+                ingresosEgresosMesAnterior
+            );
+
+            const { tarjetaMesActual, movimientosTarjeta } = procesarDatosTarjeta(
+                ventas,
+                ingresosEgresos,
+                ventasMesAnterior,
+                ingresosEgresosMesAnterior
+            );
+
+            const { mpSachaMesActual, movimientosMpSacha } = procesarDatosMercadoPagoSacha(
+                ventas,
+                ingresosEgresos,
+                ventasMesAnterior,
+                ingresosEgresosMesAnterior
+            );
+
+            const { mpValeMesActual, movimientosMpVale } = procesarDatosMercadoPagoVale(
+                ventas,
+                ingresosEgresos,
+                ventasMesAnterior,
+                ingresosEgresosMesAnterior
+            );
+
+
+            // Asegúrate de que estos arrays ya estén filtrados con los datos correctos
+actualizarTablaMovimientos("movEfectivo", movimientosEfectivo);
+actualizarTablaMovimientos("movTarjeta", movimientosTarjeta);
+actualizarTablaMovimientos("movMpSacha", movimientosMpSacha);
+actualizarTablaMovimientos("movMpVale", movimientosMpVale);
+
+            actualizarTablaEfectivo(efectivoMesActual);
+          //  actualizarTablaMovimientos(movimientosEfectivo);
+
+            actualizarTablaTarjeta(tarjetaMesActual);
+            //actualizarTablaMovimientosTarjeta(movimientosTarjeta);
+
+            actualizarTablaMpSacha(mpSachaMesActual);
+            //actualizarTablaMovimientosMpSacha(movimientosMpSacha);
+
+            actualizarTablaMpVale(mpValeMesActual);
+            //actualizarTablaMovimientosMpVale(movimientosMpVale);
+        })
+        .catch(err => console.error("Error al obtener datos:", err));
+}
+
+
+function procesarDatosEfectivo(
+    ventas,
+    ingresosEgresos,
+    ventasMesAnterior,
+    ingresosEgresosMesAnterior) {
+
+    const efectivoMesActual = {
+        saldoAnterior: 0,
+        periodos: {
+            "1 al 7": 0,
+            "8 al 14": 0,
+            "15 al 21": 0,
+            "22 al 28": 0,
+            "29 al fin de mes": 0,
+        },
+        totalVentas: 0,
+        totalIngresos: 0,
+        totalEgresos: 0,
+    };
+
+    const movimientosEfectivo = [];
+
+    // Función auxiliar para determinar el período de una fecha
+    function obtenerPeriodo(fecha) {
+        const dia = fecha.getDate();
+        if (dia >= 1 && dia <= 7) return "1 al 7";
+        if (dia >= 8 && dia <= 14) return "8 al 14";
+        if (dia >= 15 && dia <= 21) return "15 al 21";
+        if (dia >= 22 && dia <= 28) return "22 al 28";
+        const ultimoDiaMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0).getDate();
+        if (dia >= 29 && dia <= ultimoDiaMes) return "29 al fin de mes";
+        return null;
+    }
+
+    // Calcular el saldo anterior en efectivo
+    let saldoAnteriorVentas = 0;
+    ventasMesAnterior.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => pago.metodo === "EFECTIVO")
+                .forEach((pago) => {
+                    saldoAnteriorVentas += pago.monto;
+                });
         }
-        
-       
-    
-        // Construir el objeto con los datos del formulario
-        const movimiento = {
-            ingreso,
-            metodoPago,
-            usuarioId,
-            fecha, // Ahora en formato LocalDateTime
-            descripcion,
-            monto,
-            adelanto: esAdelanto // Añadir si es un adelanto
+    });
+
+    let saldoAnteriorIngresos = 0;
+    let saldoAnteriorEgresos = 0;
+    ingresosEgresosMesAnterior
+        .filter((ie) => ie.metodoPago === "EFECTIVO")
+        .forEach((ie) => {
+            if (ie.ingreso) {
+                saldoAnteriorIngresos += ie.monto;
+            } else {
+                saldoAnteriorEgresos += ie.monto;
+            }
+        });
+
+    efectivoMesActual.saldoAnterior = saldoAnteriorVentas + saldoAnteriorIngresos - saldoAnteriorEgresos;
+
+    // Procesar ventas del mes actual
+    ventas.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => pago.metodo === "EFECTIVO")
+                .forEach((pago) => {
+                    const fechaVenta = new Date(venta.fecha);
+                    const periodo = obtenerPeriodo(fechaVenta);
+                    if (periodo) {
+                        efectivoMesActual.periodos[periodo] += pago.monto;
+                    }
+                    efectivoMesActual.totalVentas += pago.monto;
+                });
+        }
+    });
+
+    // Procesar ingresos y egresos del mes actual
+    ingresosEgresos
+        .filter((ie) => ie.metodoPago === "EFECTIVO")
+        .forEach((ie) => {
+            const fechaIE = new Date(ie.fecha);
+            const periodo = obtenerPeriodo(fechaIE);
+            const monto = ie.ingreso ? ie.monto : -ie.monto;
+            if (periodo) {
+                efectivoMesActual.periodos[periodo] += monto; // Sumar ingresos, restar egresos al período
+            }
+            if (ie.ingreso) {
+                efectivoMesActual.totalIngresos += ie.monto;
+            } else {
+                efectivoMesActual.totalEgresos += ie.monto;
+            }
+            movimientosEfectivo.push({
+                id: ie.id,
+                fecha: fechaIE.toLocaleDateString(),
+                descripcion: ie.descripcion,
+                usuario: ie.usuario ? ie.usuario.nombre : "N/A",
+                tipo: ie.ingreso ? "Ingreso" : "Egreso",
+                monto: monto.toFixed(2),
+                metodo: ie.metodoPago,
+            });
+        });
+
+    const totalDelMes =
+        efectivoMesActual.totalVentas +
+        efectivoMesActual.totalIngresos -
+        efectivoMesActual.totalEgresos;
+    efectivoMesActual.totalDelMes = totalDelMes;
+    efectivoMesActual.totalConSaldoAnterior =
+        efectivoMesActual.saldoAnterior + totalDelMes;
+
+    return { efectivoMesActual, movimientosEfectivo };
+}
+
+// El resto de tu código (funciones actualizarTablaEfectivo y actualizarTablaMovimientos, y la llamada a obtenerDatos) permanece igual.
+
+// El resto de tu código permanece igual.
+
+function actualizarTablaEfectivo(data) {
+    const tablaEfectivoBody = document.getElementById("tablaEfectivo");
+    tablaEfectivoBody.innerHTML = ""; // Limpiar la tabla
+
+    const filas = [
+        { periodo: "SALDO MES ANTERIOR", total: `$${data.saldoAnterior.toFixed(2)}` },
+        { periodo: "1 al 7", total: `$${data.periodos["1 al 7"].toFixed(2)}` },
+        { periodo: "8 al 14", total: `$${data.periodos["8 al 14"].toFixed(2)}` },
+        { periodo: "15 al 21", total: `$${data.periodos["15 al 21"].toFixed(2)}` },
+        { periodo: "22 al 28", total: `$${data.periodos["22 al 28"].toFixed(2)}` },
+        { periodo: "29 al fin de mes", total: `$${data.periodos["29 al fin de mes"].toFixed(2)}` },
+        { periodo: "TOTAL VENTAS", total: `$${data.totalVentas.toFixed(2)}` },
+        { periodo: "TOTAL INGRESOS", total: `$${data.totalIngresos.toFixed(2)}` },
+        { periodo: "TOTAL EGRESOS", total: `-$${data.totalEgresos.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES", total: `$${data.totalDelMes.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES + SALDO ANTERIOR", total: `$${data.totalConSaldoAnterior.toFixed(2)}` },
+    ];
+
+    filas.forEach((fila) => {
+        const tr = document.createElement("tr");
+        const tdPeriodo = document.createElement("td");
+        const tdTotal = document.createElement("td");
+        tdPeriodo.textContent = fila.periodo;
+        tdTotal.textContent = fila.total;
+        tr.appendChild(tdPeriodo);
+        tr.appendChild(tdTotal);
+        tablaEfectivoBody.appendChild(tr);
+    });
+}
+
+function actualizarTablaMovimientos(tablaId, movimientos) {
+    const movEfectivoBody = document.getElementById(tablaId);
+    movEfectivoBody.innerHTML = ""; // Limpiar la tabla
+
+    movimientos.forEach((movimiento) => {
+        const tr = document.createElement("tr");
+
+        const tdFecha = document.createElement("td");
+        const tdDescripcion = document.createElement("td");
+        const tdUsuario = document.createElement("td");
+        const tdTipo = document.createElement("td");
+        const tdMetodo = document.createElement("td");
+        const tdMonto = document.createElement("td");
+        const tdAcciones = document.createElement("td"); // Columna nueva para acciones
+
+        tdFecha.textContent = movimiento.fecha;
+        tdDescripcion.textContent = movimiento.descripcion;
+        tdUsuario.textContent = movimiento.usuario;
+        tdTipo.textContent = movimiento.tipo;
+        tdMetodo.textContent = movimiento.metodo;
+        tdMonto.textContent = movimiento.monto;
+
+        // Crear botón eliminar
+        const botonEliminar = document.createElement("button");
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.className = "btn btn-danger btn-sm"; // Bootstrap estilo
+        botonEliminar.onclick = function () {
+            eliminarMovimiento(movimiento.id);
         };
 
-        console.log("Fecha enviada:", fecha); // 🔍 Verifica en consola
+        tdAcciones.appendChild(botonEliminar);
 
-        fetch(`${BASE_URL}/ingresoegreso/guardar`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(movimiento)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Ingreso/Egreso guardado correctamente.");
-                    formIngresoEgreso.reset();
-                    location.reload();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => console.error("Error al guardar movimiento:", error));
+        tr.appendChild(tdFecha);
+        tr.appendChild(tdDescripcion);
+        tr.appendChild(tdUsuario);
+        tr.appendChild(tdTipo);
+        tr.appendChild(tdMetodo);
+        tr.appendChild(tdMonto);
+        tr.appendChild(tdAcciones); // Agregar botón a la fila
+        movEfectivoBody.appendChild(tr);
+    });
+}
+
+
+
+
+//////////////////////////////////////
+
+function procesarDatosTarjeta(
+    ventas,
+    ingresosEgresos,
+    ventasMesAnterior,
+    ingresosEgresosMesAnterior
+) {
+
+    const tarjetaMesActual = {
+        saldoAnterior: 0,
+        periodos: {
+            "1 al 7": 0,
+            "8 al 14": 0,
+            "15 al 21": 0,
+            "22 al 28": 0,
+            "29 al fin de mes": 0,
+        },
+        totalVentas: 0,
+        totalIngresos: 0,
+        totalEgresos: 0,
+    };
+
+    const movimientosTarjeta = [];
+    const metodosTarjeta = ["CREDITO", "DEBITO"];
+
+    // Función auxiliar para determinar el período de una fecha
+    function obtenerPeriodo(fecha) {
+        const dia = fecha.getDate();
+        if (dia >= 1 && dia <= 7) return "1 al 7";
+        if (dia >= 8 && dia <= 14) return "8 al 14";
+        if (dia >= 15 && dia <= 21) return "15 al 21";
+        if (dia >= 22 && dia <= 28) return "22 al 28";
+        const ultimoDiaMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0).getDate();
+        if (dia >= 29 && dia <= ultimoDiaMes) return "29 al fin de mes";
+        return null;
+    }
+
+    // Calcular el saldo anterior de tarjetas
+    let saldoAnteriorVentasTarjeta = 0;
+    ventasMesAnterior.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => metodosTarjeta.includes(pago.metodo))
+                .forEach((pago) => {
+                    const montoConRecargo = pago.metodo === "CREDITO" ? pago.monto * 1.15 : pago.monto;
+                    saldoAnteriorVentasTarjeta += montoConRecargo;
+                });
+        }
     });
 
+    let saldoAnteriorIngresosTarjeta = 0;
+    let saldoAnteriorEgresosTarjeta = 0;
+    ingresosEgresosMesAnterior
+        .filter((ie) => metodosTarjeta.includes(ie.metodoPago))
+        .forEach((ie) => {
+            saldoAnteriorIngresosTarjeta += ie.ingreso ? ie.monto : 0;
+            saldoAnteriorEgresosTarjeta += ie.ingreso ? 0 : ie.monto;
+        });
 
-    const selectMes = document.getElementById("mes");
-    const selectAnio = document.getElementById("anio");
-    const tablaEfectivo = document.getElementById("tablaEfectivo");
-    const movEfectivo = document.getElementById("movEfectivo");
-    const tablaTarjeta = document.getElementById("tablaTarjeta");
-    const movTarjeta = document.getElementById("movTarjeta");
-    const tablaMpVale = document.getElementById("tablaMpVale");
-    const movMpVale = document.getElementById("movMpVale");
-    const tablaMpSacha = document.getElementById("tablaMpSacha");
-    const movMpSacha = document.getElementById("movMpSacha");
+    tarjetaMesActual.saldoAnterior = saldoAnteriorVentasTarjeta + saldoAnteriorIngresosTarjeta - saldoAnteriorEgresosTarjeta;
 
-
-    function llenarSelectores() {
-        console.log("SELECTORES FUERA")
-        // 🟢 Llenar selector de mes
-        const meses = [
-            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-        ];
-        let mesActual = new Date().getMonth() + 1;
-        let anioActual = new Date().getFullYear();
-
-        selectMes.innerHTML = meses.map((mes, index) =>
-            `<option value="${index + 1}" ${index + 1 === mesActual ? "selected" : ""}>${mes}</option>`
-        ).join("");
-
-        // 🟢 Llenar selector de año (de 2025 a 2030)
-        let opcionesAnio = "";
-        for (let i = 2025; i <= 2030; i++) {
-            opcionesAnio += `<option value="${i}" ${i === anioActual ? "selected" : ""}>${i}</option>`;
+    // Procesar ventas del mes actual con tarjeta
+    ventas.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => metodosTarjeta.includes(pago.metodo))
+                .forEach((pago) => {
+                    const fechaVenta = new Date(venta.fecha);
+                    const periodo = obtenerPeriodo(fechaVenta);
+                    const montoConRecargo = pago.metodo === "CREDITO" ? pago.monto * 1.15 : pago.monto;
+                    if (periodo) {
+                        tarjetaMesActual.periodos[periodo] += montoConRecargo;
+                    }
+                    tarjetaMesActual.totalVentas += montoConRecargo;
+                });
         }
-        selectAnio.innerHTML = opcionesAnio;
+    });
+
+    // Procesar ingresos y egresos del mes actual con tarjeta
+    ingresosEgresos
+        .filter((ie) => metodosTarjeta.includes(ie.metodoPago))
+        .forEach((ie) => {
+            const fechaIE = new Date(ie.fecha);
+            const periodo = obtenerPeriodo(fechaIE);
+            const montoConSigno = ie.ingreso ? ie.monto : -ie.monto;
+            if (periodo) {
+                tarjetaMesActual.periodos[periodo] += montoConSigno;
+            }
+            if (ie.ingreso) {
+                tarjetaMesActual.totalIngresos += ie.monto;
+            } else {
+                tarjetaMesActual.totalEgresos += ie.monto;
+            }
+            movimientosTarjeta.push({
+                id: ie.id,
+                fecha: fechaIE.toLocaleDateString(),
+                descripcion: ie.descripcion,
+                usuario: ie.usuario ? ie.usuario.nombre : "N/A",
+                tipo: ie.ingreso ? "Ingreso" : "Egreso",
+                metodo: ie.metodoPago,
+                monto: montoConSigno.toFixed(2),
+            });
+        });
+
+    const totalDelMesTarjeta =
+        tarjetaMesActual.totalVentas +
+        tarjetaMesActual.totalIngresos -
+        tarjetaMesActual.totalEgresos;
+    tarjetaMesActual.totalDelMes = totalDelMesTarjeta;
+    tarjetaMesActual.totalConSaldoAnterior =
+        tarjetaMesActual.saldoAnterior + totalDelMesTarjeta;
+
+    return { tarjetaMesActual, movimientosTarjeta };
+}
+
+function actualizarTablaTarjeta(data) {
+    const tablaTarjetaBody = document.getElementById("tablaTarjeta");
+    tablaTarjetaBody.innerHTML = ""; // Limpiar la tabla
+
+    const filas = [
+        { periodo: "SALDO MES ANTERIOR", total: `$${data.saldoAnterior.toFixed(2)}` },
+        { periodo: "1 al 7", total: `$${data.periodos["1 al 7"].toFixed(2)}` },
+        { periodo: "8 al 14", total: `$${data.periodos["8 al 14"].toFixed(2)}` },
+        { periodo: "15 al 21", total: `$${data.periodos["15 al 21"].toFixed(2)}` },
+        { periodo: "22 al 28", total: `$${data.periodos["22 al 28"].toFixed(2)}` },
+        { periodo: "29 al fin de mes", total: `$${data.periodos["29 al fin de mes"].toFixed(2)}` },
+        { periodo: "TOTAL VENTAS", total: `$${data.totalVentas.toFixed(2)}` },
+        { periodo: "TOTAL INGRESOS", total: `$${data.totalIngresos.toFixed(2)}` },
+        { periodo: "TOTAL EGRESOS", total: `-$${data.totalEgresos.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES", total: `$${data.totalDelMes.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES + SALDO ANTERIOR", total: `$${data.totalConSaldoAnterior.toFixed(2)}` },
+    ];
+
+    filas.forEach((fila) => {
+        const tr = document.createElement("tr");
+        const tdPeriodo = document.createElement("td");
+        const tdTotal = document.createElement("td");
+        tdPeriodo.textContent = fila.periodo;
+        tdTotal.textContent = fila.total;
+        tr.appendChild(tdPeriodo);
+        tr.appendChild(tdTotal);
+        tablaTarjetaBody.appendChild(tr);
+    });
+}
+
+function actualizarTablaMovimientosTarjeta(movimientos) {
+    const movTarjetaBody = document.getElementById("movTarjeta");
+    movTarjetaBody.innerHTML = ""; // Limpiar la tabla
+
+    movimientos.forEach((movimiento) => {
+        const tr = document.createElement("tr");
+        const tdFecha = document.createElement("td");
+        const tdDescripcion = document.createElement("td");
+        const tdUsuario = document.createElement("td");
+        const tdTipo = document.createElement("td");
+        const tdMetodo = document.createElement("td");
+        const tdMonto = document.createElement("td");
+
+        tdFecha.textContent = movimiento.fecha;
+        tdDescripcion.textContent = movimiento.descripcion;
+        tdUsuario.textContent = movimiento.usuario;
+        tdTipo.textContent = movimiento.tipo;
+        tdMetodo.textContent = movimiento.metodo;
+        tdMonto.textContent = movimiento.monto;
+
+        tr.appendChild(tdFecha);
+        tr.appendChild(tdDescripcion);
+        tr.appendChild(tdUsuario);
+        tr.appendChild(tdTipo);
+        tr.appendChild(tdMetodo);
+        tr.appendChild(tdMonto);
+        movTarjetaBody.appendChild(tr);
+    });
+}
+
+function procesarDatosMercadoPagoSacha(
+    ventas,
+    ingresosEgresos,
+    ventasMesAnterior,
+    ingresosEgresosMesAnterior
+) {
 
 
-        // 🔴 Llamar al endpoint cuando se carguen los select
-        obtenerIngresosEfectivo(mesActual, anioActual);
+    const mpSachaMesActual = {
+        saldoAnterior: 0,
+        periodos: {
+            "1 al 7": 0,
+            "8 al 14": 0,
+            "15 al 21": 0,
+            "22 al 28": 0,
+            "29 al fin de mes": 0,
+        },
+        totalVentas: 0,
+        totalIngresos: 0,
+        totalEgresos: 0,
+    };
+
+    const movimientosMpSacha = [];
+    const metodoPago = "MERCADOPAGO_SAC"; // Ajustar el método de pago
+
+    // Función auxiliar para determinar el período de una fecha
+    function obtenerPeriodo(fecha) {
+        const dia = fecha.getDate();
+        if (dia >= 1 && dia <= 7) return "1 al 7";
+        if (dia >= 8 && dia <= 14) return "8 al 14";
+        if (dia >= 15 && dia <= 21) return "15 al 21";
+        if (dia >= 22 && dia <= 28) return "22 al 28";
+        const ultimoDiaMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0).getDate();
+        if (dia >= 29 && dia <= ultimoDiaMes) return "29 al fin de mes";
+        return null;
     }
 
-    function obtenerMesAnterior(mes, anio) {
-        if (mes === 1) {
-            return { mes: 12, anio: anio - 1 };
+    // Calcular el saldo anterior de MercadoPago Sacha
+    ventasMesAnterior.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => pago.metodo === metodoPago)
+                .forEach((pago) => {
+                    mpSachaMesActual.saldoAnterior += pago.monto;
+                });
         }
-        return { mes: mes - 1, anio: anio };
+    });
+
+    ingresosEgresosMesAnterior
+        .filter((ie) => ie.metodoPago === metodoPago)
+        .forEach((ie) => {
+            mpSachaMesActual.saldoAnterior += ie.ingreso ? ie.monto : -ie.monto;
+        });
+
+    // Procesar ventas del mes actual de MercadoPago Sacha
+    ventas.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => pago.metodo === metodoPago)
+                .forEach((pago) => {
+                    const fechaVenta = new Date(venta.fecha);
+                    const periodo = obtenerPeriodo(fechaVenta);
+                    if (periodo) {
+                        mpSachaMesActual.periodos[periodo] += pago.monto;
+                    }
+                    mpSachaMesActual.totalVentas += pago.monto;
+                });
+        }
+    });
+
+    // Procesar ingresos y egresos del mes actual de MercadoPago Sacha
+    ingresosEgresos
+        .filter((ie) => ie.metodoPago === metodoPago)
+        .forEach((ie) => {
+            const fechaIE = new Date(ie.fecha);
+            const periodo = obtenerPeriodo(fechaIE);
+            const monto = ie.ingreso ? ie.monto : -ie.monto;
+            if (periodo) {
+                mpSachaMesActual.periodos[periodo] += monto;
+            }
+            if (ie.ingreso) {
+                mpSachaMesActual.totalIngresos += ie.monto;
+            } else {
+                mpSachaMesActual.totalEgresos += ie.monto;
+            }
+            movimientosMpSacha.push({
+                id: ie.id,
+                fecha: fechaIE.toLocaleDateString(),
+                descripcion: ie.descripcion,
+                usuario: ie.usuario ? ie.usuario.nombre : "N/A",
+                tipo: ie.ingreso ? "Ingreso" : "Egreso",
+                monto: monto.toFixed(2),
+                metodo: ie.metodoPago,
+            });
+        });
+
+    const totalDelMesMpSacha =
+        mpSachaMesActual.totalVentas +
+        mpSachaMesActual.totalIngresos -
+        mpSachaMesActual.totalEgresos;
+    mpSachaMesActual.totalDelMes = totalDelMesMpSacha;
+    mpSachaMesActual.totalConSaldoAnterior =
+        mpSachaMesActual.saldoAnterior + totalDelMesMpSacha;
+
+
+    return { mpSachaMesActual, movimientosMpSacha };
+}
+
+function actualizarTablaMpSacha(data) {
+    const tablaMpSachaBody = document.getElementById("tablaMpSacha");
+    tablaMpSachaBody.innerHTML = ""; // Limpiar la tabla
+
+    const filas = [
+        { periodo: "SALDO MES ANTERIOR", total: `$${data.saldoAnterior.toFixed(2)}` },
+        { periodo: "1 al 7", total: `$${data.periodos["1 al 7"].toFixed(2)}` },
+        { periodo: "8 al 14", total: `$${data.periodos["8 al 14"].toFixed(2)}` },
+        { periodo: "15 al 21", total: `$${data.periodos["15 al 21"].toFixed(2)}` },
+        { periodo: "22 al 28", total: `$${data.periodos["22 al 28"].toFixed(2)}` },
+        { periodo: "29 al fin de mes", total: `$${data.periodos["29 al fin de mes"].toFixed(2)}` },
+        { periodo: "TOTAL VENTAS", total: `$${data.totalVentas.toFixed(2)}` },
+        { periodo: "TOTAL INGRESOS", total: `$${data.totalIngresos.toFixed(2)}` },
+        { periodo: "TOTAL EGRESOS", total: `-$${data.totalEgresos.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES", total: `$${data.totalDelMes.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES + SALDO ANTERIOR", total: `$${data.totalConSaldoAnterior.toFixed(2)}` },
+    ];
+
+    filas.forEach((fila) => {
+        const tr = document.createElement("tr");
+        const tdPeriodo = document.createElement("td");
+        const tdTotal = document.createElement("td");
+        tdPeriodo.textContent = fila.periodo;
+        tdTotal.textContent = fila.total;
+        tr.appendChild(tdPeriodo);
+        tr.appendChild(tdTotal);
+        tablaMpSachaBody.appendChild(tr);
+    });
+}
+
+function actualizarTablaMovimientosMpSacha(movimientos) {
+    const movMpSachaBody = document.getElementById("movMpSacha");
+    movMpSachaBody.innerHTML = ""; // Limpiar la tabla
+
+    movimientos.forEach((movimiento) => {
+        const tr = document.createElement("tr");
+        const tdFecha = document.createElement("td");
+        const tdDescripcion = document.createElement("td");
+        const tdUsuario = document.createElement("td");
+        const tdTipo = document.createElement("td");
+        const tdMonto = document.createElement("td");
+
+        tdFecha.textContent = movimiento.fecha;
+        tdDescripcion.textContent = movimiento.descripcion;
+        tdUsuario.textContent = movimiento.usuario;
+        tdTipo.textContent = movimiento.tipo;
+        tdMonto.textContent = movimiento.monto;
+
+        tr.appendChild(tdFecha);
+        tr.appendChild(tdDescripcion);
+        tr.appendChild(tdUsuario);
+        tr.appendChild(tdTipo);
+        tr.appendChild(tdMonto);
+        movMpSachaBody.appendChild(tr);
+    });
+}
+
+function procesarDatosMercadoPagoVale(
+    ventas,
+    ingresosEgresos,
+    ventasMesAnterior,
+    ingresosEgresosMesAnterior
+) {
+    
+    const mpValeMesActual = {
+        saldoAnterior: 0,
+        periodos: {
+            "1 al 7": 0,
+            "8 al 14": 0,
+            "15 al 21": 0,
+            "22 al 28": 0,
+            "29 al fin de mes": 0,
+        },
+        totalVentas: 0,
+        totalIngresos: 0,
+        totalEgresos: 0,
+    };
+
+    const movimientosMpVale = [];
+    const metodoPago = "MERCADOPAGO_VAL"; // Ajustar el método de pago
+
+    // Función auxiliar para determinar el período de una fecha
+    function obtenerPeriodo(fecha) {
+        const dia = fecha.getDate();
+        if (dia >= 1 && dia <= 7) return "1 al 7";
+        if (dia >= 8 && dia <= 14) return "8 al 14";
+        if (dia >= 15 && dia <= 21) return "15 al 21";
+        if (dia >= 22 && dia <= 28) return "22 al 28";
+        const ultimoDiaMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0).getDate();
+        if (dia >= 29 && dia <= ultimoDiaMes) return "29 al fin de mes";
+        return null;
     }
 
-
-    function obtenerIngresosEfectivo(mes, anio) {
-        console.log("OBTENER INGRESOS LARGO");
-        // Calcular el mes y año anterior
-        let mesAnterior = mes - 1;
-        let anioAnterior = anio;
-        if (mesAnterior === 0) {
-            mesAnterior = 12;
-            anioAnterior--;
+    // Calcular el saldo anterior de MercadoPago Valeria
+    ventasMesAnterior.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => pago.metodo === metodoPago)
+                .forEach((pago) => {
+                    mpValeMesActual.saldoAnterior += pago.monto;
+                });
         }
+    });
 
-        // Obtener los datos del mes seleccionado
-        let urlActual = `${BASE_URL}/ventas/ventas-gastos?mes=${mes}&anio=${anio}`;
-        let urlAnterior = `${BASE_URL}/ventas/ventas-gastos?mes=${mesAnterior}&anio=${anioAnterior}`;
+    ingresosEgresosMesAnterior
+        .filter((ie) => ie.metodoPago === metodoPago)
+        .forEach((ie) => {
+            mpValeMesActual.saldoAnterior += ie.ingreso ? ie.monto : -ie.monto;
+        });
 
-        Promise.all([
-            fetch(urlActual).then(response => response.json()),
-            fetch(urlAnterior).then(response => response.json())
-        ])
-            .then(([dataActual, dataAnterior]) => {
-                console.log("Datos actuales:", dataActual);
-                console.log("Datos del mes anterior:", dataAnterior);
-                actualizarTabla(dataActual, dataAnterior);
+    // Procesar ventas del mes actual de MercadoPago Valeria
+    ventas.forEach((venta) => {
+        if (venta && venta.pagos) {
+            venta.pagos
+                .filter((pago) => pago.metodo === metodoPago)
+                .forEach((pago) => {
+                    const fechaVenta = new Date(venta.fecha);
+                    const periodo = obtenerPeriodo(fechaVenta);
+                    if (periodo) {
+                        mpValeMesActual.periodos[periodo] += pago.monto;
+                    }
+                    mpValeMesActual.totalVentas += pago.monto;
+                });
+        }
+    });
+
+    // Procesar ingresos y egresos del mes actual de MercadoPago Valeria
+    ingresosEgresos
+        .filter((ie) => ie.metodoPago === metodoPago)
+        .forEach((ie) => {
+            const fechaIE = new Date(ie.fecha);
+            const periodo = obtenerPeriodo(fechaIE);
+            const monto = ie.ingreso ? ie.monto : -ie.monto;
+            if (periodo) {
+                mpValeMesActual.periodos[periodo] += monto;
+            }
+            if (ie.ingreso) {
+                mpValeMesActual.totalIngresos += ie.monto;
+            } else {
+                mpValeMesActual.totalEgresos += ie.monto;
+            }
+            movimientosMpVale.push({
+                id: ie.id,
+                fecha: fechaIE.toLocaleDateString(),
+                descripcion: ie.descripcion,
+                usuario: ie.usuario ? ie.usuario.nombre : "N/A",
+                tipo: ie.ingreso ? "Ingreso" : "Egreso",
+                monto: monto.toFixed(2),
+                metodo: ie.metodoPago,
+            });
+        });
+
+    const totalDelMesMpVale =
+        mpValeMesActual.totalVentas +
+        mpValeMesActual.totalIngresos -
+        mpValeMesActual.totalEgresos;
+    mpValeMesActual.totalDelMes = totalDelMesMpVale;
+    mpValeMesActual.totalConSaldoAnterior =
+        mpValeMesActual.saldoAnterior + totalDelMesMpVale;
+   
+    return { mpValeMesActual, movimientosMpVale };
+}
+
+function actualizarTablaMpVale(data) {
+    const tablaMpValeBody = document.getElementById("tablaMpVale");
+    tablaMpValeBody.innerHTML = ""; // Limpiar la tabla
+
+    const filas = [
+        { periodo: "SALDO MES ANTERIOR", total: `$${data.saldoAnterior.toFixed(2)}` },
+        { periodo: "1 al 7", total: `$${data.periodos["1 al 7"].toFixed(2)}` },
+        { periodo: "8 al 14", total: `$${data.periodos["8 al 14"].toFixed(2)}` },
+        { periodo: "15 al 21", total: `$${data.periodos["15 al 21"].toFixed(2)}` },
+        { periodo: "22 al 28", total: `$${data.periodos["22 al 28"].toFixed(2)}` },
+        { periodo: "29 al fin de mes", total: `$${data.periodos["29 al fin de mes"].toFixed(2)}` },
+        { periodo: "TOTAL VENTAS", total: `$${data.totalVentas.toFixed(2)}` },
+        { periodo: "TOTAL INGRESOS", total: `$${data.totalIngresos.toFixed(2)}` },
+        { periodo: "TOTAL EGRESOS", total: `-$${data.totalEgresos.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES", total: `$${data.totalDelMes.toFixed(2)}` },
+        { periodo: "TOTAL DEL MES + SALDO ANTERIOR", total: `$${data.totalConSaldoAnterior.toFixed(2)}` },
+    ];
+
+    filas.forEach((fila) => {
+        const tr = document.createElement("tr");
+        const tdPeriodo = document.createElement("td");
+        const tdTotal = document.createElement("td");
+        tdPeriodo.textContent = fila.periodo;
+        tdTotal.textContent = fila.total;
+        tr.appendChild(tdPeriodo);
+        tr.appendChild(tdTotal);
+        tablaMpValeBody.appendChild(tr);
+    });
+}
+
+function actualizarTablaMovimientosMpVale(movimientos) {
+    const movMpValeBody = document.getElementById("movMpVale");
+    movMpValeBody.innerHTML = ""; // Limpiar la tabla
+
+    movimientos.forEach((movimiento) => {
+        const tr = document.createElement("tr");
+        const tdFecha = document.createElement("td");
+        const tdDescripcion = document.createElement("td");
+        const tdUsuario = document.createElement("td");
+        const tdTipo = document.createElement("td");
+        const tdMonto = document.createElement("td");
+
+        tdFecha.textContent = movimiento.fecha;
+        tdDescripcion.textContent = movimiento.descripcion;
+        tdUsuario.textContent = movimiento.usuario;
+        tdTipo.textContent = movimiento.tipo;
+        tdMonto.textContent = movimiento.monto;
+
+        tr.appendChild(tdFecha);
+        tr.appendChild(tdDescripcion);
+        tr.appendChild(tdUsuario);
+        tr.appendChild(tdTipo);
+        tr.appendChild(tdMonto);
+        movMpValeBody.appendChild(tr);
+    });
+}
+
+//Funcion para eliminar Ingreso Egreso
+function eliminarMovimiento(id) {   
+    if (confirm("¿Estás seguro de que deseas eliminar este movimiento?")) {
+        fetch('/ingresoegreso/eliminar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken   // Usar el nombre correcto de cabecera dinámicamente
+            },
+            body: JSON.stringify({ id: id })
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("Movimiento eliminado correctamente.");
+                    // Después de eliminar, actualizar la tabla:
+                    window.location.reload();
+                } else {
+                    alert("Error al eliminar el movimiento.");
+                }
             })
             .catch(error => {
-                console.error("Error al obtener los datos:", error);
+                console.error("Error:", error);
+                alert("Error de conexión al intentar eliminar.");
             });
     }
-
-
-    function actualizarTabla(dataActual, dataAnterior) {
-        // Limpiar contenido de las tablas
-        tablaEfectivo.innerHTML = "";
-        movEfectivo.innerHTML = "";
-        tablaTarjeta.innerHTML = "";
-        movTarjeta.innerHTML = "";
-        tablaMpVale.innerHTML = "";
-        movMpVale.innerHTML = "";
-        tablaMpSacha.innerHTML = "";
-        movMpSacha.innerHTML = "";
-
-
-        const periodos = ["1 al 7", "8 al 14", "15 al 21", "22 al 28", "29 al fin de mes"];
-        const totalesEfectivo = [0, 0, 0, 0, 0];
-        const totalesTarjeta = [0, 0, 0, 0, 0];
-        const totalesMpVale = [0, 0, 0, 0, 0];
-        const totalesMpSacha = [0, 0, 0, 0, 0];
-
-        let saldoMesAnteriorEfectivo = 0;
-        let saldoMesAnteriorTarjeta = 0;
-        let saldoMesAnteriorMpVale = 0;
-        let saldoMesAnteriorMpSacha = 0;
-        let totalVentasEfectivo = 0, totalVentasTarjeta = 0;
-        let totalIngresosEfectivo = 0, totalIngresosTarjeta = 0;
-        let totalEgresosEfectivo = 0, totalEgresosTarjeta = 0;
-
-        let totalVentasMpVale = 0, TotalVentasMpSacha = 0;
-        let totalIngresosMpVale = 0, totalIngresosMpSacha = 0;
-        let totalEgresosMpVale = 0, totalEgresosMpSacha = 0;
-
-
-        // 📌 Calcular ventas en efectivo y tarjeta del mes actual
-        dataActual.ventas.forEach(venta => {
-            let fecha = new Date(venta.fecha);
-            let dia = fecha.getDate();
-            let index = obtenerPeriodoIndex(dia);
-
-            if (venta.metodoPago === "EFECTIVO") {
-                totalesEfectivo[index] += venta.total;
-                totalVentasEfectivo += venta.total;
-            } else if (venta.metodoPago === "DEBITO" || venta.metodoPago === "CREDITO") {
-                totalesTarjeta[index] += venta.total;
-                totalVentasTarjeta += venta.total;
-            } else if (venta.metodoPago === "MERCADOPAGO_VAL") {
-                totalesMpVale[index] += venta.total;
-                totalVentasMpVale += venta.total;
-            } else if (venta.metodoPago === "MERCADOPAGO_SAC") {
-                totalesMpSacha[index] += venta.total;
-                TotalVentasMpSacha += venta.total;
-            }
-
-
-        });
-
-        // 📌 Calcular ingresos y egresos en efectivo y tarjeta
-        dataActual.ingresosEgresos.forEach(ie => {
-            let fecha = new Date(ie.fecha);
-            let dia = fecha.getDate();
-            let index = obtenerPeriodoIndex(dia);
-            let tipo = ie.ingreso ? "INGRESO" : "EGRESO";
-
-            if (ie.metodoPago === "EFECTIVO") {
-                if (ie.ingreso) {
-                    totalesEfectivo[index] += ie.monto;
-                    totalIngresosEfectivo += ie.monto;
-                } else {
-                    totalesEfectivo[index] -= ie.monto;
-                    totalEgresosEfectivo += ie.monto;
-                }
-
-                // 🟢 Agregar fila a la tabla de movimientos en efectivo
-                let fila = `
-                <tr>
-                    <td>${fecha.toLocaleDateString()}</td>
-                    <td>${ie.descripcion || "Ingreso/Egreso"}</td>
-                    <td>${ie.usuario?.nombre || "N/A"}</td>
-                    <td>${tipo}</td>
-                    <td>$${ie.monto.toFixed(2)}</td>
-                </tr>`;
-                movEfectivo.innerHTML += fila;
-            } else if (ie.metodoPago === "DEBITO" || ie.metodoPago === "CREDITO") {
-                if (ie.ingreso) {
-                    totalesTarjeta[index] += ie.monto;
-                    totalIngresosTarjeta += ie.monto;
-                } else {
-                    totalesTarjeta[index] -= ie.monto;
-                    totalEgresosTarjeta += ie.monto;
-                }
-
-                // 🟢 Agregar fila a la tabla de movimientos con tarjeta
-                let fila = `
-                <tr>
-                    <td>${fecha.toLocaleDateString()}</td>
-                    <td>${ie.descripcion || "Ingreso/Egreso"}</td>
-                    <td>${ie.usuario?.nombre || "N/A"}</td>
-                    <td>${tipo}</td>
-                <td>${ie.metodoPago}</td>
-                    <td>$${ie.monto.toFixed(2)}</td>
-                </tr>`;
-                movTarjeta.innerHTML += fila;
-            } else if (ie.metodoPago === "MERCADOPAGO_VAL") {
-                if (ie.ingreso) {
-                    totalesMpVale[index] += ie.monto;
-                    totalIngresosMpVale += ie.monto;
-                } else {
-                    totalesMpVale[index] -= ie.monto;
-                    totalEgresosMpVale += ie.monto;
-                }
-
-                // 🟢 Agregar fila a la tabla de movimientos MercadoPago Valeria
-                let fila = `
-                <tr>
-                    <td>${fecha.toLocaleDateString()}</td>
-                    <td>${ie.descripcion || "Ingreso/Egreso"}</td>
-                    <td>${ie.usuario?.nombre || "N/A"}</td>
-                    <td>${tipo}</td>                
-                    <td>$${ie.monto.toFixed(2)}</td>
-                </tr>`;
-                movMpVale.innerHTML += fila;
-            } else if (ie.metodoPago === "MERCADOPAGO_SAC") {
-                if (ie.ingreso) {
-                    totalesMpSacha[index] += ie.monto;
-                    totalIngresosMpSacha += ie.monto;
-                } else {
-                    totalesMpSacha[index] -= ie.monto;
-                    totalEgresosMpSacha += ie.monto;
-                }
-
-                // 🟢 Agregar fila a la tabla de movimientos MercadoPago Sacha
-                let fila = `
-                <tr>
-                    <td>${fecha.toLocaleDateString()}</td>
-                    <td>${ie.descripcion || "Ingreso/Egreso"}</td>
-                    <td>${ie.usuario?.nombre || "N/A"}</td>
-                    <td>${tipo}</td>
-                    <td>$${ie.monto.toFixed(2)}</td>
-                </tr>`;
-                movMpSacha.innerHTML += fila;
-            }
-
-
-        });
-
-        // 📌 Calcular saldo del mes anterior (ventas e ingresos)
-        dataAnterior.ventas.forEach(venta => {
-            if (venta.metodoPago === "EFECTIVO") {
-                saldoMesAnteriorEfectivo += venta.total;
-            } else if (venta.metodoPago === "DEBITO" || venta.metodoPago === "CREDITO") {
-                saldoMesAnteriorTarjeta += venta.total;
-            } else if (venta.metodoPago === "MERCADOPAGO_VAL") {
-                saldoMesAnteriorMpVale += venta.total;
-            } else if (venta.metodoPago === "MERCADOPAGO_SAC") {
-                saldoMesAnteriorMpSacha += venta.total;
-            }
-
-        });
-
-
-        dataAnterior.ingresosEgresos.forEach(ie => {
-            if (ie.ingreso) {
-                if (ie.metodoPago === "EFECTIVO") {
-                    saldoMesAnteriorEfectivo += ie.monto;
-                } else if (ie.metodoPago === "DEBITO" || ie.metodoPago === "CREDITO") {
-                    saldoMesAnteriorTarjeta += ie.monto;
-                } else if (ie.metodoPago === "MERCADOPAGO_VAL") {
-                    saldoMesAnteriorMpVale += ie.monto;
-                } else if (ie.metodoPago === "MERCADOPAGO_SAC") {
-                    saldoMesAnteriorMpSacha += ie.monto;
-                }
-            }
-        });
-
-        // 🟢 Agregar filas a tablaEfectivo
-        tablaEfectivo.innerHTML += `<tr style="font-weight: bold;">
-        <td>SALDO MES ANTERIOR</td>
-        <td>$${saldoMesAnteriorEfectivo.toFixed(2)}</td>
-    </tr>`;
-        periodos.forEach((periodo, index) => {
-            tablaEfectivo.innerHTML += `<tr>
-            <td>${periodo}</td>
-            <td>$${totalesEfectivo[index].toFixed(2)}</td>
-        </tr>`;
-        });
-
-        let totalMesEfectivo = totalVentasEfectivo + totalIngresosEfectivo - totalEgresosEfectivo;
-        let totalMesSaldoAnteriorEfectivo = totalMesEfectivo + saldoMesAnteriorEfectivo;
-
-        tablaEfectivo.innerHTML += `
-    <tr style="font-weight: bold;"><td>TOTAL VENTAS</td><td>$${totalVentasEfectivo.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold;"><td>TOTAL INGRESOS</td><td>$${totalIngresosEfectivo.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold; color: red;"><td>TOTAL EGRESOS</td><td>-$${totalEgresosEfectivo.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold;"><td>TOTAL DEL MES</td><td>$${totalMesEfectivo.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold;"><td>TOTAL DEL MES + SALDO ANTERIOR</td><td>$${totalMesSaldoAnteriorEfectivo.toFixed(2)}</td></tr>`;
-
-        // 🟢 Agregar filas a tablaTarjeta
-        tablaTarjeta.innerHTML += `<tr style="font-weight: bold;">
-        <td>SALDO MES ANTERIOR</td>
-        <td>$${saldoMesAnteriorTarjeta.toFixed(2)}</td>
-        </tr>`;
-        periodos.forEach((periodo, index) => {
-            tablaTarjeta.innerHTML += `<tr>
-            <td>${periodo}</td>
-            <td>$${totalesTarjeta[index].toFixed(2)}</td>
-        </tr>`;
-        });
-
-        let totalMesTarjeta = totalVentasTarjeta + totalIngresosTarjeta - totalEgresosTarjeta;
-        let totalMesSaldoAnteriorTarjeta = totalMesTarjeta + saldoMesAnteriorTarjeta;
-
-        tablaTarjeta.innerHTML += `
-    <tr style="font-weight: bold;"><td>TOTAL VENTAS</td><td>$${totalVentasTarjeta.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold;"><td>TOTAL INGRESOS</td><td>$${totalIngresosTarjeta.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold; color: red;"><td>TOTAL EGRESOS</td><td>-$${totalEgresosTarjeta.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold;"><td>TOTAL DEL MES</td><td>$${totalMesTarjeta.toFixed(2)}</td></tr>
-    <tr style="font-weight: bold;"><td>TOTAL DEL MES + SALDO ANTERIOR</td><td>$${totalMesSaldoAnteriorTarjeta.toFixed(2)}</td></tr>`;
-
-
-        // 🟢 Agregar filas a tablaMpVale
-        tablaMpVale.innerHTML += `<tr style="font-weight: bold;">
-    <td>SALDO MES ANTERIOR</td>
-    <td>$${saldoMesAnteriorMpVale.toFixed(2)}</td>
-    </tr>`;
-        periodos.forEach((periodo, index) => {
-            tablaMpVale.innerHTML += `<tr>
-        <td>${periodo}</td>
-        <td>$${totalesMpVale[index].toFixed(2)}</td>
-    </tr>`;
-        });
-
-        let totalMesMpVale = totalVentasMpVale + totalIngresosMpVale - totalEgresosMpVale;
-        let totalMesSaldoAnteriorMpVale = totalMesMpVale + saldoMesAnteriorMpVale;
-
-        tablaMpVale.innerHTML += `
-<tr style="font-weight: bold;"><td>TOTAL VENTAS</td><td>$${totalVentasMpVale.toFixed(2)}</td></tr>
-<tr style="font-weight: bold;"><td>TOTAL INGRESOS</td><td>$${totalIngresosMpVale.toFixed(2)}</td></tr>
-<tr style="font-weight: bold; color: red;"><td>TOTAL EGRESOS</td><td>-$${totalEgresosMpVale.toFixed(2)}</td></tr>
-<tr style="font-weight: bold;"><td>TOTAL DEL MES</td><td>$${totalMesMpVale.toFixed(2)}</td></tr>
-<tr style="font-weight: bold;"><td>TOTAL DEL MES + SALDO ANTERIOR</td><td>$${totalMesSaldoAnteriorMpVale.toFixed(2)}</td></tr>`;
-
-
-        // 🟢 Agregar filas a tablaMpSacha
-        tablaMpSacha.innerHTML += `<tr style="font-weight: bold;">
-<td>SALDO MES ANTERIOR</td>
-<td>$${saldoMesAnteriorMpSacha.toFixed(2)}</td>
-</tr>`;
-        periodos.forEach((periodo, index) => {
-            tablaMpSacha.innerHTML += `<tr>
-    <td>${periodo}</td>
-    <td>$${totalesMpSacha[index].toFixed(2)}</td>
-</tr>`;
-        });
-
-        let totalMesMpSacha = TotalVentasMpSacha + totalIngresosMpSacha - totalEgresosMpSacha;
-        let totalMesSaldoAnteriorMpSacha = totalMesMpSacha + saldoMesAnteriorMpSacha;
-
-        tablaMpSacha.innerHTML += `
-<tr style="font-weight: bold;"><td>TOTAL VENTAS</td><td>$${TotalVentasMpSacha.toFixed(2)}</td></tr>
-<tr style="font-weight: bold;"><td>TOTAL INGRESOS</td><td>$${totalIngresosMpSacha.toFixed(2)}</td></tr>
-<tr style="font-weight: bold; color: red;"><td>TOTAL EGRESOS</td><td>-$${totalEgresosMpSacha.toFixed(2)}</td></tr>
-<tr style="font-weight: bold;"><td>TOTAL DEL MES</td><td>$${totalMesMpSacha.toFixed(2)}</td></tr>
-<tr style="font-weight: bold;"><td>TOTAL DEL MES + SALDO ANTERIOR</td><td>$${totalMesSaldoAnteriorMpSacha.toFixed(2)}</td></tr>`;
-
-    }
-
-    function obtenerPeriodoIndex(dia) {
-        if (dia >= 1 && dia <= 7)
-            return 0;
-        if (dia >= 8 && dia <= 14)
-            return 1;
-        if (dia >= 15 && dia <= 21)
-            return 2;
-        if (dia >= 22 && dia <= 28)
-            return 3;
-        return 4;
-    }
-
-    function actualizarTotales() {
-
-        document.getElementById("totalEfectivo").textContent = `$ ${data.totalMesEfectivo.toFixed(2)}`;
-        document.getElementById("totalCredito").textContent = `$ ${data.totalCredito.toFixed(2)}`;
-        document.getElementById("totalDebito").textContent = `$ ${data.totalDebito.toFixed(2)}`;
-        document.getElementById("totalMercadoPago").textContent = `$ ${data.totalMercadoPago.toFixed(2)}`;
-        document.getElementById("totalGeneral").textContent = `$ ${data.totalGeneral.toFixed(2)}`;
-
-    }
-
-    // Evento para actualizar datos cuando cambia el mes o el año
-    selectMes.addEventListener("change", () => {
-        obtenerIngresosEfectivo(selectMes.value, selectAnio.value);
-    });
-
-    selectAnio.addEventListener("change", () => {
-        obtenerIngresosEfectivo(selectMes.value, selectAnio.value);
-    });
-
-    // Cargar selectores y datos al inicio
-    llenarSelectores();
-
-});
+}

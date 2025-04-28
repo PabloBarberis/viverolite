@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequiredArgsConstructor
@@ -152,6 +156,32 @@ public class RegistroHorarioController {
         int totalSalidaMinutos = salidaHoras * 60 + salidaMinutos;
 
         return (totalSalidaMinutos - totalEntradaMinutos) / 60.0;
+    }
+
+    @GetMapping("/reporte-pdf")
+    public ResponseEntity<byte[]> generarReportePdf(
+            @RequestParam int mes,
+            @RequestParam int anio,
+            @RequestParam Long id) {
+
+        System.out.println("CONTROLLER");
+        System.out.println("MES :" + mes);
+        System.out.println("ANIO :" + anio);
+        System.out.println("ID : " + id);
+        try {
+            byte[] pdfBytes = registroHorarioService.generarReportePdf(mes, anio, id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "reporte_ventas_" + anio + "_" + mes + ".pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 }

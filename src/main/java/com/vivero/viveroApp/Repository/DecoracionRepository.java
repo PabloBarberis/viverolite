@@ -14,13 +14,10 @@ import java.util.Optional;
 @Repository
 public interface DecoracionRepository extends JpaRepository<Decoracion, Long> {
 
-    // Buscar todas las decoraciones activas con paginación
     Page<Decoracion> findByActivoTrue(Pageable pageable);
 
-    // Buscar una decoración por ID si está activa
     Optional<Decoracion> findByIdAndActivoTrue(Long id);
 
-    // Búsqueda personalizada con paginación
     @Query("SELECT d FROM Decoracion d LEFT JOIN d.proveedores p WHERE "
             + "d.activo = TRUE AND ("
             + "LOWER(d.nombre) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "

@@ -36,7 +36,7 @@ public class IngresoEgreso {
     private Usuario usuario;
     
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-private boolean adelanto;
+    private boolean adelanto;
 
 
 }

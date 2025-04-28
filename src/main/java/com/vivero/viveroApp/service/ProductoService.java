@@ -68,26 +68,16 @@ public class ProductoService {
         }
     }
 
-    @Transactional
-    private long redondearPrecio(String tipoProducto, double precio) {
-        if ("planta".equalsIgnoreCase(tipoProducto) || "tierra".equalsIgnoreCase(tipoProducto)) {
-            // Redondeo especial para tierras: 30 hacia abajo, 31 hacia arriba
-            long residuo = Math.round(precio) % 100; // Obtener los decimales de la centena
-            if (residuo <= 30) {
-                return Math.round(precio) - residuo; // Redondear hacia abajo
-            } else {
-                return Math.round(precio) + (100 - residuo); // Redondear hacia arriba
-            }
-        } else {
-            // Redondeo normal a la decena más cercana
-            long residuo = Math.round(precio) % 10; // Obtener los decimales de la decena
-            if (residuo <= 3) {
-                return Math.round(precio) - residuo; // Redondear hacia abajo
-            } else {
-                return Math.round(precio) + (10 - residuo); // Redondear hacia arriba
-            }
-        }
+@Transactional
+private long redondearPrecio(String tipoProducto, double precio) {
+    long residuo = Math.round(precio) % 100;
+    if (residuo <= 30) {
+        return Math.round(precio) - residuo; // Redondear hacia abajo
+    } else {
+        return Math.round(precio) + (100 - residuo); // Redondear hacia arriba
     }
+}
+
 
     @Transactional(readOnly = true)
     private Class<? extends Producto> obtenerClaseProducto(String tipoProducto) {
@@ -139,5 +129,19 @@ public class ProductoService {
             return productoRepository.findByTipoAndMarca(clase, marca);
         }
     }
+
+   public void actualizarCampo(Long id, String campo, String valor) {
+    switch (campo) {
+        case "precio":
+            productoRepository.actualizarPrecio(id, Double.valueOf(valor));
+            break;
+        case "stock":
+            productoRepository.actualizarStock(id, Integer.valueOf(valor));
+            break;
+        default:
+            throw new IllegalArgumentException("Campo no válido");
+    }
+}
+
 
 }

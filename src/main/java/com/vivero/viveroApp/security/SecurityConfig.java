@@ -22,31 +22,37 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/login",
-                        "/images/**", "/fotos/**", "/resources/**", "/plantasvivero/**").permitAll()
-                .requestMatchers("/ventas/**",
-                        "/plantas/listar", "/tierra/listar", "/grow/listar",
-                        "/decoracion/listar", "/maceta/listar", "/fertilizante/listar", "/herramienta/listar",
-                        "/insecticida/listar", "/semilla/listar",
-                        "/proveedores/**", "/clientes/**", "/dashboard",
-                        "/plantas/pdf", "/maceta/pdf", "/tierra/pdf", "/grow/pdf", "/decoracion/pdf",
-                        "/producto/**")
-                .hasAnyRole("ADMIN", "VENTA")
-                .anyRequest().hasRole("ADMIN") // El resto solo para admin
+                        .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/login",
+                                "/images/**", "/fotos/**", "/resources/**", "/plantasvivero/**").permitAll()
+                        .requestMatchers("/ventas/**",
+                                "/plantas/listar", "/tierra/listar", "/grow/listar",
+                                "/decoracion/listar", "/maceta/listar", "/fertilizante/listar", "/herramienta/listar",
+                                "/insecticida/listar", "/semilla/listar",
+                                "/proveedores/**", "/clientes/**", "/dashboard",
+                                "/plantas/pdf", "/maceta/pdf", "/tierra/pdf", "/grow/pdf", "/decoracion/pdf",
+                                "/producto/**", "/api/**", "/ingresoegreso/**", "/horas/**")
+                        .hasAnyRole("ADMIN", "VENTA")
+                        .anyRequest().hasRole("ADMIN") // El resto solo para admin
                 )
                 .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
-                .permitAll()
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .permitAll()
                 )
                 .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .permitAll()
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                )
+                .sessionManagement(session -> session
+                        .maximumSessions(3)  // Permite un máximo de 3 sesiones simultáneas por usuario
+                        .maxSessionsPreventsLogin(false)  // No previene el inicio de sesión si el límite se alcanza
+                        .expiredUrl("/login?expired=true")  // URL a la que se redirige cuando la sesión expira
                 );
+                
 
         return http.build();
     }
@@ -82,3 +88,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

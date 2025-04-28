@@ -3,8 +3,6 @@ package com.vivero.viveroApp.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;

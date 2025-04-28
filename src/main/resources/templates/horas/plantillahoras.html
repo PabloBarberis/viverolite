@@ -52,6 +52,9 @@
                 <p id="saludo" class = "saludo-texto" th:text="'Hola, ' + ${usuarioSeleccionado != null ? usuarioSeleccionado.nombre : 'Seleccione un usuario'} + '!'"></p>
                 <h2 id="nombreUsuario" th:if="${usuarioSeleccionado != null}" th:text="'Tabla de ' + ${usuarioSeleccionado.nombre}"></h2>
 
+
+                
+
                 <!-- Selección de Mes y Año -->
                 <div class="form-row">
                     <div class="form-group col-md-6">

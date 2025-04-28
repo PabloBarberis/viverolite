@@ -1,5 +1,6 @@
-
 package com.vivero.viveroApp.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,9 +24,13 @@ public class VentaProducto {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "venta_id")
     private Venta venta;
 
-    private int cantidad;
+    private Double precioOriginal;  // Precio del producto en la venta (puede ser con descuento)
+    private Integer cantidad;  // Cantidad del producto que se vende
+    private Double porcentajeDescuento;  // Descuento aplicado a este producto
+    private Double subtotal;  // Subtotal para este producto (precio * cantidad)
 }

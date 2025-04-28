@@ -1,7 +1,7 @@
 package com.vivero.viveroApp.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vivero.viveroApp.model.enums.Descuento;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vivero.viveroApp.model.enums.MetodoPago;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
@@ -20,65 +21,64 @@ public class Venta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = true) // Relación con Cliente
+    @ManyToOne(optional = true)
     @JsonIgnore
     private Cliente cliente;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true) // Relación con VentaProducto
+    @ToString.Exclude
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VentaProducto> productos = new ArrayList<>();
 
-    private Double total; // Atributo para almacenar el total de la venta
+    private Double total;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 🛠 Formato de fecha
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime fecha;
 
-    @Enumerated(EnumType.STRING) // Almacena el método de pago como un String en la base de datos
-    @Column(name = "tipo_pago")
-    private MetodoPago metodoPago; // Tipo de método de pago (efectivo, débito, crédito, Mercadopago)
+    @JsonManagedReference
+    @ToString.Exclude
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PagoVenta> pagos;
 
-    @Enumerated(EnumType.STRING) // Almacena el descuento como un String en la base de datos
-    @Column(name = "descuento")
-    private Descuento descuento; // Enum para el porcentaje de descuento
+    private Double descuento;
 
-    // Constructor
-    public Venta(Cliente cliente, MetodoPago metodoPago, Descuento descuento) {
+    // Constructor con parámetros
+    public Venta(Cliente cliente, List<PagoVenta> pagos, Double descuento) {
         this.cliente = cliente;
-        this.fecha = LocalDateTime.now(); // Fecha y hora actual
-        this.metodoPago = metodoPago;
-        this.descuento = descuento; // Asignamos el descuento al crear la venta
+        this.fecha = LocalDateTime.now();
+        this.pagos = pagos;
+        this.descuento = descuento;
     }
 
-    // Método para agregar producto con cantidad
-    public void agregarProducto(Producto producto, int cantidad) {
-        if (producto != null && cantidad > 0) {
-            VentaProducto ventaProducto = new VentaProducto();
-            ventaProducto.setProducto(producto);
-            ventaProducto.setCantidad(cantidad);
-            ventaProducto.setVenta(this); // Asociamos el producto a la venta
+    // Nuevo método: agregar un VentaProducto ya preparado
+    public void agregarVentaProducto(VentaProducto ventaProducto) {
+        if (ventaProducto != null) {
+            ventaProducto.setVenta(this);
             this.productos.add(ventaProducto);
-            calcularTotal(); // Calcula el total después de agregar el producto
         }
     }
 
-    // Método para calcular el total de la venta
+    // Calcular total una vez agregados productos y pagos
     public void calcularTotal() {
-        
-        // Calcular el total inicial basado en los productos y sus cantidades
+        // 🔥 Sumar los subtotales de cada `VentaProducto` en lugar de recalcular los descuentos
         this.total = productos.stream()
-                .mapToDouble(ventaProducto -> ventaProducto.getProducto().getPrecio() * ventaProducto.getCantidad())
+                .mapToDouble(VentaProducto::getSubtotal)
                 .sum();
 
-        // Aplicar el costo adicional si el método de pago es crédito
-        if (metodoPago == MetodoPago.CREDITO) {
-            this.total *= 1.15; // Aumenta el precio en un 15%
+        double monto = 0;
+        for (PagoVenta pago : pagos) {
+            if (pago.getMetodo() == MetodoPago.CREDITO) {
+                monto += pago.getMonto() * 1.15;
+            } else {
+                monto += pago.getMonto();
+            }
         }
+        this.total = monto;
 
-        // Aplicar el descuento si existe
-        if (descuento != null) {
-            this.total -= (this.total * (descuento.getPorcentaje() / 100.0)); // Aplica el descuento
+        // 🔥 Aplicar descuento global a la venta (en porcentaje)
+        if (descuento != null && descuento > 0) {
+            this.total -= (this.total * (descuento / 100.0));
         }
-
     }
 
 }

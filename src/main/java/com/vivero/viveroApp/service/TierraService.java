@@ -56,8 +56,6 @@ public class TierraService {
         tierra.setStock(tierraDetails.getStock());
         tierra.setDescripcion(tierraDetails.getDescripcion());
         tierra.setTipo(tierraDetails.getTipo());
-        tierra.setVolumen(tierraDetails.getVolumen());
-        tierra.setComposicion(tierraDetails.getComposicion());
 
         // Actualizar los proveedores
         if (tierraDetails.getProveedores() != null) {

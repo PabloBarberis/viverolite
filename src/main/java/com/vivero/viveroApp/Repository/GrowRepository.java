@@ -14,13 +14,11 @@ import java.util.Optional;
 @Repository
 public interface GrowRepository extends JpaRepository<Grow, Long> {
 
-    // Buscar todas las productos Grow activos con paginación
+    
     Page<Grow> findByActivoTrue(Pageable pageable);
 
-    // Buscar un producto Grow por ID si está activo
     Optional<Grow> findByIdAndActivoTrue(Long id);
 
-    // Búsqueda personalizada con paginación
     @Query("SELECT g FROM Grow g LEFT JOIN g.proveedores p WHERE " +
            "g.activo = TRUE AND (" +
            "LOWER(g.nombre) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

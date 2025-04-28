@@ -93,10 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirm(`¿Aplicar ${accion} del ${porcentaje}% para ${producto} (${interiorExterior || 'Todos'})?`)) {
             return;
         }
-
-        console.log("Datos enviados:", JSON.stringify({ tipoAccion: accion, tipoProducto: producto, porcentaje, marca, interiorExterior }));
-
-
+   
         // Nueva URL unificada
         let url = `${BASE_URL}/precios/aumentoDescuento`;
 

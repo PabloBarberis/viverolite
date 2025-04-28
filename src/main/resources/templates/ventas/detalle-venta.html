@@ -1,78 +1,87 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Detalle de Venta</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Venta</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
 
-    </head>
+</head>
 
-    <body>
+<body>
 
-        <!-- Contenedor principal para navbar y botones -->
-        <div class="navbar-container d-flex justify-content-between align-items-center">
-            <!-- Navbar se carga con th:replace -->
-            <div th:replace="~{navbar :: navbar}"></div>
+    <!-- Contenedor principal para navbar y botones -->
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <!-- Navbar se carga con th:replace -->
+        <div th:replace="~{navbar :: navbar}"></div>
 
-            <!-- Botones específicos para cada página -->
+        <!-- Botones específicos para cada página -->
 
-        </div>
-
-
+    </div>
 
 
-        <div class="container-fluid mt-5" style="max-width: 90%;">            
-
-            <h1>Detalle de Venta</h1>
 
 
-            <table class="table table-bordered table-bordered-green">
-                <tr>
-                    <th>ID</th>
-                    <td th:text="${venta.id}"></td>
-                </tr>
-                <tr>
-                    <th>Cliente</th>
-                    <td th:text="${venta.cliente != null ? venta.cliente.nombre : 'N/A'}"></td>
-                </tr>
-                <tr>
-                    <th>Fecha</th>
-                    <td th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy HH:mm:ss')}"></td>
-                </tr>
-                <tr>
-                    <th>Método de Pago</th>
-                    <td th:text="${venta.metodoPago}"></td>
-                </tr>
-                <tr>
-                    <th>Descuento</th>
-                    <td th:text="${venta.descuento != null ? venta.descuento.porcentaje + '%' : 'N/A'}"></td>
-                </tr>
-                <tr>
-                    <th>Productos</th>
-                    <td>
-                        <ul>
-                            <li th:each="vp : ${venta.productos}">
-                                <span
-                                    th:text="${vp.producto.nombre} + ' x ' + ${vp.cantidad} + ' $' + ${vp.cantidad * vp.producto.precio} + ' ($' + ${vp.producto.precio} + ' c/u)'"></span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Total</th>
-                    <td th:text="'$' + ${T(java.lang.String).format('%.2f', venta.total)}"></td>
-                </tr>
-            </table>
+    <div class="container-fluid mt-5" style="max-width: 90%;">
 
-        </div>
+        <h1>Detalle de Venta</h1>
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <table class="table table-bordered table-bordered-green">
+            <tr>
+                <th>ID</th>
+                <td th:text="${venta.id}"></td>
+            </tr>
+            <tr>
+                <th>Cliente</th>
+                <td th:text="${venta.cliente != null ? venta.cliente.nombre : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy HH:mm:ss')}"></td>
+            </tr>
 
-    </body>
+            <tr>
+                <th>Productos</th>
+                <td>
+                    <ul>
+                        <li th:each="vp : ${venta.productos}">
+                            <span th:text="${vp.cantidad} + ' x ' + ${vp.producto.nombre}"></span>
+                            <span>($<span th:text="${T(java.lang.String).format('%.2f', vp.precioOriginal)}"></span>
+                                c/u)</span>
+                            <span> - Descuento: <span th:text="${vp.porcentajeDescuento} + '%'"></span></span>
+                            <span> Total: $<span
+                                    th:text="${T(java.lang.String).format('%.2f', vp.cantidad * vp.precioOriginal * (1 - vp.porcentajeDescuento / 100.0))}"></span></span>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Métodos de Pago</th>
+                <td>
+                    <ul>
+                        <li th:each="pago : ${venta.pagos}">
+                            <span
+                                th:text="${pago.metodo} + ': $' + ${T(java.lang.String).format('%.2f', pago.monto)}"></span>
+                        </li>
+                        <li th:if="${venta.pagos.isEmpty()}">N/A</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <th>Total</th>
+                <td th:text="'$' + ${T(java.lang.String).format('%.2f', venta.total)}"></td>
+            </tr>
+        </table>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
 
 </html>

@@ -4,14 +4,23 @@
     <div th:fragment="paginationFragment(endpoint, currentPage, totalPages, nombre, marca, color, material, tipo)">
         <nav aria-label="Page navigation" th:if="${totalPages > 0}">
             <ul class="pagination">
+
+                <!-- Botón 'Primera' -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{${endpoint}(page=0, size=${size}, sort=${sort}, 
+                        nombre=${nombre}, marca=${marca}, color=${color}, material=${material}, tipo=${tipo})}">
+                        Inicio
+                    </a>
+                </li>
+
                 <!-- Botón 'Anterior' -->
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a class="page-link" th:href="@{${endpoint}(page=${currentPage - 1},
-                     size=${size}, sort=${sort},
-                     nombre=${nombre}, marca=${marca},
-                     color=${color}, material=${material}, tipo=${tipo})}">Anterior</a>
+                    <a class="page-link" th:href="@{${endpoint}(page=${currentPage - 1}, size=${size}, sort=${sort},
+                        nombre=${nombre}, marca=${marca}, color=${color}, material=${material}, tipo=${tipo})}">
+                        Anterior
+                    </a>
                 </li>
-        
+
                 <!-- Botones de página -->
                 <li class="page-item" 
                     th:each="i : ${#numbers.sequence(
@@ -19,17 +28,27 @@
                         currentPage <= 5 ? (totalPages < 10 ? totalPages - 1 : 9) : (currentPage + 5 >= totalPages ? totalPages - 1 : currentPage + 4)
                     )}"
                     th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:href="@{${endpoint}(page=${i}, size=${size},
-                     sort=${sort}, nombre=${nombre}, marca=${marca}, 
-                     color=${color}, material=${material}, tipo=${tipo})}" th:text="${i + 1}"></a>
+                    <a class="page-link" th:href="@{${endpoint}(page=${i}, size=${size}, sort=${sort}, 
+                        nombre=${nombre}, marca=${marca}, color=${color}, material=${material}, tipo=${tipo})}"
+                        th:text="${i + 1}"></a>
                 </li>
-        
+
                 <!-- Botón 'Siguiente' -->
                 <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                    <a class="page-link" th:href="@{${endpoint}(page=${currentPage + 1}, size=${size},
-                     sort=${sort}, nombre=${nombre}, marca=${marca}, 
-                     color=${color}, material=${material}, tipo=${tipo})}">Siguiente</a>
+                    <a class="page-link" th:href="@{${endpoint}(page=${currentPage + 1}, size=${size}, sort=${sort},
+                        nombre=${nombre}, marca=${marca}, color=${color}, material=${material}, tipo=${tipo})}">
+                        Siguiente
+                    </a>
                 </li>
+
+                <!-- Botón 'Última' -->
+                <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{${endpoint}(page=${totalPages - 1}, size=${size}, sort=${sort}, 
+                        nombre=${nombre}, marca=${marca}, color=${color}, material=${material}, tipo=${tipo})}">
+                        Fin
+                    </a>
+                </li>
+
             </ul>
         </nav>
     </div>

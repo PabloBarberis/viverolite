@@ -11,6 +11,14 @@ public enum TipoPlanta {
     FOLLAJE,
     FRUTAL,
     HERBACEA,
+    HORTALIZA,
     ORNAMENTAL,
     SUCULENTA,
+    TREPADORA,
+    CRASA,
+    PALMERA,
+    BONSAI,
+    ARALIA,
+    ACUATICA
 }
+

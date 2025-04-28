@@ -128,8 +128,7 @@ window.calcularTotalHoras = function (dia) {
     calcularTotal(dia);
 };
 
-window.guardar = function (dia, id) {
-    console.log("Función guardar ejecutada para el día:", dia, "ID:", id);
+window.guardar = function (dia, id) {    
 };
 
 
@@ -464,3 +463,53 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+/*
+document.getElementById('btnGenerarReporte').addEventListener('click', generarReporte);
+
+    function generarReporte() {
+        const mes = document.getElementById('mes').value;
+        const anio = document.getElementById('anio').value;
+        const id = document.getElementById('usuario').value;
+
+        if (!mes || !anio) {
+            alert('Por favor completa el mes y el año.');
+            return;
+        }
+
+        fetch(`/horas/reporte-pdf?mes=${mes}&anio=${anio}&id=${id}`, {
+            method: 'GET'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al generar el reporte');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `reporte_ventas_${anio}_${mes}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+
+<h3>Generar Reporte</h3>
+                <div class="row align-items-center" style="margin-left: 10px;">
+                    <div class="d-flex align-items-center">
+                        <label for="mes" class="mr-2">Mes</label>
+                        <input type="number" id="mes" min="1" max="12" class="form-control mr-3" style="width: 80px;" required>
+                        <label for="anio" class="mr-2">Año:</label>
+                        <input type="number" id="anio" min="2000" max="2100" class="form-control mr-3" style="width: 100px;">
+                        <button id="btnGenerarReporte" class="btn btn-info">Generar Reporte</button>
+                    </div>
+                </div>
+
+
+*/
