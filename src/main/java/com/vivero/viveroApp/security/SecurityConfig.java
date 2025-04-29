@@ -64,12 +64,7 @@ public class SecurityConfig {
         String adminPassword = dotenv.get("ADMIN_PASSWORD");
         String ventaUsername = dotenv.get("VENTA_USER");
         String ventaPassword = dotenv.get("VENTA_PASSWORD");
-
-        // Verificar que las variables del entorno existen
-        if (adminUsername == null || adminPassword == null || ventaUsername == null || ventaPassword == null) {
-            throw new IllegalStateException("Las variables de entorno necesarias no están configuradas correctamente.");
-        }
-
+        
         // Crear usuarios en memoria
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
         manager.createUser(User.withUsername(adminUsername)
