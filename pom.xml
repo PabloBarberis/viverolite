@@ -42,20 +42,15 @@
         </dependency>
 
         <dependency>
-    <groupId>com.itextpdf</groupId>
-    <artifactId>kernel</artifactId>
-    <version>9.1.0</version> <!-- Cambia a la versión más reciente disponible -->
-</dependency>
-<dependency>
-    <groupId>com.itextpdf</groupId>
-    <artifactId>layout</artifactId>
-    <version>9.1.0</version>
-</dependency>
-
-
-
-
-
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>9.1.0</version> <!-- Cambia a la versión más reciente disponible -->
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>9.1.0</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -96,21 +91,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        
-        <!-- https://mvnrepository.com/artifact/com.hynnet/pdfjet -->
-        <dependency>
-            <groupId>com.hynnet</groupId>
-            <artifactId>pdfjet</artifactId>
-            <version>5.75</version>
-        </dependency>
-        
+                
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
             <version>3.0.0</version>
         </dependency>
-
-
 
     </dependencies>
 
@@ -119,6 +105,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.5.0</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -130,4 +122,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
