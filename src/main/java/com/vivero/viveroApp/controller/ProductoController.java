@@ -5,11 +5,8 @@ import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.repository.ProductoRepository;
 import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProductoService;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,43 +44,28 @@ public class ProductoController {
     @GetMapping("/producto/pdf")
     public ResponseEntity<byte[]> generarPDFPorProducto(
             @RequestParam String tipo,
-            @RequestParam(required = false) String marca,
-            HttpServletResponse response) throws Exception {
-
-        List<Producto> productos = productoService.obtenerProductosPorMarca(tipo, marca);
-
-        if (productos == null || productos.isEmpty()) {
-            // Retorna un ResponseEntity con un mensaje de error y código 404 (No encontrado)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No se encontraron productos para el tipo y marca proporcionados.".getBytes());
-        }
-
-        String[] headers = new String[]{"ID", "Nombre", "Marca", "Precio", "Stock"};
-
-        Function<Object, String[]> rowMapper = obj -> {
-            Producto p = (Producto) obj;
-            return new String[]{
-                String.valueOf(p.getId()),
-                p.getNombre(),
-                p.getMarca(),
-                String.valueOf(p.getPrecio()),
-                String.valueOf(p.getStock())
-            };
-        };
-
+            @RequestParam(required = false) String marca) {
         try {
-            byte[] pdfBytes = pdfService.generarPDF(productos, headers, rowMapper);
+            // Obtener los productos filtrados por tipo y marca
+            List<Producto> productos = productoService.obtenerProductosPorMarca(tipo, marca);
 
-            // Retorna el ResponseEntity con el archivo PDF como respuesta
+            if (productos == null || productos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            // Generar el PDF utilizando el servicio
+            byte[] pdfBytes = pdfService.generarPDFPorProducto(productos);
+
+            // Configurar los headers para la respuesta HTTP
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", tipo.toLowerCase() + ".pdf");
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tipo.toLowerCase() + ".pdf")
-                    .contentType(MediaType.APPLICATION_PDF)
+                    .headers(headers)
                     .body(pdfBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            // En caso de error, retornar un mensaje de error con código 500 (Internal Server Error)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al generar el PDF.".getBytes());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

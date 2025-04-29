@@ -74,7 +74,7 @@ public class PerdidaInventarioController {
         try {
             perdidaInventarioService.deletePerdidaInventario(id);
             model.addAttribute("success", "Pérdida de inventario eliminada correctamente.");
-            return "redirect:/perdida_inventario"; 
+            return "redirect:/perdida_inventario";
         } catch (EntityNotFoundException e) {
             model.addAttribute("error", "Error: No se encontró la pérdida de inventario.");
             return "redirect:/perdida_inventario";

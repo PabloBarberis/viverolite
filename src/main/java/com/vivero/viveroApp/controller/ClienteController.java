@@ -5,7 +5,6 @@ import com.vivero.viveroApp.service.ClienteService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/clientes")
 public class ClienteController {
 
-    
     private final ClienteService clienteService;
 
     // Obtener todos los clientes activos para mostrar en la vista

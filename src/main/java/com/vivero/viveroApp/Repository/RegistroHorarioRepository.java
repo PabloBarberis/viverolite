@@ -20,12 +20,14 @@ public interface RegistroHorarioRepository extends JpaRepository<RegistroHorario
             nativeQuery = true)
     List<RegistroHorario> obtenerIngresosRegistrosHorariosPorMesYAnio(@Param("mes") String mes, @Param("anio") String anio);
 
-    @Query(value = "SELECT * FROM registro_horario "
+   @Query(value = "SELECT * FROM registro_horario "
             + "WHERE strftime('%Y', datetime(fecha / 1000, 'unixepoch')) = :anio "
-            + "AND strftime('%m', datetime(fecha / 1000, 'unixepoch')) = :mes"
-            + "AND usuario_id = :id ",
+            + "AND strftime('%m', datetime(fecha / 1000, 'unixepoch')) = :mes "
+            + "AND usuario_id = :id",
             nativeQuery = true)
-    List<RegistroHorario> obtenerIngresosRegistrosHorariosPorMesAnioYUsuario(@Param("mes") String mes,
-                                                                                                                                @Param("anio") String anio,
-                                                                                                                                @Param("id") Long id);
+List<RegistroHorario> obtenerIngresosRegistrosHorariosPorMesAnioYUsuario(@Param("mes") String mes,
+                                                                          @Param("anio") String anio,
+                                                                          @Param("id") Long id);
+
+
 }

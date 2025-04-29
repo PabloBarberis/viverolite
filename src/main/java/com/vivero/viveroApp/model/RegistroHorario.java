@@ -29,8 +29,6 @@ public class RegistroHorario {
     private String salidaTT;
     private double totalHoras;
     private boolean feriado;
-    private double precioHora; // Nuevo campo para el precio por hora
+    private double precioHora;
 
-    // Métodos adicionales si es necesario
 }
-

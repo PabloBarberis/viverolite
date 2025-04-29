@@ -25,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
@@ -34,15 +33,10 @@ import lombok.RequiredArgsConstructor;
 public class VentaService {
 
     private final ProductoRepository productoRepository;
-
     private final VentaRepository ventaRepository;
-
     private final ProductoService productoService;
-
     private final ClienteRepository clienteRepository;
-    
     private final IngresoEgresoService ingresoEgresoService;
-
     private final PdfService pdfService;
 
     public Optional<Venta> getVentaById(Long id) {
@@ -80,9 +74,8 @@ public class VentaService {
             ventaProducto.setCantidad(ventaProductoDTO.getCantidad());
             ventaProducto.setPrecioOriginal(producto.getPrecio());
             ventaProducto.setPorcentajeDescuento(ventaProductoDTO.getDescuentoProducto());
-
-            ventaProducto.setSubtotal(ventaProducto.getPrecioOriginal() * ventaProducto.getCantidad() * (1 - (ventaProducto.getPorcentajeDescuento() != null ? ventaProducto.getPorcentajeDescuento() : 0) / 100.0));
-
+            ventaProducto.setSubtotal(ventaProducto.getPrecioOriginal() * ventaProducto.getCantidad() * (1 - (ventaProducto.getPorcentajeDescuento() != null
+                    ? ventaProducto.getPorcentajeDescuento() : 0) / 100.0));
             nuevaVenta.agregarVentaProducto(ventaProducto);
         }
 
@@ -104,7 +97,7 @@ public class VentaService {
                 Cliente cliente = clienteOpt.orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado"));
                 ventaExistente.setCliente(cliente);
             } catch (Exception e) {
-                // Manejar la excepción si el cliente no se encuentra (opcional)
+
             }
         }
 
@@ -177,9 +170,8 @@ public class VentaService {
             pago.setMonto(pagoDTO.getMonto());
             pago.setVenta(ventaExistente);
             ventaExistente.getPagos().add(pago);
-
         }
-        System.out.println("TOTAL VENTA EXISTENTE ANTES DE CALCULARTOTAL SI NO ESTABA DEFINIDO " + ventaExistente.getTotal());
+
         // 7. Calcular total si no está definido
         if (ventaExistente.getTotal() != null || ventaExistente.getTotal() != 0) {
             ventaExistente.calcularTotal();
@@ -214,100 +206,51 @@ public class VentaService {
         return ventaRepository.findAll(pageable);
     }
 
-    // Método para validar el stock de los productos
-    private void validarStock(Venta venta) {
-        for (VentaProducto ventaProducto : venta.getProductos()) {
-            Producto producto = ventaProducto.getProducto();
-            if (ventaProducto.getCantidad() > producto.getStock()) {
-                throw new IllegalArgumentException("Cantidad solicitada excede el stock disponible para el producto: " + producto.getNombre());
-            }
-        }
-    }
-
     public List<Venta> obtenerVentasPorMesYAnio(int mes, int anio) {
         String mesStr = String.format("%02d", mes); // Convierte 3 → "03"
         String anioStr = String.valueOf(anio); // Convierte 2025 → "2025"
         return ventaRepository.obtenerVentasPorMesYAnio(mesStr, anioStr);
     }
 
-  public byte[] generarReportePdf(int mes, int anio) throws Exception {
-    // Traer ventas del mes y año
-    List<Venta> ventasDelMes = obtenerVentasPorMesYAnio(mes, anio);
+    public byte[] generarReportePdf(int mes, int anio) throws Exception {
+        List<Venta> ventasDelMes = obtenerVentasPorMesYAnio(mes, anio);
+        List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
 
-    // Traer ingresos y egresos del mes y año
-    List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
+        Map<String, Integer> productosVendidos = new HashMap<>();
+        Map<DayOfWeek, Integer> ventasPorDia = new HashMap<>();
+        Map<String, Integer> comprasPorCliente = new HashMap<>();
+        Map<String, Double> gastoPorCliente = new HashMap<>();
+        double totalVentas = 0.0;
+        double totalGastos = 0.0;
 
-    // Datos para el resumen
-    Map<String, Integer> productosVendidos = new HashMap<>();
-    Map<DayOfWeek, Integer> ventasPorDia = new HashMap<>();
-    Map<String, Integer> comprasPorCliente = new HashMap<>();
-    Map<String, Double> gastoPorCliente = new HashMap<>();
-    double totalVentas = 0.0;
-    double totalGastos = 0.0;
+        for (Venta venta : ventasDelMes) {
+            for (VentaProducto vp : venta.getProductos()) {
+                String nombreProducto = vp.getProducto().getNombre();
+                productosVendidos.put(nombreProducto, productosVendidos.getOrDefault(nombreProducto, 0) + vp.getCantidad());
+            }
 
-    // Procesar ventas
-    for (Venta venta : ventasDelMes) {
-        // Contar productos
-        for (VentaProducto vp : venta.getProductos()) {
-            String nombreProducto = vp.getProducto().getNombre();
-            productosVendidos.put(nombreProducto, productosVendidos.getOrDefault(nombreProducto, 0) + vp.getCantidad());
+            DayOfWeek dia = venta.getFecha().getDayOfWeek();
+            ventasPorDia.put(dia, ventasPorDia.getOrDefault(dia, 0) + 1);
+
+            if (venta.getCliente() != null) {
+                String nombreCliente = venta.getCliente().getNombre();
+                comprasPorCliente.put(nombreCliente, comprasPorCliente.getOrDefault(nombreCliente, 0) + 1);
+                gastoPorCliente.put(nombreCliente, gastoPorCliente.getOrDefault(nombreCliente, 0.0) + venta.getTotal());
+            }
+
+            totalVentas += venta.getTotal();
         }
 
-        // Contar ventas por día de la semana
-        DayOfWeek dia = venta.getFecha().getDayOfWeek();
-        ventasPorDia.put(dia, ventasPorDia.getOrDefault(dia, 0) + 1);
-
-        // Contar compras y gasto por cliente
-        if (venta.getCliente() != null) {
-            String nombreCliente = venta.getCliente().getNombre();
-            comprasPorCliente.put(nombreCliente, comprasPorCliente.getOrDefault(nombreCliente, 0) + 1);
-            gastoPorCliente.put(nombreCliente, gastoPorCliente.getOrDefault(nombreCliente, 0.0) + venta.getTotal());
+        for (IngresoEgreso movimiento : ingresosEgresos) {
+            if (Boolean.FALSE.equals(movimiento.getIngreso())) {
+                totalGastos += movimiento.getMonto();
+            }
         }
 
-        // Sumar total ventas
-        totalVentas += venta.getTotal();
+        double granTotal = totalVentas - totalGastos;
+
+        return pdfService.generarReporteVentas(productosVendidos, ventasPorDia, comprasPorCliente,
+                gastoPorCliente, totalVentas, totalGastos, granTotal, mes, anio);
     }
-
-    // Procesar ingresos/egresos para sumar los gastos
-    for (IngresoEgreso movimiento : ingresosEgresos) {
-        if (Boolean.FALSE.equals(movimiento.getIngreso())) {
-            totalGastos += movimiento.getMonto();
-        }
-    }
-
-    double granTotal = totalVentas - totalGastos;
-
-    // Preparar datos para el PDF
-    List<String[]> datos = new ArrayList<>();
-
-    datos.add(new String[]{"Producto", "Cantidad"});
-    productosVendidos.forEach((producto, cantidad) -> datos.add(new String[]{producto, cantidad.toString()}));
-
-    datos.add(new String[]{"", ""});
-    datos.add(new String[]{"Ventas por Día", "Cantidad"});
-    for (DayOfWeek dia : DayOfWeek.values()) {
-        Integer cantidad = ventasPorDia.getOrDefault(dia, 0);
-        datos.add(new String[]{dia.toString(), cantidad.toString()});
-    }
-
-    datos.add(new String[]{"", ""});
-    datos.add(new String[]{"Cliente", "Compras", "Gasto"});
-    for (String cliente : comprasPorCliente.keySet()) {
-        Integer compras = comprasPorCliente.get(cliente);
-        Double gasto = gastoPorCliente.get(cliente);
-        datos.add(new String[]{cliente, compras.toString(), String.format("%.2f", gasto)});
-    }
-
-    datos.add(new String[]{"", ""});
-    datos.add(new String[]{"Totales del Mes", ""});
-    datos.add(new String[]{"Total Ventas", String.format("%.2f", totalVentas)});
-    datos.add(new String[]{"Total Gastos", String.format("%.2f", totalGastos)});
-    datos.add(new String[]{"Total Final", String.format("%.2f", granTotal)});
-
-    // Generar el PDF
-    String mesAnio = String.format("%d-%d", mes, anio);
-    return pdfService.generarReporteVentas(datos, mesAnio);
-}
-
 
 }

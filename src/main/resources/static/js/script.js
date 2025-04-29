@@ -463,12 +463,12 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-/*
+
 document.getElementById('btnGenerarReporte').addEventListener('click', generarReporte);
 
     function generarReporte() {
         const mes = document.getElementById('mes').value;
-        const anio = document.getElementById('anio').value;
+        const anio = document.getElementById('año').value;
         const id = document.getElementById('usuario').value;
 
         if (!mes || !anio) {
@@ -500,16 +500,6 @@ document.getElementById('btnGenerarReporte').addEventListener('click', generarRe
     }
 
 
-<h3>Generar Reporte</h3>
-                <div class="row align-items-center" style="margin-left: 10px;">
-                    <div class="d-flex align-items-center">
-                        <label for="mes" class="mr-2">Mes</label>
-                        <input type="number" id="mes" min="1" max="12" class="form-control mr-3" style="width: 80px;" required>
-                        <label for="anio" class="mr-2">Año:</label>
-                        <input type="number" id="anio" min="2000" max="2100" class="form-control mr-3" style="width: 100px;">
-                        <button id="btnGenerarReporte" class="btn btn-info">Generar Reporte</button>
-                    </div>
-                </div>
 
 
-*/
+

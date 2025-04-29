@@ -6,12 +6,9 @@ import com.vivero.viveroApp.dto.VentaDTO;
 import com.vivero.viveroApp.model.Cliente;
 import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.Venta;
-import com.vivero.viveroApp.model.Producto;
-import com.vivero.viveroApp.model.VentaProducto;
 import com.vivero.viveroApp.model.enums.MetodoPago;
 import com.vivero.viveroApp.repository.VentaRepository;
 import com.vivero.viveroApp.service.VentaService;
-import com.vivero.viveroApp.service.ProductoService;
 import com.vivero.viveroApp.service.ClienteService;
 import com.vivero.viveroApp.service.IngresoEgresoService;
 import java.time.LocalDate;
@@ -41,7 +38,6 @@ public class VentaController {
 
     private final VentaService ventaService;
     private final VentaRepository ventaRepository;
-    private final ProductoService productoService;
     private final ClienteService clienteService;
     private final IngresoEgresoService ingresoEgresoService;
     private final IngresoEgresoRepository ingresoEgresoRepository;
@@ -145,7 +141,6 @@ public class VentaController {
                 response.put("error", "La fecha y la hora son obligatorias.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
-
             ventaService.updateVenta(ventaDTO);
 
             response.put("message", "Venta actualizada correctamente");
@@ -216,10 +211,9 @@ public class VentaController {
     @GetMapping("/ventas-gastos")
     @ResponseBody
     public Map<String, Object> obtenerVentasYGastos(@RequestParam int mes, @RequestParam int anio) {
+        
         Map<String, Object> response = new HashMap<>();
-
         List<Venta> ventas = ventaService.obtenerVentasPorMesYAnio(mes, anio);
-
         List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
 
         response.put("ventas", ventas);
@@ -253,8 +247,7 @@ public class VentaController {
         respuesta.put("ingresosEgresos", ingresosEgresos);
         respuesta.put("ventasMesAnterior", ventasMesAnterior);
         respuesta.put("ingresosEgresosMesAnterior", ingresosEgresosMesAnterior);
-
-        // Retornar la respuesta
+        
         return ResponseEntity.ok(respuesta);
     }
 

@@ -1,293 +1,223 @@
 package com.vivero.viveroApp.service;
 
-import com.pdfjet.*;
 import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.RegistroHorario;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Function;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.vivero.viveroApp.model.Producto;
+import java.io.ByteArrayOutputStream;
+import java.time.DayOfWeek;
+import java.util.Map;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.templateparser.raw.IRawHandler;
 
 @Service
 public class PdfService {
 
     /**
-     * Genera un PDF a partir de una lista de datos.
-     *
-     * @param items Lista de objetos que se incluirán en el PDF.
-     * @param headers Encabezados de la tabla del PDF.
-     * @param rowMapper Función que convierte cada objeto en una fila de datos.
+     * @param productos     *
      * @return Array de bytes del PDF generado.
      * @throws IOException En caso de error durante la creación del PDF.
      */
-    public byte[] generarPDF(List<?> items, String[] headers, Function<Object, String[]> rowMapper) throws IOException, Exception {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            PDF pdf = new PDF(outputStream);
-            Font font = new Font(pdf, CoreFont.HELVETICA);
-            Font dateFont = new Font(pdf, CoreFont.HELVETICA_BOLD);
+    public byte[] generarPDFPorProducto(List<Producto> productos) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
 
-            int itemsPerPage = 38; // Máximo por página
-            int totalItems = items.size();
-            int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+        try (Document document = new Document(pdf)) {
+            Table table = new Table(new float[]{1, 4, 2, 2, 2}); // 5 columnas
+            table.addHeaderCell(new Cell().add(new Paragraph("ID")));
+            table.addHeaderCell(new Cell().add(new Paragraph("Nombre")));
+            table.addHeaderCell(new Cell().add(new Paragraph("Marca")));
+            table.addHeaderCell(new Cell().add(new Paragraph("Precio")));
+            table.addHeaderCell(new Cell().add(new Paragraph("Stock")));
 
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd/MM/yyyy", new Locale("es", "ES"));
-            String currentDate = sdf.format(new Date());
-
-            for (int pageIndex = 0; pageIndex < totalPages; pageIndex++) {
-                Page page = new Page(pdf, Letter.PORTRAIT);
-
-                // Fecha
-                TextLine dateText = new TextLine(dateFont, currentDate);
-                dateText.setPosition(50, 30);
-                dateText.drawOn(page);
-
-                // Tabla
-                Table table = new Table();
-                List<List<Cell>> tableData = new java.util.ArrayList<>();
-
-                // Encabezados
-                List<Cell> headerRow = new java.util.ArrayList<>();
-                for (String header : headers) {
-                    Cell cell = new Cell(font, header);
-                    cell.setTextAlignment(Align.CENTER);
-                    cell.setBgColor(Color.lightgray);
-                    headerRow.add(cell);
-                }
-                tableData.add(headerRow);
-
-                // Rango de esta página
-                int start = pageIndex * itemsPerPage;
-                int end = Math.min(start + itemsPerPage, totalItems);
-
-                // Filas de datos
-                for (int i = start; i < end; i++) {
-                    String[] row = rowMapper.apply(items.get(i));
-                    List<Cell> dataRow = new java.util.ArrayList<>();
-                    for (String cellValue : row) {
-                        Cell cell = new Cell(font, cellValue);
-                        cell.setTextAlignment(Align.LEFT);
-                        dataRow.add(cell);
-                    }
-                    tableData.add(dataRow);
-                }
-
-                table.setData(tableData);
-                table.setCellBordersWidth(0.5f);
-
-                table.setColumnWidth(0, 40f);   // ID
-                table.setColumnWidth(1, 240f);  // Nombre
-                table.setColumnWidth(2, 130f);  // Marca
-                table.setColumnWidth(3, 80f);   // Precio
-                table.setColumnWidth(4, 40f);   // Stock
-
-                table.setPosition(50, 50);
-                table.drawOn(page);
+            for (Producto producto : productos) {
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(producto.getId()))));
+                table.addCell(new Cell().add(new Paragraph(producto.getNombre())));
+                table.addCell(new Cell().add(new Paragraph(producto.getMarca())));
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(producto.getPrecio()))));
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(producto.getStock()))));
             }
-
-            pdf.flush();
-            return outputStream.toByteArray();
+            document.add(table);
         }
+        return baos.toByteArray();
     }
 
-    public byte[] generarReporteVentas(List<String[]> datos, String mesAnio) throws IOException, Exception {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            PDF pdf = new PDF(outputStream);
-            Font font = new Font(pdf, CoreFont.HELVETICA);
-            Font boldFont = new Font(pdf, CoreFont.HELVETICA_BOLD);
-            Font dateFont = new Font(pdf, CoreFont.HELVETICA_BOLD);
+    public byte[] generarReporteVentas(
+            Map<String, Integer> productosVendidos,
+            Map<DayOfWeek, Integer> ventasPorDia,
+            Map<String, Integer> comprasPorCliente,
+            Map<String, Double> gastoPorCliente,
+            double totalVentas,
+            double totalGastos,
+            double granTotal,
+            int mes,
+            int anio) throws Exception {
 
-            int itemsPerPage = 25; // Máximo por página
-            int totalItems = datos.size();
-            int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd/MM/yyyy", new Locale("es", "ES"));
-            String currentDate = sdf.format(new Date());
+        try (Document document = new Document(pdf)) {
+            document.add(new Paragraph("Reporte de Ventas - " + mes + "/" + anio).setFontSize(18));
+            
+            document.add(new Paragraph("Productos vendidos del mes"));
+            Table productosTable = new Table(new float[]{3, 1});
+            productosTable.addHeaderCell(new Cell().add(new Paragraph("Producto")));
+            productosTable.addHeaderCell(new Cell().add(new Paragraph("Cantidad")));
+            productosVendidos.forEach((producto, cantidad) -> {
+                productosTable.addCell(new Cell().add(new Paragraph(producto)));
+                productosTable.addCell(new Cell().add(new Paragraph(cantidad.toString())));
+            });
+            document.add(productosTable);
 
-            for (int pageIndex = 0; pageIndex < totalPages; pageIndex++) {
-                Page page = new Page(pdf, Letter.PORTRAIT);
+            document.add(new Paragraph("\n"));
 
-                // Fecha actual arriba
-                TextLine dateText = new TextLine(dateFont, currentDate);
-                dateText.setPosition(50, 30);
-                dateText.drawOn(page);
-
-                // Título principal
-                TextLine title = new TextLine(font, "Reporte de Ventas del Mes (" + mesAnio + ")");
-                title.setPosition(50, 60);
-                title.drawOn(page);
-
-                // Tabla
-                Table table = new Table();
-                List<List<Cell>> tableData = new ArrayList<>();
-
-                // Rango de esta página
-                int start = pageIndex * itemsPerPage;
-                int end = Math.min(start + itemsPerPage, totalItems);
-
-                for (int i = start; i < end; i++) {
-                    String[] row = datos.get(i);
-
-                    // Si detecta filas especiales vacías o con un solo valor, pone títulos/subtítulos
-                    if (row.length == 1) {
-                        List<Cell> titleRow = new ArrayList<>();
-                        Cell cell = new Cell(boldFont, row[0]);
-                        cell.setTextAlignment(Align.LEFT);
-                        cell.setTopPadding(10f);
-                        titleRow.add(cell);
-                        tableData.add(titleRow);
-                    } else {
-                        List<Cell> dataRow = new ArrayList<>();
-                        for (String cellValue : row) {
-                            Cell cell = new Cell(font, cellValue);
-                            cell.setTextAlignment(Align.LEFT);
-                            dataRow.add(cell);
-                        }
-                        tableData.add(dataRow);
-                    }
+            document.add(new Paragraph("Ventas por día de la semana"));
+            Table ventasDiaTable = new Table(new float[]{2, 1});
+            ventasDiaTable.addHeaderCell(new Cell().add(new Paragraph("Día")));
+            ventasDiaTable.addHeaderCell(new Cell().add(new Paragraph("Cantidad")));
+            for (DayOfWeek dia : DayOfWeek.values()) {
+                String diaEsp = "";
+                switch (dia) {
+                    case MONDAY ->
+                        diaEsp = "Lunes";
+                    case TUESDAY ->
+                        diaEsp = "Martes";
+                    case WEDNESDAY ->
+                        diaEsp = "Miércoles";
+                    case THURSDAY ->
+                        diaEsp = "Jueves";
+                    case FRIDAY ->
+                        diaEsp = "Viernes";
+                    case SATURDAY ->
+                        diaEsp = "Sábado";
+                    case SUNDAY ->
+                        diaEsp = "Domingo";
+                    default ->
+                        throw new AssertionError();
                 }
 
-                table.setData(tableData);
-                table.setCellBordersWidth(0.5f);
-                table.setColumnWidth(0, 240f);   // Primera columna
-                table.setColumnWidth(1, 100f);   // Segunda columna
-                if (tableData.stream().anyMatch(row -> row.size() > 2)) {
-                    table.setColumnWidth(2, 100f);   // Tercera columna para sección Clientes
-                }
-                table.setPosition(50, 100);
-                table.drawOn(page);
+                ventasDiaTable.addCell(new Cell().add(new Paragraph(diaEsp)));
+                ventasDiaTable.addCell(new Cell().add(new Paragraph(ventasPorDia.getOrDefault(dia, 0).toString())));
             }
+            document.add(ventasDiaTable);
 
-            pdf.flush();
-            return outputStream.toByteArray();
+            document.add(new Paragraph("\n"));
+
+            document.add(new Paragraph("Cantidad de compras por cliente"));
+            Table clienteTable = new Table(new float[]{3, 1, 2});
+            clienteTable.addHeaderCell(new Cell().add(new Paragraph("Cliente")));
+            clienteTable.addHeaderCell(new Cell().add(new Paragraph("Cant. Compras")));
+            clienteTable.addHeaderCell(new Cell().add(new Paragraph("Gasto ($)")));
+            comprasPorCliente.forEach((cliente, compras) -> {
+                Double gasto = gastoPorCliente.getOrDefault(cliente, 0.0);
+                clienteTable.addCell(new Cell().add(new Paragraph(cliente)));
+                clienteTable.addCell(new Cell().add(new Paragraph(compras.toString())));
+                clienteTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", gasto))));
+            });
+            document.add(clienteTable);
+
+            document.add(new Paragraph("\n"));
+
+            document.add(new Paragraph("Totales"));
+            Table totalesTable = new Table(new float[]{3, 2});
+            totalesTable.addCell(new Cell().add(new Paragraph("Total Ventas ($):")));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalVentas))));
+            totalesTable.addCell(new Cell().add(new Paragraph("Total Gastos ($):")));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalGastos))));
+            totalesTable.addCell(new Cell().add(new Paragraph("Total Final($):")));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", granTotal))));
+            document.add(totalesTable);
         }
+        return baos.toByteArray();
     }
 
-    public byte[] generarReporteSimple(List<RegistroHorario> registros, List<IngresoEgreso> adelantos) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PDF pdf = new PDF(baos, Compliance.PDF_A_1B);
+    public byte[] generarPdf(List<RegistroHorario> registros, List<IngresoEgreso> ingresosEgresos) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        
+        try (Document document = new Document(pdf)) {
+            document.add(new Paragraph("Registro de horas"));
+            Table tableRegistros = new Table(new float[]{1, 1, 1, 1, 1, 1, 1, 1, 1});
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("Fecha")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("E. TM")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("S. TM")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("E. TT")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("S. TT")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("Horas")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("Feriado")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("Precio hora")));
+            tableRegistros.addHeaderCell(new Cell().add(new Paragraph("Total ($)")));
 
-            Font font = new Font(pdf, CoreFont.HELVETICA);
-            Font fontBold = new Font(pdf, CoreFont.HELVETICA_BOLD);
-
-            Page page = new Page(pdf, Letter.PORTRAIT);
-
-            float x = 50;
-            float y = 50;
-
-            TextLine title = new TextLine(fontBold, "Reporte Simple");
-            title.setFontSize(16);
-            title.setLocation(x, y);
-            title.drawOn(page);
-            y += 30;
-
-            TextLine header1 = new TextLine(fontBold, "Tabla: RegistroHorario");
-            header1.setLocation(x, y);
-            header1.drawOn(page);
-            y += 20;
+            double sumaTotalFinal = 0;
 
             for (RegistroHorario registro : registros) {
-                TextLine line = new TextLine(font, "ID: " + registro.getId() + " | Nombre: " + registro.getUsuario().getNombre());
-                line.setLocation(x, y);
-                line.drawOn(page);
-                y += 15;
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(registro.getFecha()))));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTM())));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTM())));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTT())));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTT())));
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(registro.getTotalHoras()))));
+
+                String feriado = registro.isFeriado() ? "Sí" : "No";
+                tableRegistros.addCell(new Cell().add(new Paragraph(feriado)));
+
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(registro.getPrecioHora()))));
+
+                double multiplicador = registro.isFeriado() ? 2 : 1;
+                double total = registro.getTotalHoras() * registro.getPrecioHora() * multiplicador;
+                sumaTotalFinal += total;
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(total))));
             }
 
-            y += 30;
+            document.add(tableRegistros);
 
-            TextLine header2 = new TextLine(fontBold, "Tabla: IngresoEgreso");
-            header2.setLocation(x, y);
-            header2.drawOn(page);
-            y += 20;
+            Table footerRegistros = new Table(1);
+            footerRegistros.addCell(new Cell().add(new Paragraph("Total Final ($): " + sumaTotalFinal)));
+            document.add(footerRegistros);
 
-            for (IngresoEgreso ingreso : adelantos) {
-                TextLine line = new TextLine(font, "ID: " + ingreso.getId() + " | Cantidad: " + ingreso.getMonto());
-                line.setLocation(x, y);
-                line.drawOn(page);
-                y += 15;
+            document.add(new Paragraph("\n"));
+            
+            document.add(new Paragraph("Adelantos"));
+            Table tableIngresos = new Table(new float[]{1, 4, 2, 2});
+            tableIngresos.addHeaderCell(new Cell().add(new Paragraph("ID")));
+            tableIngresos.addHeaderCell(new Cell().add(new Paragraph("Descripción")));
+            tableIngresos.addHeaderCell(new Cell().add(new Paragraph("Método de Pago")));
+            tableIngresos.addHeaderCell(new Cell().add(new Paragraph("Monto ($)")));
+
+            double sumaMontos = 0;
+
+            for (IngresoEgreso ingreso : ingresosEgresos) {
+                tableIngresos.addCell(new Cell().add(new Paragraph(String.valueOf(ingreso.getId()))));
+                tableIngresos.addCell(new Cell().add(new Paragraph(ingreso.getDescripcion())));
+                tableIngresos.addCell(new Cell().add(new Paragraph(ingreso.getMetodoPago().name())));
+                tableIngresos.addCell(new Cell().add(new Paragraph(String.valueOf(ingreso.getMonto()))));
+                sumaMontos += ingreso.getMonto();
             }
+            document.add(tableIngresos);
 
-            pdf.close(); // Aquí cerramos el PDF correctamente
-            return baos.toByteArray(); // Retornamos el byte array del PDF
+            Table footerIngresos = new Table(1);
+            footerIngresos.addCell(new Cell().add(new Paragraph("Total Adelantos ($): " + sumaMontos)));
+            document.add(footerIngresos);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            document.add(new Paragraph("\n"));
+
+            document.add(new Paragraph("Totales"));
+            Table resumenFinal = new Table(1);
+            resumenFinal.addCell(new Cell().add(new Paragraph("Total Horas Trabajadas ($): " + sumaTotalFinal)));
+            resumenFinal.addCell(new Cell().add(new Paragraph("Total Adelantos ($): " + sumaMontos)));
+            double totalFinal = sumaTotalFinal - sumaMontos;
+            resumenFinal.addCell(new Cell().add(new Paragraph("Total Final ($): " + totalFinal)));
+            document.add(resumenFinal);
         }
+        return baos.toByteArray();
     }
-
-    //////////////////////////////////
-    public byte[] generarReporteHorarios(List<String[]> datos, String mesAnio) throws IOException, Exception {
-    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-        PDF pdf = new PDF(outputStream);
-        Font font = new Font(pdf, CoreFont.HELVETICA);
-        Font boldFont = new Font(pdf, CoreFont.HELVETICA_BOLD);
-        Font dateFont = new Font(pdf, CoreFont.HELVETICA_BOLD);
-
-        int itemsPerPage = 25;
-        int totalItems = datos.size();
-        int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd/MM/yyyy", new Locale("es", "ES"));
-        String currentDate = sdf.format(new Date());
-
-        for (int pageIndex = 0; pageIndex < totalPages; pageIndex++) {
-            Page page = new Page(pdf, Letter.PORTRAIT);
-
-            // Fecha actual arriba
-            TextLine dateText = new TextLine(dateFont, currentDate);
-            dateText.setPosition(50, 30);
-            dateText.drawOn(page);
-
-            // Título principal
-            TextLine title = new TextLine(font, "Reporte de Registros de Horarios (" + mesAnio + ")");
-            title.setPosition(50, 60);
-            title.drawOn(page);
-
-            // Tabla
-            Table table = new Table();
-            List<List<Cell>> tableData = new ArrayList<>();
-
-            // Rango de esta página
-            int start = pageIndex * itemsPerPage;
-            int end = Math.min(start + itemsPerPage, totalItems);
-
-            for (int i = start; i < end; i++) {
-                String[] row = datos.get(i);
-
-                List<Cell> dataRow = new ArrayList<>();
-
-                for (String cellValue : row) {
-                    Cell cell;
-                    if (row.length == 1 || (row[0].isEmpty() && row[1].isEmpty())) {
-                        // Para separadores o títulos grandes
-                        cell = new Cell(boldFont, cellValue);
-                    } else {
-                        cell = new Cell(font, cellValue);
-                    }
-                    cell.setTextAlignment(Align.LEFT);
-                    dataRow.add(cell);
-                }
-                tableData.add(dataRow);
-            }
-
-            table.setData(tableData, Table.DATA_HAS_1_HEADER_ROWS);
-            table.setPosition(50, 100);
-            table.drawOn(page);
-        }
-
-        pdf.close();
-        return outputStream.toByteArray();
-    }
-}
-
-
 }

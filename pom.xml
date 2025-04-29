@@ -41,6 +41,19 @@
             <artifactId>hibernate-community-dialects</artifactId>
         </dependency>
 
+        <dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>kernel</artifactId>
+    <version>9.1.0</version> <!-- Cambia a la versión más reciente disponible -->
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>layout</artifactId>
+    <version>9.1.0</version>
+</dependency>
+
+
+
 
 
         <dependency>

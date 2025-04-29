@@ -52,8 +52,7 @@
                 <p id="saludo" class = "saludo-texto" th:text="'Hola, ' + ${usuarioSeleccionado != null ? usuarioSeleccionado.nombre : 'Seleccione un usuario'} + '!'"></p>
                 <h2 id="nombreUsuario" th:if="${usuarioSeleccionado != null}" th:text="'Tabla de ' + ${usuarioSeleccionado.nombre}"></h2>
 
-
-                
+        
 
                 <!-- Selección de Mes y Año -->
                 <div class="form-row">
@@ -91,7 +90,8 @@
                 </div>
 
 
-                <button class="btn btn-primary" onclick="cargarDias()">Cargar Días</button>
+                <button class="btn btn-secondary" onclick="cargarDias()">Cargar Días</button>
+                <button id="btnGenerarReporte" class="btn btn-info">Generar Reporte</button>
 
                 <div class="separator"></div>
 
