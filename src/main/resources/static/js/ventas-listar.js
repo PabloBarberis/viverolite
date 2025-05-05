@@ -40,7 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("totalEfectivo").textContent = `$ ${(data.totalEfectivo || 0).toFixed(2)}`;
                 document.getElementById("totalCredito").textContent = `$ ${(data.totalCredito || 0).toFixed(2)}`;
                 document.getElementById("totalDebito").textContent = `$ ${(data.totalDebito || 0).toFixed(2)}`;
-                document.getElementById("totalMercadoPago").textContent = `$ ${(data.totalMercadoPago || 0).toFixed(2)}`;
+                document.getElementById("totalMercadoPagoVale").textContent = `$ ${(data.totalMercadoPagoVale || 0).toFixed(2)}`;
+                document.getElementById("totalMercadoPagoSacha").textContent = `$ ${(data.totalMercadoPagoSacha || 0).toFixed(2)}`;
                 document.getElementById("totalGeneral").textContent = `$ ${(data.totalGeneral || 0).toFixed(2)}`;
             })
             .catch(error => console.error("Error al obtener las ventas:", error));

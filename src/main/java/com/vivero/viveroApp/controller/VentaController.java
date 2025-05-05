@@ -175,8 +175,9 @@ public class VentaController {
         LocalDateTime finFecha = fechaLocal.atTime(23, 59, 59);
 
         List<Venta> ventas = ventaRepository.findByFechaBetween(inicioFecha, finFecha);
-
+        
         Map<MetodoPago, Double> totales = new HashMap<>();
+        
         for (MetodoPago metodo : MetodoPago.values()) {
             double total = ventas.stream()
                     .flatMap(v -> v.getPagos().stream())
@@ -189,15 +190,13 @@ public class VentaController {
                     .sum();
             totales.put(metodo, total);
         }
-
-        double totalMercadoPago = totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0)
-                + totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0);
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("totalEfectivo", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0));
         response.put("totalCredito", totales.getOrDefault(MetodoPago.CREDITO, 0.0));
         response.put("totalDebito", totales.getOrDefault(MetodoPago.DEBITO, 0.0));
-        response.put("totalMercadoPago", totalMercadoPago);
+        response.put("totalMercadoPagoVale", totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0));
+        response.put("totalMercadoPagoSacha", totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0));
         response.put("totalGeneral", ventas.stream().mapToDouble(Venta::getTotal).sum());
 
         return ResponseEntity.ok(response);

@@ -9,6 +9,7 @@ import com.vivero.viveroApp.model.PagoVenta;
 import com.vivero.viveroApp.model.Venta;
 import com.vivero.viveroApp.model.VentaProducto;
 import com.vivero.viveroApp.model.Producto;
+import com.vivero.viveroApp.model.enums.MetodoPago;
 import com.vivero.viveroApp.repository.ClienteRepository;
 import com.vivero.viveroApp.repository.ProductoRepository;
 import com.vivero.viveroApp.repository.VentaRepository;
@@ -248,9 +249,26 @@ public class VentaService {
         }
 
         double granTotal = totalVentas - totalGastos;
+        
+        
+        
+        Map<MetodoPago, Double> totales = new HashMap<>();
+        
+        for (MetodoPago metodo : MetodoPago.values()) {
+            double total = ventasDelMes.stream()
+                    .flatMap(v -> v.getPagos().stream())
+                    .filter(p -> p.getMetodo() == metodo)
+                    .mapToDouble(pago -> {
 
+                        boolean aplicaRecargo = metodo == MetodoPago.CREDITO;
+                        return aplicaRecargo ? pago.getMonto() * 1.15 : pago.getMonto();
+                    })
+                    .sum();
+            totales.put(metodo, total);
+        }
+        
         return pdfService.generarReporteVentas(productosVendidos, ventasPorDia, comprasPorCliente,
-                gastoPorCliente, totalVentas, totalGastos, granTotal, mes, anio);
+                gastoPorCliente, totalVentas, totalGastos, granTotal, mes, anio, totales);
     }
 
 }
