@@ -33,7 +33,7 @@ public class SecurityConfig {
                                 "/insecticida/listar", "/semilla/listar",
                                 "/proveedores/**", "/clientes/**", "/dashboard",
                                 "/plantas/pdf", "/maceta/pdf", "/tierra/pdf", "/grow/pdf", "/decoracion/pdf",
-                                "/producto/**", "/api/**")
+                                "/producto/**", "/api/**", "/ingresoegreso", "/ingresoegreso/guardar", "/usuarios/listar")
                         .hasAnyRole("ADMIN", "VENTA")
                         .anyRequest().hasRole("ADMIN") // El resto solo para admin
                 )
