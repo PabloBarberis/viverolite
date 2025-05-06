@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/login",
                                 "/images/**", "/fotos/**", "/resources/**", "/plantasvivero/**").permitAll()
-                        .requestMatchers("/ventas/**", "/ventas/listar", "/ventas/listar/**",
+                        .requestMatchers("/ventas/**", "/ventas/listar*", "/ventas/listar/**",
                                 "/plantas/listar", "/tierra/listar", "/grow/listar",
                                 "/decoracion/listar", "/maceta/listar", "/fertilizante/listar", "/herramienta/listar",
                                 "/insecticida/listar", "/semilla/listar",

@@ -84,12 +84,16 @@ public class VentaController {
     @GetMapping("/listar")
     public String listarVentas(Model model, @PageableDefault(size = 10, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<Venta> ventas = ventaService.getAllVentas(pageable);
-
+        String sortFormatted = pageable.getSort()
+                .stream()
+                .map(order -> order.getProperty() + "," + order.getDirection()) // Ajustar formato
+                .findFirst()
+                .orElse("fecha,DESC"); // Valor por defecto
         model.addAttribute("ventas", ventas);
         model.addAttribute("currentPage", ventas.getNumber());
         model.addAttribute("totalPages", ventas.getTotalPages());
         model.addAttribute("size", pageable.getPageSize());
-        model.addAttribute("sort", pageable.getSort());
+        model.addAttribute("sort", sortFormatted);
 
         return "ventas/listar-venta";
     }
@@ -175,9 +179,9 @@ public class VentaController {
         LocalDateTime finFecha = fechaLocal.atTime(23, 59, 59);
 
         List<Venta> ventas = ventaRepository.findByFechaBetween(inicioFecha, finFecha);
-        
+
         Map<MetodoPago, Double> totales = new HashMap<>();
-        
+
         for (MetodoPago metodo : MetodoPago.values()) {
             double total = ventas.stream()
                     .flatMap(v -> v.getPagos().stream())
@@ -190,7 +194,7 @@ public class VentaController {
                     .sum();
             totales.put(metodo, total);
         }
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("totalEfectivo", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0));
         response.put("totalCredito", totales.getOrDefault(MetodoPago.CREDITO, 0.0));
@@ -210,7 +214,7 @@ public class VentaController {
     @GetMapping("/ventas-gastos")
     @ResponseBody
     public Map<String, Object> obtenerVentasYGastos(@RequestParam int mes, @RequestParam int anio) {
-        
+
         Map<String, Object> response = new HashMap<>();
         List<Venta> ventas = ventaService.obtenerVentasPorMesYAnio(mes, anio);
         List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
@@ -246,7 +250,7 @@ public class VentaController {
         respuesta.put("ingresosEgresos", ingresosEgresos);
         respuesta.put("ventasMesAnterior", ventasMesAnterior);
         respuesta.put("ingresosEgresosMesAnterior", ingresosEgresosMesAnterior);
-        
+
         return ResponseEntity.ok(respuesta);
     }
 
