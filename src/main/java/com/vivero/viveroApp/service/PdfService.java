@@ -130,37 +130,20 @@ public class PdfService {
             document.add(new Paragraph("\n"));
 
             document.add(new Paragraph("Totales"));
-            Table totalesTable = new Table(new float[]{3, 2});
-//            totalesTable.addCell(new Cell().add(new Paragraph("Total Ventas ($):")));
-//            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalVentas))));
-//            totalesTable.addCell(new Cell().add(new Paragraph("Total Gastos ($):")));
-//            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalGastos))));
-//            totalesTable.addCell(new Cell().add(new Paragraph("Total Final($):")));
-//            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", granTotal))));
-//            
-//
-//            
-            
-            
-            
+            Table totalesTable = new Table(new float[]{3, 2});           
+                        
             totalesTable.addCell(new Cell().add(new Paragraph("Efectivo ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.EFECTIVO,0.0)))));
-
             totalesTable.addCell(new Cell().add(new Paragraph("Débito ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.DEBITO,0.0)))));
-
             totalesTable.addCell(new Cell().add(new Paragraph("Crédito ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.CREDITO,0.0)))));
-
             totalesTable.addCell(new Cell().add(new Paragraph("MP Vale ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL,0.0)))));
-
             totalesTable.addCell(new Cell().add(new Paragraph("MP Sacha ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC,0.0)))));
-
             totalesTable.addCell(new Cell().add(new Paragraph("Total Ventas ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalVentas))));
-
             totalesTable.addCell(new Cell().add(new Paragraph("Total Gastos ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalGastos))));
 

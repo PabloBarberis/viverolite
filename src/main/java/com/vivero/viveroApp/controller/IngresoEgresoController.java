@@ -9,7 +9,6 @@ import com.vivero.viveroApp.repository.UsuarioRepository;
 import com.vivero.viveroApp.service.IngresoEgresoService;
 import com.vivero.viveroApp.service.RegistroHorarioService;
 import com.vivero.viveroApp.service.UsuarioService;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Controller;

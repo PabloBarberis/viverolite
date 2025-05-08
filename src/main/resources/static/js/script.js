@@ -489,7 +489,7 @@ document.getElementById('btnGenerarReporte').addEventListener('click', generarRe
                 const url = window.URL.createObjectURL(new Blob([blob]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', `reporte_ventas_${anio}_${mes}.pdf`);
+                link.setAttribute('download', `reporte_Horas_${anio}_${mes}.pdf`);
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
