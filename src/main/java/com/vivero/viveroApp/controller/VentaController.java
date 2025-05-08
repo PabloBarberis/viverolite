@@ -236,14 +236,14 @@ public class VentaController {
         LocalDateTime hasta = fin.atTime(23, 59, 59);
 
         List<Venta> ventas = ventaRepository.findByFechaBetween(desde, hasta);
-        List<IngresoEgreso> ingresosEgresos = ingresoEgresoRepository.findByFechaBetween(desde, hasta);
+        List<IngresoEgreso> ingresosEgresos = ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(desde, hasta);
 
         LocalDate mesAnterior = inicio.minusMonths(1);
         LocalDateTime desdeMesAnterior = mesAnterior.withDayOfMonth(1).atStartOfDay();
         LocalDateTime hastaMesAnterior = mesAnterior.withDayOfMonth(mesAnterior.lengthOfMonth()).atTime(23, 59, 59);
 
         List<Venta> ventasMesAnterior = ventaRepository.findByFechaBetween(desdeMesAnterior, hastaMesAnterior);
-        List<IngresoEgreso> ingresosEgresosMesAnterior = ingresoEgresoRepository.findByFechaBetween(desdeMesAnterior, hastaMesAnterior);
+        List<IngresoEgreso> ingresosEgresosMesAnterior = ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(desdeMesAnterior, hastaMesAnterior);
 
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("ventas", ventas);

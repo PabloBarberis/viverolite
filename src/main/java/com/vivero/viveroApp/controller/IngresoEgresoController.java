@@ -5,10 +5,13 @@ import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.RegistroHorario;
 import com.vivero.viveroApp.model.Usuario;
 import com.vivero.viveroApp.model.enums.MetodoPago;
+import com.vivero.viveroApp.repository.UsuarioRepository;
 import com.vivero.viveroApp.service.IngresoEgresoService;
 import com.vivero.viveroApp.service.RegistroHorarioService;
 import com.vivero.viveroApp.service.UsuarioService;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
@@ -18,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 @Controller
@@ -32,6 +37,8 @@ public class IngresoEgresoController {
     private final UsuarioService usuarioService;
 
     private final RegistroHorarioService registroHorarioService;
+
+    private final UsuarioRepository usuarioRepository;
     // Cargar la vista de ingresos/egresos
 
     @GetMapping
@@ -125,7 +132,7 @@ public class IngresoEgresoController {
         // Obtener total ganado
         List<RegistroHorario> registros = registroHorarioService.getRegistrosByUsuarioAndMesAndAño(usuario, mes, año);
         double totalGanado = registros.stream()
-                .mapToDouble(registro -> registro.getTotalHoras() * registro.getPrecioHora())
+                .mapToDouble(registro -> registro.getTotalHoras() * registro.getPrecioHora() * (registro.isFeriado() ? 2 : 1))
                 .sum();
 
         // Obtener total de adelantos
@@ -160,6 +167,77 @@ public class IngresoEgresoController {
         } catch (Exception e) {
         }
 
+    }
+
+    @GetMapping("/editar/{id}")
+    public ResponseEntity<?> obtenerIngresoEgreso(@PathVariable Long id) {
+        Optional<IngresoEgreso> optional = ingresoEgresoRepository.findById(id);
+        if (optional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        IngresoEgreso ie = optional.get();
+
+        // DTO para mandar solo los datos necesarios al frontend
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("id", ie.getId());
+        dto.put("fecha", ie.getFecha().toString());
+        dto.put("descripcion", ie.getDescripcion());
+        dto.put("metodoPago", ie.getMetodoPago().name());
+        dto.put("ingreso", ie.getIngreso());
+        dto.put("monto", ie.getMonto());
+        dto.put("usuarioId", ie.getUsuario().getId());
+        dto.put("adelanto", ie.isAdelanto());
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/actualizar")
+    public ResponseEntity<Map<String, Object>> actualizarIngresoEgreso(@RequestBody Map<String, Object> datos) {
+        Map<String, Object> respuesta = new HashMap<>();
+
+        try {
+            Long id = Long.valueOf(datos.get("id").toString());
+            Optional<IngresoEgreso> optional = ingresoEgresoRepository.findById(id);
+
+            if (optional.isEmpty()) {
+                respuesta.put("success", false);
+                respuesta.put("message", "Ingreso/Egreso no encontrado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(respuesta);
+            }
+
+            IngresoEgreso ie = optional.get();
+
+            // Actualizar campos
+            ie.setDescripcion(datos.get("descripcion").toString());
+            ie.setMetodoPago(MetodoPago.valueOf(datos.get("metodoPago").toString()));
+            ie.setIngreso(Boolean.parseBoolean(datos.get("ingreso").toString()));
+            ie.setMonto(Double.parseDouble(datos.get("monto").toString()));
+            ie.setAdelanto(Boolean.parseBoolean(datos.get("adelanto").toString()));
+
+            // Convertir fecha correctamente desde String tipo "yyyy-MM-ddTHH:mm:ss"
+            String fechaStr = datos.get("fecha").toString();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+            LocalDateTime fechaLocal = LocalDateTime.parse(fechaStr, formatter);
+            ie.setFecha(fechaLocal);
+
+            // Cargar usuario
+            Long usuarioId = Long.valueOf(datos.get("usuarioId").toString());
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            ie.setUsuario(usuario);
+
+            ingresoEgresoRepository.save(ie);
+
+            respuesta.put("success", true);
+            respuesta.put("message", "Ingreso/Egreso actualizado correctamente");
+            return ResponseEntity.ok(respuesta);
+
+        } catch (Exception e) {
+            respuesta.put("success", false);
+            respuesta.put("message", "Error al actualizar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
+        }
     }
 
 }

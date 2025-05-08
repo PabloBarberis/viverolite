@@ -57,7 +57,7 @@ public class IngresoEgresoService {
         LocalDateTime finMes = inicioMes.withDayOfMonth(inicioMes.toLocalDate().lengthOfMonth())
                 .withHour(23).withMinute(59).withSecond(59);
 
-        return ingresoEgresoRepository.findByFechaBetween(inicioMes, finMes);
+        return ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(inicioMes, finMes);
     }
 
     public List<IngresoEgreso> obtenerIngresosEgresosPorMesYAnio(int mes, int anio) {

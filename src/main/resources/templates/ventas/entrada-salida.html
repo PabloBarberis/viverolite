@@ -35,6 +35,17 @@
             </div>
         </div>
 
+        <div class="container-fluid mt-4">
+            <div class="row align-items-center justify-content-between">
+                <h1>Ingresos y Gastos</h1>
+                <!-- Agregar un ID al botón para poder seleccionar el elemento desde JavaScript -->
+                <button type="button" id="btnCrearIngreso" class="btn btn-primary">
+                    NUEVO Ingreso/Egreso
+                </button>
+            </div>
+        </div>
+        
+
         <!-- Botón para abrir el modal -->
 
         <div class="separator"></div>
@@ -268,6 +279,8 @@
                             <button type="button" class="btn btn-danger" data-dismiss="modal"
                                 aria-label="Cerrar">Cerrar</button>
                         </div>
+                        <input type="hidden" id="idIngresoEgreso" name="id">
+
                     </form>
                 </div>
             </div>

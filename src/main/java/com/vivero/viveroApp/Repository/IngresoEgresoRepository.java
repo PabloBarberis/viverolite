@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IngresoEgresoRepository extends JpaRepository<IngresoEgreso, Long> {
 
-    public List<IngresoEgreso> findByFechaBetween(LocalDateTime inicioMes, LocalDateTime finMes);
+    public List<IngresoEgreso> findByFechaBetweenOrderByFechaAsc(LocalDateTime inicioMes, LocalDateTime finMes);
 
     @Query(value = "SELECT * FROM ingreso_egreso "
             + "WHERE strftime('%Y', datetime(fecha / 1000, 'unixepoch')) = :anio "

@@ -4,6 +4,9 @@ let ventas = [];
 let ingresosEgresos = [];
 let ventasMesAnterior = [];
 let ingresosEgresosMesAnterior = [];
+let editando = false; // Variable global que indica si estamos en modo edición
+const btnCrearIngreso = document.getElementById("btnCrearIngreso");
+
 const usuarioSelect = document.getElementById("usuario");
 const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
 const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -21,6 +24,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("mes").addEventListener("change", obtenerDatos);
     document.getElementById("anio").addEventListener("change", obtenerDatos);
+
+    
+
+    // Asignamos la función abrirModalCrear al evento click del botón
+    if (btnCrearIngreso) {
+        btnCrearIngreso.addEventListener("click", abrirModalCrear);
+    }
+
+
 });
 
 // Cargar usuarios
@@ -37,7 +49,6 @@ fetch(`${BASE_URL}/usuarios/listar`, {
 
 formIngresoEgreso.addEventListener("submit", function (event) {
     event.preventDefault();
-
 
     // Captura los valores del formulario
     const ingreso = document.getElementById("tipoMovimiento").value === "true";
@@ -59,9 +70,7 @@ formIngresoEgreso.addEventListener("submit", function (event) {
         fecha = `${fecha}T${hora}:${minutos}:${segundos}`;
     }
 
-
-
-    // Construir el objeto con los datos del formulario
+    // Si estamos editando, incluir el ID en el objeto
     const movimiento = {
         ingreso,
         metodoPago,
@@ -69,10 +78,18 @@ formIngresoEgreso.addEventListener("submit", function (event) {
         fecha, // Ahora en formato LocalDateTime
         descripcion,
         monto,
-        adelanto: esAdelanto // Añadir si es un adelanto
+        adelanto: esAdelanto, // Añadir si es un adelanto
+        id: editando ? formIngresoEgreso.dataset.editandoId : undefined // Si estamos editando, agregar el id
     };
 
-    fetch(`${BASE_URL}/ingresoegreso/guardar`, {
+    // Definir la URL y el método
+    const url = editando
+  ? `${BASE_URL}/ingresoegreso/actualizar`   // ✅ correcto
+  : `${BASE_URL}/ingresoegreso/guardar`;
+
+    
+
+    fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -92,6 +109,14 @@ formIngresoEgreso.addEventListener("submit", function (event) {
         })
         .catch(error => console.error("Error al guardar movimiento:", error));
 });
+
+
+// Escuchar el evento de cierre del modal
+document.getElementById("modalIngresoEgreso").addEventListener('hidden.bs.modal', function () {
+    editando = false;  // Restablecer el estado de edición
+    formIngresoEgreso.reset();  // Limpiar el formulario
+});
+
 
 // Llenar los meses
 function cargarMeses() {
@@ -173,22 +198,16 @@ function obtenerDatos() {
 
 
             // Asegúrate de que estos arrays ya estén filtrados con los datos correctos
-actualizarTablaMovimientos("movEfectivo", movimientosEfectivo);
-actualizarTablaMovimientos("movTarjeta", movimientosTarjeta);
-actualizarTablaMovimientos("movMpSacha", movimientosMpSacha);
-actualizarTablaMovimientos("movMpVale", movimientosMpVale);
+            actualizarTablaMovimientos("movEfectivo", movimientosEfectivo);
+            actualizarTablaMovimientos("movTarjeta", movimientosTarjeta);
+            actualizarTablaMovimientos("movMpSacha", movimientosMpSacha);
+            actualizarTablaMovimientos("movMpVale", movimientosMpVale);
 
             actualizarTablaEfectivo(efectivoMesActual);
-          //  actualizarTablaMovimientos(movimientosEfectivo);
-
             actualizarTablaTarjeta(tarjetaMesActual);
-            //actualizarTablaMovimientosTarjeta(movimientosTarjeta);
-
             actualizarTablaMpSacha(mpSachaMesActual);
-            //actualizarTablaMovimientosMpSacha(movimientosMpSacha);
-
             actualizarTablaMpVale(mpValeMesActual);
-            //actualizarTablaMovimientosMpVale(movimientosMpVale);
+
         })
         .catch(err => console.error("Error al obtener datos:", err));
 }
@@ -366,12 +385,22 @@ function actualizarTablaMovimientos(tablaId, movimientos) {
         // Crear botón eliminar
         const botonEliminar = document.createElement("button");
         botonEliminar.textContent = "Eliminar";
-        botonEliminar.className = "btn btn-danger btn-sm"; // Bootstrap estilo
+        botonEliminar.className = "btn btn-danger btn-sm me-2";
         botonEliminar.onclick = function () {
             eliminarMovimiento(movimiento.id);
         };
 
+        // Crear botón editar
+        const botonEditar = document.createElement("button");
+        botonEditar.textContent = "Editar";
+        botonEditar.className = "btn btn-primary btn-sm";
+        botonEditar.onclick = function () {
+            abrirModalEditar(movimiento.id);
+        };
+
+        // Agregar ambos botones a la columna
         tdAcciones.appendChild(botonEliminar);
+        tdAcciones.appendChild(botonEditar);
 
         tr.appendChild(tdFecha);
         tr.appendChild(tdDescripcion);
@@ -379,10 +408,12 @@ function actualizarTablaMovimientos(tablaId, movimientos) {
         tr.appendChild(tdTipo);
         tr.appendChild(tdMetodo);
         tr.appendChild(tdMonto);
-        tr.appendChild(tdAcciones); // Agregar botón a la fila
+        tr.appendChild(tdAcciones);
+
         movEfectivoBody.appendChild(tr);
     });
 }
+
 
 
 
@@ -533,35 +564,6 @@ function actualizarTablaTarjeta(data) {
     });
 }
 
-function actualizarTablaMovimientosTarjeta(movimientos) {
-    const movTarjetaBody = document.getElementById("movTarjeta");
-    movTarjetaBody.innerHTML = ""; // Limpiar la tabla
-
-    movimientos.forEach((movimiento) => {
-        const tr = document.createElement("tr");
-        const tdFecha = document.createElement("td");
-        const tdDescripcion = document.createElement("td");
-        const tdUsuario = document.createElement("td");
-        const tdTipo = document.createElement("td");
-        const tdMetodo = document.createElement("td");
-        const tdMonto = document.createElement("td");
-
-        tdFecha.textContent = movimiento.fecha;
-        tdDescripcion.textContent = movimiento.descripcion;
-        tdUsuario.textContent = movimiento.usuario;
-        tdTipo.textContent = movimiento.tipo;
-        tdMetodo.textContent = movimiento.metodo;
-        tdMonto.textContent = movimiento.monto;
-
-        tr.appendChild(tdFecha);
-        tr.appendChild(tdDescripcion);
-        tr.appendChild(tdUsuario);
-        tr.appendChild(tdTipo);
-        tr.appendChild(tdMetodo);
-        tr.appendChild(tdMonto);
-        movTarjetaBody.appendChild(tr);
-    });
-}
 
 function procesarDatosMercadoPagoSacha(
     ventas,
@@ -701,32 +703,7 @@ function actualizarTablaMpSacha(data) {
     });
 }
 
-function actualizarTablaMovimientosMpSacha(movimientos) {
-    const movMpSachaBody = document.getElementById("movMpSacha");
-    movMpSachaBody.innerHTML = ""; // Limpiar la tabla
 
-    movimientos.forEach((movimiento) => {
-        const tr = document.createElement("tr");
-        const tdFecha = document.createElement("td");
-        const tdDescripcion = document.createElement("td");
-        const tdUsuario = document.createElement("td");
-        const tdTipo = document.createElement("td");
-        const tdMonto = document.createElement("td");
-
-        tdFecha.textContent = movimiento.fecha;
-        tdDescripcion.textContent = movimiento.descripcion;
-        tdUsuario.textContent = movimiento.usuario;
-        tdTipo.textContent = movimiento.tipo;
-        tdMonto.textContent = movimiento.monto;
-
-        tr.appendChild(tdFecha);
-        tr.appendChild(tdDescripcion);
-        tr.appendChild(tdUsuario);
-        tr.appendChild(tdTipo);
-        tr.appendChild(tdMonto);
-        movMpSachaBody.appendChild(tr);
-    });
-}
 
 function procesarDatosMercadoPagoVale(
     ventas,
@@ -734,7 +711,7 @@ function procesarDatosMercadoPagoVale(
     ventasMesAnterior,
     ingresosEgresosMesAnterior
 ) {
-    
+
     const mpValeMesActual = {
         saldoAnterior: 0,
         periodos: {
@@ -830,7 +807,7 @@ function procesarDatosMercadoPagoVale(
     mpValeMesActual.totalDelMes = totalDelMesMpVale;
     mpValeMesActual.totalConSaldoAnterior =
         mpValeMesActual.saldoAnterior + totalDelMesMpVale;
-   
+
     return { mpValeMesActual, movimientosMpVale };
 }
 
@@ -864,35 +841,8 @@ function actualizarTablaMpVale(data) {
     });
 }
 
-function actualizarTablaMovimientosMpVale(movimientos) {
-    const movMpValeBody = document.getElementById("movMpVale");
-    movMpValeBody.innerHTML = ""; // Limpiar la tabla
-
-    movimientos.forEach((movimiento) => {
-        const tr = document.createElement("tr");
-        const tdFecha = document.createElement("td");
-        const tdDescripcion = document.createElement("td");
-        const tdUsuario = document.createElement("td");
-        const tdTipo = document.createElement("td");
-        const tdMonto = document.createElement("td");
-
-        tdFecha.textContent = movimiento.fecha;
-        tdDescripcion.textContent = movimiento.descripcion;
-        tdUsuario.textContent = movimiento.usuario;
-        tdTipo.textContent = movimiento.tipo;
-        tdMonto.textContent = movimiento.monto;
-
-        tr.appendChild(tdFecha);
-        tr.appendChild(tdDescripcion);
-        tr.appendChild(tdUsuario);
-        tr.appendChild(tdTipo);
-        tr.appendChild(tdMonto);
-        movMpValeBody.appendChild(tr);
-    });
-}
-
 //Funcion para eliminar Ingreso Egreso
-function eliminarMovimiento(id) {   
+function eliminarMovimiento(id) {
     if (confirm("¿Estás seguro de que deseas eliminar este movimiento?")) {
         fetch('/ingresoegreso/eliminar', {
             method: 'POST',
@@ -917,3 +867,57 @@ function eliminarMovimiento(id) {
             });
     }
 }
+
+function abrirModalEditar(id) {
+    fetch(`${BASE_URL}/ingresoegreso/editar/${id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Error al obtener el ingreso/egreso.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Setear los valores en el modal
+            document.getElementById("tipoMovimiento").value = data.ingreso;
+            document.getElementById("metodoPago").value = data.metodoPago;
+            document.getElementById("usuario").value = data.usuarioId;
+            document.getElementById("esAdelanto").checked = data.adelanto;
+            document.getElementById("fecha").value = data.fecha.substring(0, 10); // solo yyyy-MM-dd
+            document.getElementById("descripcion").value = data.descripcion;
+            document.getElementById("monto").value = data.monto;
+
+            // Guardamos el ID para luego hacer la actualización
+            document.getElementById("formIngresoEgreso").dataset.editandoId = id;
+
+            // Setear la variable global en true para indicar que estamos editando
+            editando = true;
+
+            // Cambiar el título del modal
+            document.getElementById("modalIngresoEgresoLabel").textContent = "Editar Ingreso/Egreso";
+
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById("modalIngresoEgreso"));
+            modal.show();
+        })
+        .catch(error => {
+            console.error("Error al abrir modal de edición:", error);
+            alert("Hubo un error al cargar los datos del movimiento.");
+        });
+}
+
+
+
+function abrirModalCrear() {
+    // Limpiar cualquier campo del formulario si había datos de una edición anterior
+    formIngresoEgreso.reset();
+    document.getElementById("modalIngresoEgresoLabel").textContent = "Nuevo Ingreso/Egreso";
+
+    // Setear la variable global en false para indicar que estamos creando
+    editando = false;
+
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById("modalIngresoEgreso"));
+    modal.show();
+}
+
+
