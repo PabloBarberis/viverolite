@@ -393,7 +393,8 @@ function actualizarTablaMovimientos(tablaId, movimientos) {
         // Crear botón editar
         const botonEditar = document.createElement("button");
         botonEditar.textContent = "Editar";
-        botonEditar.className = "btn btn-primary btn-sm";
+        botonEditar.className = "btn btn-primary btn-sm mt-2 ml-2";
+
         botonEditar.onclick = function () {
             abrirModalEditar(movimiento.id);
         };
