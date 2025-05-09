@@ -248,10 +248,8 @@ public class VentaService {
             }
         }
 
-        double granTotal = totalVentas - totalGastos;
-        
-        
-        
+        double granTotal = totalVentas - totalGastos;       
+                
         Map<MetodoPago, Double> totales = new HashMap<>();
         
         for (MetodoPago metodo : MetodoPago.values()) {
@@ -259,7 +257,6 @@ public class VentaService {
                     .flatMap(v -> v.getPagos().stream())
                     .filter(p -> p.getMetodo() == metodo)
                     .mapToDouble(pago -> {
-
                         boolean aplicaRecargo = metodo == MetodoPago.CREDITO;
                         return aplicaRecargo ? pago.getMonto() * 1.15 : pago.getMonto();
                     })

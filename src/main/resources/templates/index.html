@@ -1,53 +1,240 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bienvenidos a Vive Verde</title>
-        
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="/css/styles.css">
-        <style>
-            /* Efecto gradual para el logo */
-            .logo {
-                filter: grayscale(100%); /* Empieza en escala de grises */
-                opacity: 0; /* Logo invisible al principio */
-                transition: filter 2s ease, opacity 2s ease; /* Transición gradual de color y opacidad */
-            }
 
-            .logo-visible {
-                filter: grayscale(0%); /* Pasa a color */
-                opacity: 1; /* Logo completamente visible */
-            }
-        </style>
-    </head>
-    <body>
-               <!-- Contenedor principal para navbar y botones -->
-        <div class="navbar-container d-flex justify-content-between align-items-center">
-            <!-- Navbar se carga con th:replace -->
-            <div th:replace="~{navbar :: navbar}"></div>
-          
-        </div>
-        <!-- Contenido principal -->
-        <div class="container mt-4 text-center">
-            <!-- Logo de la página -->
-            <div>
-                <img id="logo" src="/images/logo.png" class="img-fluid logo" alt="Logo Vive Verde">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vivero Vive Verde</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/indexstyle.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Vive Verde</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#galeria">Galería</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">Ingresar</a></li>
+                </ul>
             </div>
         </div>
+    </nav>
+
+    <div class="highlight">
+        <h1>Vivero Vive Verde</h1>
+        <p>🌱 Todo lo que buscas para tu jardín y decorar tu hogar</p>
+    </div>
 
 
-        <script>
-            // Cuando la página termine de cargar, aplicar el efecto de visibilidad al logo
-            window.onload = function () {
-                document.getElementById("logo").classList.add("logo-visible");
-            };
-        </script>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="section">
+                    <h2><strong>Contamos con:</strong></h2>
+                    <ul style="list-style: none; padding: 0; text-align: left; font-size: 1.2em;">
+                        <li><strong>🌿 Plantas de interior</strong></li>
+                        <li><strong>🌾 Plantas de exterior</strong></li>
+                        <li><strong>🏺 Macetas</strong></li>
+                        <li><strong>🧴 Insecticidas y fertilizantes</strong></li>
+                        <li><strong>🛠️ Herramientas de jardinería</strong></li>
+                        <li><strong>🏡 Decoración</strong></li>
+                        <li><strong>🌱 Productos Grow</strong></li>
+                        <li><strong>✨ ¡Y muchos más!</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="section">
+                    <p><strong>💲 Aceptamos todos los medios de pago.</strong></p>
+                    <p><strong>🚚 Realizamos envíos a domicilio.</strong></p>
+                    <p><strong>🤑 Consultá por nuestras ofertas!</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
-    </body>
+    <div class="section">
+        <div class="carousel-container">
+            <div id="plantasCarousel" class="carousel slide" data-bs-ride="carousel">
+                <h2>Algunas de nuestras plantas</h2>
+                <div class="carousel-inner">
+                    <div class="carousel-item active"><img src="/images/vivero/plantas/Aliso1.webp" alt="Aliso"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Croton hibrido.webp"
+                            alt="Croton híbrido"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Croton Mandarina (1).webp"
+                            alt="Croton Mandarina"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Ficus Gomero Ruby.webp"
+                            alt="Ficus Gomero Ruby"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Gerbera1.webp" alt="Gerbera 1"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Gerbera2.webp" alt="Gerbera 2"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0002.webp"
+                            alt="IMG 0002"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0014.webp"
+                            alt="IMG 0014"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0016.webp"
+                            alt="IMG 0016"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0017.webp"
+                            alt="IMG 0017"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0018.webp"
+                            alt="IMG 0018"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0020.webp"
+                            alt="IMG 0020"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0022.webp"
+                            alt="IMG 0022"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0023.webp"
+                            alt="IMG 0023"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0024.webp"
+                            alt="IMG 0024"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0027.webp"
+                            alt="IMG 0027"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0028.webp"
+                            alt="IMG 0028"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0030.webp"
+                            alt="IMG 0030"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0031.webp"
+                            alt="IMG 0031"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250203-WA0037.webp"
+                            alt="IMG 0037"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/IMG-20250422-WA0022.webp"
+                            alt="IMG 0022"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Penacho.webp" alt="Penacho"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Pensamiento1.webp" alt="Pensamiento">
+                    </div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Peru editada 2.webp" alt="Peru 2"></div>
+                    <div class="carousel-item"><img src="/images/vivero/plantas/Peru editada 3.webp" alt="Peru 3"></div>
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#plantasCarousel"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#plantasCarousel"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+
+            <div id="localCarousel" class="carousel slide" data-bs-ride="carousel">
+                <h2>Nuestro Local</h2>
+                <div class="carousel-inner">
+                    <div class="carousel-item active"><img src="/images/vivero/local/foto1.webp" alt="Local 1"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto2.webp" alt="Local 2"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto3.webp" alt="Local 3"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto4.webp" alt="Local 4"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto5.webp" alt="Local 5"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto6.webp" alt="Local 6"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto7.webp" alt="Local 7"></div>
+                    <div class="carousel-item"><img src="/images/vivero/local/foto8.webp" alt="Local 8"></div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#localCarousel"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#localCarousel"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="section">
+        <div class="carousel-container">
+            <div id="decoCarousel" class="carousel slide" data-bs-ride="carousel">
+                <h2>Decoración</h2>
+                <div class="carousel-inner">
+                    <div class="carousel-item active"><img src="/images/vivero/decoracion/Escultura 1 editada.webp"
+                            alt="Escultura 1"></div>
+                    <div class="carousel-item"><img src="/images/vivero/decoracion/Escultura 2 editada.webp"
+                            alt="Escultura 2"></div>
+                    <div class="carousel-item"><img src="/images/vivero/decoracion/Escultura 3 editada.webp"
+                            alt="Escultura 3"></div>
+                    <div class="carousel-item"><img src="/images/vivero/decoracion/Escultura 4 editada.webp"
+                            alt="Escultura 4"></div>
+                </div>
+
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#decoCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#decoCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+
+
+            <div id="otrosCarousel" class="carousel slide" data-bs-ride="carousel">
+                <h2>Otros</h2>
+                <div class="carousel-inner">
+                    <div class="carousel-item active"><img src="/images/vivero/otros/bioproyect Cropped.webp"
+                            alt="Bioproyect"></div>
+                    <div class="carousel-item"><img src="/images/vivero/otros/cultivate Cropped.webp" alt="Cultivate">
+                    </div>
+                    <div class="carousel-item"><img src="/images/vivero/otros/fertifox Cropped.webp" alt="Fertifox">
+                    </div>
+                    <div class="carousel-item"><img src="/images/vivero/otros/glacoxan Cropped.webp" alt="Glacoxan">
+                    </div>
+                    <div class="carousel-item"><img src="/images/vivero/otros/mamboreta Cropped.webp" alt="Mamboreta">
+                    </div>
+                    <div class="carousel-item"><img src="/images/vivero/otros/topcrop Cropped.webp" alt="Topcrop"></div>
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#otrosCarousel"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#otrosCarousel"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contacto" class="section contact-info" style="font-size: 1.2em;">
+        <h2><strong>Vení a visitarnos!</strong></h2>
+        <p><strong>Dirección:</strong> Necochea 2986 (Esq. Amenabar), Rosario</p>
+        <p><strong>Horarios:</strong> Lunes a Viernes 9:30–13:00 y 16:00–19:30 / Sábados y Domingos 10:00–13:00</p>
+
+        <h2><strong>O contactanos</strong></h2>
+        <div>
+            <a href="https://wa.me/3412283166" target="_blank">
+                <img src="/images/whatsapp-logo.png" alt="WhatsApp">
+                <span>341-2283166</span>
+            </a>
+            <a href="https://www.instagram.com/viveroviveverde/" target="_blank">
+                <img src="/images/instagram-logo.png" alt="Instagram">
+                <span>@viveroviveverde</span>
+            </a>
+            <a href="https://www.facebook.com/vive.verde.45" target="_blank">
+                <img src="/images/facebook-logo.png" alt="Facebook">
+                <span>Vive Verde Grow Green</span>
+            </a>
+        </div>
+
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3347.108271127871!2d-60.63335342529883!3d-32.97454517358168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b7ab3ab1d1edc3%3A0xd1886ad773728f3f!2sVivero%20Vive%20Verde!5e0!3m2!1ses-419!2sar!4v1736796284701!5m2!1ses-419!2sar"
+            width="100%" height="350" style="border-radius: 10px;">
+        </iframe>
+    </div>
+
+    <footer>
+        &copy; 2025 Vivero Vive Verde - Todos los derechos reservados.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
 </html>
