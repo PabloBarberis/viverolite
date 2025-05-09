@@ -9,5 +9,4 @@ log/
 .mvn/
 
 *.webp
-*
-
+*.zip
