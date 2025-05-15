@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${producto == null} ? 'Crear Producto' : 'Editar Producto'"></title>
+
+    <!-- Bootstrap y tu CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div>
+
+    <div class="container mt-4">
+
+
+        <h1 class="mb-4" th:text="${producto == null} ? 'Crear Producto' : 'Editar Producto'"></h1>
+        
+        <div class="border rounded p-2">
+
+            <form id="productoForm" method="post">
+                <!-- CSRF Token oculto -->
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+
+                <!-- Nombre y Tipo -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label fw-bold">Nombre del Producto</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tipo" class="form-label fw-bold">Tipo de Producto</label>
+                        <select id="tipo" name="tipo" class="form-control" required>
+
+
+                            <option value="">Seleccione...</option>
+                            <option value="Decoracion" th:selected="${dtype == 'Decoracion'}">Decoración</option>
+                            <option value="Fertilizante" th:selected="${dtype == 'Fertilizante'}">Fertilizante</option>
+                            <option value="Grow" th:selected="${dtype == 'Grow'}">Grow</option>
+                            <option value="Herramienta" th:selected="${dtype == 'Herramienta'}">Herramienta</option>
+                            <option value="Insecticida" th:selected="${dtype == 'Insecticida'}">Insecticida</option>
+                            <option value="Maceta" th:selected="${dtype == 'Maceta'}">Maceta</option>
+                            <option value="Planta" th:selected="${dtype == 'Planta'}">Planta</option>
+                            <option value="Semilla" th:selected="${dtype == 'Semilla'}">Semilla</option>
+                            <option value="Tierra" th:selected="${dtype == 'Tierra'}">Tierra</option>
+                        </select>
+                        
+                    </div>
+                    
+                </div>
+
+                <div class="row mb-3">
+                    <!-- Columna 1: Marca -->
+                    <div class="col-md-4 mb-5">
+                        <label class="fw-bold">Marca</label>
+                        <div class="border p-3 rounded h-100">
+
+                            <div class="form-check mt-2">
+                                <input type="radio" id="marcaNuevaRadio" name="marcaOption" value="nueva"
+                                    class="form-check-input">
+                                <label for="marcaNuevaRadio" class="form-check-label">Ingresar nueva</label>
+                                <input type="text" id="marcaNueva" name="marcaNueva" class="form-control mt-1"
+                                    placeholder="Ingrese nueva marca" style="display:none;" />
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" id="marcaExistenteRadio" name="marcaOption" value="existente"
+                                    class="form-check-input" checked>
+                                <label for="marcaExistenteRadio" class="form-check-label">Seleccionar existente</label>
+                                <select id="marcaExistente" name="marca" class="form-control mt-1"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: Precio y Stock en la misma fila -->
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="precio" class="fw-bold">Precio</label>
+                                <input type="number" id="precio" name="precio" class="form-control" step="0.01"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="stock" class="fw-bold">Stock</label>
+                                <input type="number" id="stock" name="stock" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Columna 3: Descripción a la derecha -->
+                    <div class="col-md-4 mb-5">
+                        <label for="descripcion" class="fw-bold">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control h-100" rows="4"></textarea>
+                    </div>
+                </div>
+
+
+
+
+                <div class="row">
+                    <div class="col-md-6 col-12">
+                        <div class="form-group">
+                            <label class="fw-bold">Proveedores</label>
+                            <div id="proveedoresContainer" class="border rounded p-3">
+                                <div th:each="prov : ${proveedores}" class="form-check">
+                                    <input class="form-check-input" type="checkbox" th:id="'prov-' + ${prov.id}"
+                                        th:name="proveedoresIds" th:value="${prov.id}" />
+                                    <label class="form-check-label" th:for="'prov-' + ${prov.id}"
+                                        th:text="${prov.nombre}"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Botones -->
+                <div>
+                    <button type="submit" class="btn btn-success px-4">Aceptar</button>
+                    <a th:href="@{/productos/listar}" class="btn btn-danger px-4">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JS personalizado -->
+    <script src="/js/crear-editar-producto.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+</body>
+
+</html>

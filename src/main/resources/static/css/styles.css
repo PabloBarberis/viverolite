@@ -453,3 +453,10 @@ input[type="number"] {
     display: none;
 }
 
+
+#tablaProductosCompras td {
+    color: black !important;  /* 🔥 Texto negro en todas las celdas */
+    background-color: white !important; /* 🔥 Fondo blanco en cada celda */
+    padding: 8px;  /* 🔹 Espacio uniforme para mejor visibilidad */
+    border: 1px solid #ddd; /* 🔹 Bordes sutiles para separación */
+}

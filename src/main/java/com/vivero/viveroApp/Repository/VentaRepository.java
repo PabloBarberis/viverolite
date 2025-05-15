@@ -19,4 +19,9 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
             nativeQuery = true)
     List<Venta> obtenerVentasPorMesYAnio(@Param("mes") String mes, @Param("anio") String anio);
 
+    @Query(value = "SELECT * FROM venta "
+            + "WHERE fecha BETWEEN :fechaInicio AND :fechaFin", nativeQuery = true)
+    List<Venta> obtenerVentasEntreFechas(@Param("fechaInicio") Long fechaInicio,
+            @Param("fechaFin") Long fechaFin);
+
 }

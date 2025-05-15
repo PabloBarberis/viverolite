@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ import lombok.NoArgsConstructor;
 @DiscriminatorColumn(name = "dtype")
 @Data
 @NoArgsConstructor
-public abstract class Producto {
+public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,11 +34,18 @@ public abstract class Producto {
     private Integer stock;
     private String descripcion;
     private boolean activo;
+    private String tipo;
         
-    @ManyToMany(mappedBy = "productos")
+@ManyToMany
+@JoinTable(
+    name = "proveedor_producto", // ✅ nombre correcto de la tabla intermedia
+    joinColumns = @JoinColumn(name = "producto_id"),
+    inverseJoinColumns = @JoinColumn(name = "proveedor_id")
+
+)
     private List<Proveedor> proveedores = new ArrayList<>(); // Relación Many-to-Many con proveedores
 
-        public Producto(Long id, String nombre, String marca, Double precio, Integer stock, String descripcion, boolean activo, List<Proveedor> proveedores) {
+        public Producto(Long id, String nombre, String marca, Double precio, Integer stock, String descripcion, boolean activo, String tipo, List<Proveedor> proveedores) {
         this.id = id;
         this.nombre = nombre;
         this.marca = marca;
@@ -44,6 +53,7 @@ public abstract class Producto {
         this.stock = stock;
         this.descripcion = descripcion;
         this.activo = activo;
+        this.tipo = tipo;
         this.proveedores = (proveedores != null) ? proveedores : new ArrayList<>(); // Inicializa con lista vacía si proveedores es null
     }
     

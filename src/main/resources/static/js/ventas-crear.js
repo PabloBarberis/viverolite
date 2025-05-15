@@ -144,10 +144,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
         recalcularTotalFinal();
-        
+
         // Calcular el monto pendiente
-        const totalFinal = totalParaMetodoPago;
-        
+        const totalFinal = Math.round(totalParaMetodoPago / 100) * 100;
+
         let totalAsignado = 0;
 
         document.querySelectorAll(".montoPago").forEach(input => {
@@ -232,17 +232,23 @@ document.addEventListener("DOMContentLoaded", function () {
         recalcularTotalFinal();
     }
 
-    //calcula el precio de la suma de todos los productos
-    function recalcularTotalFinal() {        
-        let total = 0;
+    function recalcularTotalFinal() {
+        let totalReal = 0;
         $('#productosSeleccionados .precio-final').each(function () {
-            total += parseFloat($(this).text());
+            totalReal += parseFloat($(this).text());
         });
-        $('#totalProductosFinal').text(total.toFixed(2));
-        totalProductos = total;
-        totalParaMetodoPago=totalProductos;        
-        ;
+
+        let totalRedondeado = Math.round(totalReal / 100) * 100;
+
+        // Mostrar el total redondeado y el real en el footer
+        $('#totalProductosFinal').text(`${totalRedondeado} (Costo real: ${totalReal.toFixed(2)})`);
+
+
+        // Guardar los valores para otras funciones
+        totalProductos = totalRedondeado;
+        totalParaMetodoPago = totalProductos;
     }
+
 
     //recalcula todo al agregar un nuevo producto
     $('#productosSeleccionados').on('input', '.cantidad, .descuento', function () {
@@ -270,8 +276,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const montoFinal = metodo === 'CREDITO' ? monto * 1.15 : monto;
         fila.find('.montoTotalPago').text(montoFinal.toFixed(2));
 
-        // Si usás un total general de métodos de pago, podés llamarlo acá
-        // recalcularTotalPagos();
     }
 
     //MOSTRAR TOTALES AL PIE DE PAGINA
@@ -288,16 +292,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         document.getElementById("totalMetodoPago").value = totalPago.toFixed(2);
 
-        // Descuento global
-        //const descuento = parseFloat(document.getElementById("descuentoGlobal").value) || 0;
-        //const totalConDescuento = totalPago * (1 - (descuento / 100));
-        //document.getElementById("totalFinal").value = totalConDescuento.toFixed(2);
     }
 
     actualizarTotalesGlobales();
-
-    // Al cambiar el descuento global
-    //document.getElementById("descuentoGlobal").addEventListener("input", actualizarTotalesGlobales);
 
     // Delegación para detectar cambios en montos
     document.getElementById("metodosPagoSeleccionados").addEventListener("input", function (e) {
@@ -379,7 +376,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         const ventaDTO = { clienteId, productos, pagos };
-        
+
         // 🚨 Validar que haya al menos un método de pago
         if (pagos.length === 0) {
             alert("Debes agregar al menos un método de pago.");
@@ -411,7 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify(ventaDTO)
         })
             .then(response => response.json()) // 🔥 Ahora la respuesta sí será JSON
-            .then(data => {                
+            .then(data => {
                 alert(data.message);
                 window.location.href = "/ventas/listar";
             })

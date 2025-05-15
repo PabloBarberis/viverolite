@@ -25,12 +25,11 @@ public interface IngresoEgresoRepository extends JpaRepository<IngresoEgreso, Lo
             + "AND usuario_id = :usuarioId "
             + "AND adelanto = :esAdelanto",
             nativeQuery = true)
-List<IngresoEgreso> obtenerIngresosEgresosPorUsuarioMesAnioYAdelanto(
-    @Param("mes") String mes,
-    @Param("anio") String anio,
-    @Param("usuarioId") Long usuarioId,
-    @Param("esAdelanto") boolean esAdelanto
-);
-
+    List<IngresoEgreso> obtenerIngresosEgresosPorUsuarioMesAnioYAdelanto(
+            @Param("mes") String mes,
+            @Param("anio") String anio,
+            @Param("usuarioId") Long usuarioId,
+            @Param("esAdelanto") boolean esAdelanto
+    );
 
 }

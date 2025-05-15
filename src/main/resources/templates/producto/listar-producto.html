@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Lista de Productos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">    
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div>
+
+    <div class="container-fluid mt-5" style="max-width: 90%;">
+
+        <div class="row d-flex justify-content-between align-items-center">
+            <h1 id="tituloProductos">Productos <span id="tipoSeleccionado" class="text-warning"></span></h1>
+
+            <div>
+                <a th:href="@{/productos/crear}" class="btn btn-nueva-venta">Nuevo Producto</a>
+            </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <!-- Filtros -->
+        <div class="row mb-3 align-items-end">
+            <div class="col-12 col-md-3">
+                <label for="tipoFiltro" class="form-label">Tipo</label>
+                <select id="tipoFiltro" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Decoracion">Decoración</option>
+                    <option value="Fertilizante">Fertilizante</option>
+                    <option value="Grow">Grow</option>
+                    <option value="Herramienta">Herramienta</option>
+                    <option value="Insecticida">Insecticida</option>
+                    <option value="Maceta">Maceta</option>
+                    <option value="Planta">Planta</option>
+                    <option value="Semilla">Semilla</option>
+                    <option value="Tierra">Tierra</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="nombreFiltro" class="form-label">Nombre</label>
+                <input type="text" id="nombreFiltro" class="form-control" placeholder="Buscar por nombre">
+            </div>
+
+            <div class="col-md-3">
+                <label for="marcaFiltro" class="form-label">Marca</label>
+                <input type="text" id="marcaFiltro" class="form-control" placeholder="Buscar por marca">
+            </div>
+
+            <div class="col-md-3">
+                <button id="btnBuscar" class="btn btn-primary w-100 mt-1">Buscar</button>
+            </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <nav>
+            <ul class="pagination justify-content-start" id="paginacionArriba">
+                <!-- Contenido generado por JS -->
+            </ul>
+        </nav>
+        <!-- Tabla -->
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Marca</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Descripción</th>
+                    <th>Proveedores</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaProductos">
+                <!-- Contenido dinámico generado por JS -->
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <nav>
+            <ul class="pagination justify-content-start" id="paginacionAbajo">
+                <!-- Contenido generado por JS -->
+            </ul>
+        </nav>
+
+        <div class="separator"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button id="generarPDF" class="btn btn-danger">Exportar a PDF</button>
+        </div>
+    </div>
+
+    <script src="/js/listar-producto.js"></script>
+    <script src="/js/editar-precios.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+</body>
+
+</html>

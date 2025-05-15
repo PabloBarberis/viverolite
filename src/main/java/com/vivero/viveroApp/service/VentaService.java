@@ -18,6 +18,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -267,5 +268,30 @@ public class VentaService {
         return pdfService.generarReporteVentas(productosVendidos, ventasPorDia, comprasPorCliente,
                 gastoPorCliente, totalVentas, totalGastos, granTotal, mes, anio, totales);
     }
+    
+    public byte[] generarReporteProductosVendidos(int diaInicio, int mesInicio, int anioInicio,
+                                              int diaFin, int mesFin, int anioFin) throws Exception {
+
+    // Obtener ventas en rango
+    LocalDateTime inicio = LocalDateTime.of(anioInicio, mesInicio, diaInicio, 0, 0);
+    LocalDateTime fin = LocalDateTime.of(anioFin, mesFin, diaFin, 23, 59, 59);
+    long fechaInicioEpoch = inicio.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    long fechaFinEpoch = fin.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+    List<Venta> ventas = ventaRepository.obtenerVentasEntreFechas(fechaInicioEpoch, fechaFinEpoch);
+
+    // Acumular productos vendidos
+    Map<String, Integer> productosVendidos = new HashMap<>();
+    for (Venta venta : ventas) {
+        for (VentaProducto vp : venta.getProductos()) {
+            String nombre = vp.getProducto().getNombre();
+            int cantidad = vp.getCantidad();
+            productosVendidos.put(nombre, productosVendidos.getOrDefault(nombre, 0) + cantidad);
+        }
+    }
+
+    return pdfService.generarReporteProductosVendidos(productosVendidos, inicio, fin);
+}
+
 
 }

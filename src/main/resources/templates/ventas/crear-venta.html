@@ -7,7 +7,6 @@
 
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <!-- Estilos CSS -->
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -21,17 +20,9 @@
 
 <body>
 
-    <!-- Contenedor principal para navbar y botones -->
     <div class="navbar-container d-flex justify-content-between align-items-center">
-        <!-- Navbar se carga con th:replace -->
         <div th:replace="~{navbar :: navbar}"></div>
-
-        <!-- Botones específicos para cada página -->
-
     </div>
-
-
-
 
     <div class="container mt-5">
         <h1>Nueva Venta</h1>

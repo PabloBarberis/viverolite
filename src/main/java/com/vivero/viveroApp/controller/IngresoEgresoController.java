@@ -30,22 +30,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class IngresoEgresoController {
 
     private final IngresoEgresoService ingresoEgresoService;
-
     private final IngresoEgresoRepository ingresoEgresoRepository;
-
     private final UsuarioService usuarioService;
-
     private final RegistroHorarioService registroHorarioService;
-
     private final UsuarioRepository usuarioRepository;
-    // Cargar la vista de ingresos/egresos
 
     @GetMapping
     public String mostrarVistaIngresoEgreso() {
-        return "ventas/entrada-salida"; // Nombre del archivo HTML en templates
+        return "ventas/entrada-salida";
     }
 
-    // Obtener lista de métodos de pago para el select
     @GetMapping("/metodos-pago")
     @ResponseBody
     public List<String> getMetodosPago() {
@@ -60,16 +54,14 @@ public class IngresoEgresoController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Capturar datos del request
             boolean ingreso = (boolean) requestData.get("ingreso");
             String metodoPagoStr = (String) requestData.get("metodoPago");
             Long usuarioId = Long.valueOf(requestData.get("usuarioId").toString());
             String fechaStr = (String) requestData.get("fecha");
             String descripcion = (String) requestData.get("descripcion");
             double monto = Double.parseDouble(requestData.get("monto").toString());
-            boolean esAdelanto = (boolean) requestData.get("adelanto"); // Capturar el estado de 'adelanto'
+            boolean esAdelanto = (boolean) requestData.get("adelanto");
 
-            // Validar usuario
             Optional<Usuario> usuarioOptional = usuarioService.getUsuarioById(usuarioId);
             if (usuarioOptional.isEmpty()) {
                 response.put("success", false);
@@ -77,10 +69,8 @@ public class IngresoEgresoController {
                 return response;
             }
 
-            // Validar método de pago
             MetodoPago metodoPago = MetodoPago.valueOf(metodoPagoStr.toUpperCase());
 
-            // Convertir la fecha de String a LocalDateTime
             LocalDateTime fecha;
             try {
                 fecha = LocalDateTime.parse(fechaStr);
@@ -90,29 +80,26 @@ public class IngresoEgresoController {
                 return response;
             }
 
-            // Crear entidad y asignar valores
             IngresoEgreso movimiento = new IngresoEgreso();
 
-            movimiento.setIngreso(ingreso); // Primero, establecer el valor real de ingreso
+            movimiento.setIngreso(ingreso);
             if (esAdelanto) {
-                movimiento.setIngreso(false); // Si es adelanto, forzar ingreso a false
+                movimiento.setIngreso(false);
             }
             movimiento.setMetodoPago(metodoPago);
             movimiento.setUsuario(usuarioOptional.get());
             movimiento.setFecha(fecha);
             movimiento.setDescripcion(descripcion);
             movimiento.setMonto(monto);
-            movimiento.setAdelanto(esAdelanto); // Asignar el valor del checkbox
+            movimiento.setAdelanto(esAdelanto);
 
-            // Guardar movimiento en la base de datos
             ingresoEgresoService.createIngresoEgreso(movimiento);
             response.put("success", true);
         } catch (Exception e) {
-            e.printStackTrace(); // 🔍 Ver el error exacto en la consola
+            e.printStackTrace();
             response.put("success", false);
             response.put("message", "Error guardando movimiento.");
         }
-
         return response;
     }
 
@@ -128,13 +115,11 @@ public class IngresoEgresoController {
             return response;
         }
 
-        // Obtener total ganado
         List<RegistroHorario> registros = registroHorarioService.getRegistrosByUsuarioAndMesAndAño(usuario, mes, año);
         double totalGanado = registros.stream()
                 .mapToDouble(registro -> registro.getTotalHoras() * registro.getPrecioHora() * (registro.isFeriado() ? 2 : 1))
                 .sum();
 
-        // Obtener total de adelantos
         List<IngresoEgreso> adelantos = ingresoEgresoService.getAllAdelantos(usuario, mes, año);
         double totalAdelantos = adelantos.stream()
                 .mapToDouble(IngresoEgreso::getMonto)
@@ -177,7 +162,6 @@ public class IngresoEgresoController {
 
         IngresoEgreso ie = optional.get();
 
-        // DTO para mandar solo los datos necesarios al frontend
         Map<String, Object> dto = new HashMap<>();
         dto.put("id", ie.getId());
         dto.put("fecha", ie.getFecha().toString());
@@ -207,20 +191,17 @@ public class IngresoEgresoController {
 
             IngresoEgreso ie = optional.get();
 
-            // Actualizar campos
             ie.setDescripcion(datos.get("descripcion").toString());
             ie.setMetodoPago(MetodoPago.valueOf(datos.get("metodoPago").toString()));
             ie.setIngreso(Boolean.parseBoolean(datos.get("ingreso").toString()));
             ie.setMonto(Double.parseDouble(datos.get("monto").toString()));
             ie.setAdelanto(Boolean.parseBoolean(datos.get("adelanto").toString()));
 
-            // Convertir fecha correctamente desde String tipo "yyyy-MM-ddTHH:mm:ss"
             String fechaStr = datos.get("fecha").toString();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             LocalDateTime fechaLocal = LocalDateTime.parse(fechaStr, formatter);
             ie.setFecha(fechaLocal);
 
-            // Cargar usuario
             Long usuarioId = Long.valueOf(datos.get("usuarioId").toString());
             Usuario usuario = usuarioRepository.findById(usuarioId)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

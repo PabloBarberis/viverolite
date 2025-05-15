@@ -41,7 +41,7 @@
             <div class="separator"></div>
             <div class="form-group">
                 <label for="usuario">Usuario</label>
-                <select id="usuario" class="form-control" onchange="cargarUsuario()">
+                <select style="width: 25%;" id="usuario" class="form-control" onchange="cargarUsuario()">
                     <option value="" disabled selected>Seleccione un Usuario</option>
                     <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
                 </select>
@@ -236,7 +236,7 @@
 
 
 
-        <script type="module" src="/js/script.js"></script>
+        <script type="module" src="/js/horas.js"></script>
     </body>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

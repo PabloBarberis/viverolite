@@ -274,4 +274,30 @@ public class VentaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/reporte-productos")
+    public ResponseEntity<byte[]> generarReporteProductos(
+            @RequestParam int diaInicio,
+            @RequestParam int mesInicio,
+            @RequestParam int anioInicio,
+            @RequestParam int diaFin,
+            @RequestParam int mesFin,
+            @RequestParam int anioFin) {
+        try {
+            byte[] pdf = ventaService.generarReporteProductosVendidos(
+                    diaInicio, mesInicio, anioInicio,
+                    diaFin, mesFin, anioFin);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "reporte_productos_vendidos.pdf");
+
+            return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

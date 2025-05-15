@@ -27,16 +27,12 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/login",
-                                "/images/**", "/fotos/**", "/resources/**", "/plantasvivero/**").permitAll()
-                        .requestMatchers("/ventas/**", "/ventas/listar*", "/ventas/listar/**",
-                                "/plantas/listar", "/tierra/listar", "/grow/listar",
-                                "/decoracion/listar", "/maceta/listar", "/fertilizante/listar", "/herramienta/listar",
-                                "/insecticida/listar", "/semilla/listar",
-                                "/proveedores/**", "/clientes/**", "/dashboard",
-                                "/plantas/pdf", "/maceta/pdf", "/tierra/pdf", "/grow/pdf", "/decoracion/pdf",
-                                "/producto/pdf", "/api/**", "/ingresoegreso", "/ingresoegreso/guardar", "/usuarios/listar")                        
+                                "/images/**", "/fotos/**", "/resources/**").permitAll()
+                        .requestMatchers("/ventas/**", "/ventas/listar*", "/ventas/listar/**",                                
+                                "/proveedores/**", "/clientes/**", "/productos/**", "/dashboard",
+                                 "/api/**", "/ingresoegreso", "/ingresoegreso/guardar", "/usuarios/listar")                        
                         .hasAnyRole("ADMIN", "VENTA")                        
-                        .anyRequest().hasRole("ADMIN") // El resto solo para admin
+                        .anyRequest().hasRole("ADMIN")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

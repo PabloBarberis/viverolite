@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Calcular el monto pendiente
-        const totalFinal = totalParaMetodoPago;
+        const totalFinal = Math.round(totalParaMetodoPago / 100) * 100;
         let totalAsignado = 0;
 
         document.querySelectorAll(".montoPago").forEach(input => {
@@ -274,14 +274,19 @@ document.addEventListener("DOMContentLoaded", function () {
         recalcularTotalFinal();
     }
 
-    //calcula el precio de la suma de todos los productos
     function recalcularTotalFinal() {
-        let total = 0;
+        let totalReal = 0;
         $('#productosSeleccionados .precio-final').each(function () {
-            total += parseFloat($(this).text());
+            totalReal += parseFloat($(this).text());
         });
-        $('#totalProductosFinal').text(total.toFixed(2));
-        totalProductos = total;
+
+        let totalRedondeado = Math.round(totalReal / 100) * 100;
+
+        // Mostrar el total redondeado y el real en el footer
+        $('#totalProductosFinal').text(`${totalRedondeado} (${totalReal.toFixed(2)})`);
+
+        // Guardar los valores para otras funciones
+        totalProductos = totalRedondeado;
         totalParaMetodoPago = totalProductos;
     }
 
@@ -461,7 +466,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify(ventaDTO)
         })
             .then(response => response.json()) // 🔥 Ahora la respuesta sí será JSON
-            .then(data => {                
+            .then(data => {
                 alert(data.message);
                 window.location.href = "/ventas/listar";
             })
@@ -478,7 +483,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll("#metodosPagoSeleccionados tr").forEach(row => {
             const monto = parseFloat(row.querySelector(".montoPago").value);
             totalMontos += monto;
-        });        
+        });
         event.preventDefault(); // Evita la recarga de la página
         enviarVentaEditada(event);
     });

@@ -82,7 +82,43 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
+    document.getElementById("form-reporte").addEventListener("submit", async function (e) {
+        e.preventDefault();
+    
+        const fechaInicioStr = document.getElementById("fechaInicio").value;
+        const fechaFinStr = document.getElementById("fechaFin").value;
+    
+        if (!fechaInicioStr || !fechaFinStr) {
+          alert("Selecciona ambas fechas");
+          return;
+        }
+    
+        const fechaInicio = new Date(fechaInicioStr);
+        const fechaFin = new Date(fechaFinStr);
+    
+        const diaInicio = fechaInicio.getDate();
+        const mesInicio = fechaInicio.getMonth() + 1; // getMonth() es base 0
+        const anioInicio = fechaInicio.getFullYear();
+    
+        const diaFin = fechaFin.getDate();
+        const mesFin = fechaFin.getMonth() + 1;
+        const anioFin = fechaFin.getFullYear();
+    
+        const url = `/ventas/reporte-productos?diaInicio=${diaInicio}&mesInicio=${mesInicio}&anioInicio=${anioInicio}&diaFin=${diaFin}&mesFin=${mesFin}&anioFin=${anioFin}`;
+    
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("No se pudo generar el reporte");
+    
+          const blob = await response.blob();
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = `reporte-productos-${fechaInicioStr}-a-${fechaFinStr}.pdf`;
+          link.click();
+        } catch (err) {
+          alert("Error al generar el PDF: " + err.message);
+        }
+      });
 
 
 });

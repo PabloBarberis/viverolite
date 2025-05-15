@@ -10,10 +10,15 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.properties.UnitValue;
+import com.vivero.viveroApp.dto.ProductoDTO;
 import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.model.enums.MetodoPago;
 import java.io.ByteArrayOutputStream;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
@@ -130,18 +135,18 @@ public class PdfService {
             document.add(new Paragraph("\n"));
 
             document.add(new Paragraph("Totales"));
-            Table totalesTable = new Table(new float[]{3, 2});           
-                        
+            Table totalesTable = new Table(new float[]{3, 2});
+
             totalesTable.addCell(new Cell().add(new Paragraph("Efectivo ($):")));
-            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.EFECTIVO,0.0)))));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.EFECTIVO, 0.0)))));
             totalesTable.addCell(new Cell().add(new Paragraph("Débito ($):")));
-            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.DEBITO,0.0)))));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.DEBITO, 0.0)))));
             totalesTable.addCell(new Cell().add(new Paragraph("Crédito ($):")));
-            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.CREDITO,0.0)))));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.CREDITO, 0.0)))));
             totalesTable.addCell(new Cell().add(new Paragraph("MP Vale ($):")));
-            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL,0.0)))));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.MERCADOPAGO_VAL, 0.0)))));
             totalesTable.addCell(new Cell().add(new Paragraph("MP Sacha ($):")));
-            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC,0.0)))));
+            totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totales.getOrDefault(MetodoPago.MERCADOPAGO_SAC, 0.0)))));
             totalesTable.addCell(new Cell().add(new Paragraph("Total Ventas ($):")));
             totalesTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", totalVentas))));
             totalesTable.addCell(new Cell().add(new Paragraph("Total Gastos ($):")));
@@ -162,6 +167,7 @@ public class PdfService {
 
         try (Document document = new Document(pdf)) {
             document.add(new Paragraph("Registro de horas"));
+
             Table tableRegistros = new Table(new float[]{1, 1, 1, 1, 1, 1, 1, 1, 1});
             tableRegistros.addHeaderCell(new Cell().add(new Paragraph("Fecha")));
             tableRegistros.addHeaderCell(new Cell().add(new Paragraph("E. TM")));
@@ -181,28 +187,31 @@ public class PdfService {
                 tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTM())));
                 tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTT())));
                 tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTT())));
-                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(registro.getTotalHoras()))));
+
+                double horas = registro.getTotalHoras();
+                double precioHora = registro.getPrecioHora();
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.format("%.2f", horas))));
 
                 String feriado = registro.isFeriado() ? "Sí" : "No";
                 tableRegistros.addCell(new Cell().add(new Paragraph(feriado)));
-
-                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(registro.getPrecioHora()))));
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.format("%.2f", precioHora))));
 
                 double multiplicador = registro.isFeriado() ? 2 : 1;
-                double total = registro.getTotalHoras() * registro.getPrecioHora() * multiplicador;
+                double total = horas * precioHora * multiplicador;
                 sumaTotalFinal += total;
-                tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(total))));
+                tableRegistros.addCell(new Cell().add(new Paragraph(String.format("%.2f", total))));
             }
 
             document.add(tableRegistros);
 
             Table footerRegistros = new Table(1);
-            footerRegistros.addCell(new Cell().add(new Paragraph("Total Final ($): " + sumaTotalFinal)));
+            footerRegistros.addCell(new Cell().add(new Paragraph("Total Horas Trabajadas ($): " + String.format("%.2f", sumaTotalFinal))));
             document.add(footerRegistros);
 
             document.add(new Paragraph("\n"));
 
             document.add(new Paragraph("Adelantos"));
+
             Table tableIngresos = new Table(new float[]{1, 4, 2, 2});
             tableIngresos.addHeaderCell(new Cell().add(new Paragraph("ID")));
             tableIngresos.addHeaderCell(new Cell().add(new Paragraph("Descripción")));
@@ -215,25 +224,92 @@ public class PdfService {
                 tableIngresos.addCell(new Cell().add(new Paragraph(String.valueOf(ingreso.getId()))));
                 tableIngresos.addCell(new Cell().add(new Paragraph(ingreso.getDescripcion())));
                 tableIngresos.addCell(new Cell().add(new Paragraph(ingreso.getMetodoPago().name())));
-                tableIngresos.addCell(new Cell().add(new Paragraph(String.valueOf(ingreso.getMonto()))));
+                tableIngresos.addCell(new Cell().add(new Paragraph(String.format("%.2f", ingreso.getMonto()))));
                 sumaMontos += ingreso.getMonto();
             }
+
             document.add(tableIngresos);
 
             Table footerIngresos = new Table(1);
-            footerIngresos.addCell(new Cell().add(new Paragraph("Total Adelantos ($): " + sumaMontos)));
+            footerIngresos.addCell(new Cell().add(new Paragraph("Total Adelantos ($): " + String.format("%.2f", sumaMontos))));
             document.add(footerIngresos);
 
             document.add(new Paragraph("\n"));
 
             document.add(new Paragraph("Totales"));
             Table resumenFinal = new Table(1);
-            resumenFinal.addCell(new Cell().add(new Paragraph("Total Horas Trabajadas ($): " + sumaTotalFinal)));
-            resumenFinal.addCell(new Cell().add(new Paragraph("Total Adelantos ($): " + sumaMontos)));
+            resumenFinal.addCell(new Cell().add(new Paragraph("Total Horas Trabajadas ($): " + String.format("%.2f", sumaTotalFinal))));
+            resumenFinal.addCell(new Cell().add(new Paragraph("Total Adelantos ($): " + String.format("%.2f", sumaMontos))));
             double totalFinal = sumaTotalFinal - sumaMontos;
-            resumenFinal.addCell(new Cell().add(new Paragraph("Total Final ($): " + totalFinal)));
+            resumenFinal.addCell(new Cell().add(new Paragraph("Total Final ($): " + String.format("%.2f", totalFinal))));
             document.add(resumenFinal);
         }
+
+        return baos.toByteArray();
+    }
+
+    public byte[] generarReporteProductosVendidos(Map<String, Integer> productosVendidos,
+            LocalDateTime fechaInicio,
+            LocalDateTime fechaFin) throws Exception {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+
+        try (Document document = new Document(pdf)) {
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            String titulo = "Productos Vendidos del "
+                    + fechaInicio.format(formatter) + " al "
+                    + fechaFin.format(formatter);
+
+            document.add(new Paragraph(titulo).setFontSize(16));
+
+            document.add(new Paragraph("\n"));
+
+            Table tabla = new Table(new float[]{4, 2});
+            tabla.addHeaderCell(new Cell().add(new Paragraph("Producto")));
+            tabla.addHeaderCell(new Cell().add(new Paragraph("Cantidad")));
+
+            productosVendidos.forEach((nombre, cantidad) -> {
+                tabla.addCell(new Cell().add(new Paragraph(nombre)));
+                tabla.addCell(new Cell().add(new Paragraph(cantidad.toString())));
+            });
+
+            document.add(tabla);
+        }
+
+        return baos.toByteArray();
+    }
+
+    public byte[] generarPedidoPDF(List<ProductoDTO> productos) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+
+        try (Document document = new Document(pdf)) {
+            // Fecha actual
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String fechaActual = LocalDate.now().format(formatter);
+            document.add(new Paragraph("Fecha: " + fechaActual).setFontSize(14));
+            document.add(new Paragraph("\n"));
+
+            // Tabla de productos
+            Table tabla = new Table(UnitValue.createPercentArray(new float[]{2, 5, 2})).useAllAvailableWidth();
+            tabla.addHeaderCell(new Cell().add(new Paragraph("ID")));
+            tabla.addHeaderCell(new Cell().add(new Paragraph("Nombre")));
+            tabla.addHeaderCell(new Cell().add(new Paragraph("Cantidad")));
+
+            for (ProductoDTO producto : productos) {
+                tabla.addCell(new Cell().add(new Paragraph(producto.getId().toString())));
+                tabla.addCell(new Cell().add(new Paragraph(producto.getNombre())));
+                tabla.addCell(new Cell().add(new Paragraph(producto.getCantidad().toString())));
+            }
+
+            document.add(tabla);
+        }
+
         return baos.toByteArray();
     }
 }
