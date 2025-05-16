@@ -101,57 +101,50 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✅ Enviar el formulario al backend (POST para crear, PUT para editar)
     document.getElementById("productoForm").addEventListener("submit", function (event) {
         event.preventDefault(); // Evita la recarga de página
-
+    
         const formData = new URLSearchParams();
         formData.append("nombre", document.getElementById("nombre").value);
         formData.append("tipo", tipoSelect.value);
         formData.append("precio", parseFloat(document.getElementById("precio").value));
         formData.append("stock", parseInt(document.getElementById("stock").value));
         formData.append("descripcion", document.getElementById("descripcion").value);
-
-        // ✅ Capturar selección de marca
+    
         const marcaOption = document.querySelector('input[name="marcaOption"]:checked').value;
         formData.append("marca", marcaOption === "existente" ? marcaSelect.value : "");
         formData.append("marcaNueva", marcaOption === "nueva" ? marcaNuevaInput.value : "");
-
-        // ✅ Capturar proveedores seleccionados
-
+    
         const proveedoresSeleccionados = Array.from(proveedoresContainer.querySelectorAll("input[type='checkbox']:checked"));
-
         if (proveedoresSeleccionados.length > 0) {
             proveedoresSeleccionados.forEach(cb => formData.append("proveedoresId", cb.value));
         } else {
-            // 👇 Esto fuerza el envío de una lista vacía
             formData.append("proveedoresId", "");
         }
-
-
-        /*        Array.from(proveedoresContainer.querySelectorAll("input[type='checkbox']:checked"))
-                    .forEach(cb => formData.append("proveedoresId", cb.value));
-        */
-        // ✅ Definir el endpoint y método según si es edición o creación
+    
         const url = esEdicion ? `/productos/editar/${productoId}` : "/productos/guardar";
         const metodo = esEdicion ? "PUT" : "POST";
-
+    
         fetch(url, {
             method: metodo,
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                [csrfHeader]: csrfToken // ✅ Asegurar que el token CSRF se envíe correctamente
+                [csrfHeader]: csrfToken
             },
             body: formData.toString()
         })
-
-            .then(response => {
-                if (response.ok) {
-                    alert("✅ Producto guardado con éxito.");
-                    window.location.href = "/productos/listar";
-                } else {
-                    return response.text().then(text => alert("Error: " + text));
-                }
-            })
-
-            .catch(error => console.error(`Error al ${metodo === "POST" ? "guardar" : "actualizar"} el producto:`, error));
+        .then(response => response.json())  // Leer JSON directamente
+        .then(data => {
+            if (data.error) {
+                alert("Error: " + data.message);
+            } else {
+                alert(data.message);
+                window.location.href = data.redirectUrl || "/productos/listar"; // redirige según backend o default
+            }
+        })
+        .catch(error => {
+            console.error(`Error al ${metodo === "POST" ? "guardar" : "actualizar"} el producto:`, error);
+            alert("Error inesperado al guardar el producto.");
+        });
     });
+    
 
 });

@@ -52,7 +52,8 @@ public class ProductoController {
     }
 
     @PostMapping("/productos/guardar")
-    public String guardarProducto(
+    @ResponseBody
+    public Map<String, Object> guardarProducto(
             @RequestParam String nombre,
             @RequestParam String tipo,
             @RequestParam double precio,
@@ -62,9 +63,12 @@ public class ProductoController {
             @RequestParam(required = false) String marcaNueva,
             @RequestParam(name = "proveedoresId", required = false) List<Long> proveedoresId
     ) {
+        Map<String, Object> response = new HashMap<>();
 
         if (tipo.isBlank() || precio <= 0 || stock < 0) {
-            return "redirect:/productos/crear?error=Campos+obligatorios+faltantes";
+            response.put("error", true);
+            response.put("message", "Campos obligatorios faltantes");
+            return response;
         }
 
         String marcaFinal = (marcaNueva != null && !marcaNueva.isBlank()) ? marcaNueva : marca;
@@ -85,7 +89,10 @@ public class ProductoController {
 
         productoService.createProducto(producto);
 
-        return "redirect:/productos/listar";
+        response.put("error", false);
+        response.put("message", "Producto guardado con éxito");
+        response.put("redirectUrl", "/productos/listar");
+        return response;
     }
 
     @GetMapping("/productos/listar-datos")
@@ -147,15 +154,15 @@ public class ProductoController {
         productoExistente.setDescripcion(descripcion);
         productoExistente.setMarca(marca);
 
-if (proveedoresId != null) {
-    if (proveedoresId.size() == 1 && proveedoresId.get(0) == 0L) {
-        // Si la lista tiene un solo elemento igual a 0 (o algún valor "vacío" que uses), la tratamos como vacía
-        productoExistente.setProveedores(Collections.emptyList());
-    } else {
-        List<Proveedor> proveedores = proveedorRepository.findAllById(proveedoresId);
-        productoExistente.setProveedores(proveedores);
-    }
-}
+        if (proveedoresId != null) {
+            if (proveedoresId.size() == 1 && proveedoresId.get(0) == 0L) {
+                // Si la lista tiene un solo elemento igual a 0 (o algún valor "vacío" que uses), la tratamos como vacía
+                productoExistente.setProveedores(Collections.emptyList());
+            } else {
+                List<Proveedor> proveedores = proveedorRepository.findAllById(proveedoresId);
+                productoExistente.setProveedores(proveedores);
+            }
+        }
 
         productoService.saveProducto(productoExistente);
         return ResponseEntity.ok("Producto actualizado exitosamente");
