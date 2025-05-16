@@ -21,6 +21,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+            botonBuscar.click(); // Simula el clic en el botón de buscar
+        }
+    });
+    
+
     // ✅ Generar PDF con filtros aplicados
     botonPDF.addEventListener("click", function () {
         const tipoSeleccionado = tipoSelect?.value || null;
