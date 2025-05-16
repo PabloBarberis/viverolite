@@ -248,40 +248,54 @@ public class PdfService {
         return baos.toByteArray();
     }
 
-    public byte[] generarReporteProductosVendidos(Map<String, Integer> productosVendidos,
-            LocalDateTime fechaInicio,
-            LocalDateTime fechaFin) throws Exception {
+    public byte[] generarReporteProductosVendidos(
+        Map<String, Map<String, Integer>> productosPorProveedor,
+        LocalDateTime fechaInicio,
+        LocalDateTime fechaFin) throws Exception {
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(baos);
-        PdfDocument pdf = new PdfDocument(writer);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PdfWriter writer = new PdfWriter(baos);
+    PdfDocument pdf = new PdfDocument(writer);
 
-        try (Document document = new Document(pdf)) {
+    try (Document document = new Document(pdf)) {
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            String titulo = "Productos Vendidos del "
-                    + fechaInicio.format(formatter) + " al "
-                    + fechaFin.format(formatter);
+        String titulo = "Productos Vendidos del "
+                + fechaInicio.format(formatter) + " al "
+                + fechaFin.format(formatter);
 
-            document.add(new Paragraph(titulo).setFontSize(16));
+        document.add(new Paragraph(titulo).setFontSize(16));
+        document.add(new Paragraph("\n"));
 
-            document.add(new Paragraph("\n"));
+        for (Map.Entry<String, Map<String, Integer>> entry : productosPorProveedor.entrySet()) {
+            String nombreProveedor = entry.getKey();
+            Map<String, Integer> productos = entry.getValue();
+
+            // Título de la tabla con el nombre del proveedor
+            document.add(new Paragraph("Proveedor: " + nombreProveedor)
+                    .setFontSize(14)
+                    
+                    .setMarginTop(15)
+                    .setMarginBottom(5));
 
             Table tabla = new Table(new float[]{4, 2});
+            
             tabla.addHeaderCell(new Cell().add(new Paragraph("Producto")));
             tabla.addHeaderCell(new Cell().add(new Paragraph("Cantidad")));
 
-            productosVendidos.forEach((nombre, cantidad) -> {
-                tabla.addCell(new Cell().add(new Paragraph(nombre)));
-                tabla.addCell(new Cell().add(new Paragraph(cantidad.toString())));
-            });
+            for (Map.Entry<String, Integer> productoEntry : productos.entrySet()) {
+                tabla.addCell(new Cell().add(new Paragraph(productoEntry.getKey())));
+                tabla.addCell(new Cell().add(new Paragraph(String.valueOf(productoEntry.getValue()))));
+            }
 
             document.add(tabla);
         }
-
-        return baos.toByteArray();
     }
+
+    return baos.toByteArray();
+}
+
 
     public byte[] generarPedidoPDF(List<ProductoDTO> productos) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

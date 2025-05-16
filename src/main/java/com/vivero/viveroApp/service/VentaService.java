@@ -9,6 +9,7 @@ import com.vivero.viveroApp.model.PagoVenta;
 import com.vivero.viveroApp.model.Venta;
 import com.vivero.viveroApp.model.VentaProducto;
 import com.vivero.viveroApp.model.Producto;
+import com.vivero.viveroApp.model.Proveedor;
 import com.vivero.viveroApp.model.enums.MetodoPago;
 import com.vivero.viveroApp.repository.ClienteRepository;
 import com.vivero.viveroApp.repository.ProductoRepository;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
+import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -218,7 +220,7 @@ public class VentaService {
         List<Venta> ventasDelMes = obtenerVentasPorMesYAnio(mes, anio);
         List<IngresoEgreso> ingresosEgresos = ingresoEgresoService.obtenerIngresosEgresosPorMesYAnio(mes, anio);
 
-        Map<String, Integer> productosVendidos = new HashMap<>();
+        Map<String, Integer> productosVendidos = new TreeMap<>();
         Map<DayOfWeek, Integer> ventasPorDia = new HashMap<>();
         Map<String, Integer> comprasPorCliente = new HashMap<>();
         Map<String, Double> gastoPorCliente = new HashMap<>();
@@ -269,10 +271,9 @@ public class VentaService {
                 gastoPorCliente, totalVentas, totalGastos, granTotal, mes, anio, totales);
     }
     
-    public byte[] generarReporteProductosVendidos(int diaInicio, int mesInicio, int anioInicio,
+   public byte[] generarReporteProductosVendidos(int diaInicio, int mesInicio, int anioInicio,
                                               int diaFin, int mesFin, int anioFin) throws Exception {
 
-    // Obtener ventas en rango
     LocalDateTime inicio = LocalDateTime.of(anioInicio, mesInicio, diaInicio, 0, 0);
     LocalDateTime fin = LocalDateTime.of(anioFin, mesFin, diaFin, 23, 59, 59);
     long fechaInicioEpoch = inicio.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -280,18 +281,36 @@ public class VentaService {
 
     List<Venta> ventas = ventaRepository.obtenerVentasEntreFechas(fechaInicioEpoch, fechaFinEpoch);
 
-    // Acumular productos vendidos
-    Map<String, Integer> productosVendidos = new HashMap<>();
+    Map<String, Map<String, Integer>> productosPorProveedor = new TreeMap<>();
+
     for (Venta venta : ventas) {
         for (VentaProducto vp : venta.getProductos()) {
-            String nombre = vp.getProducto().getNombre();
+            Producto producto = vp.getProducto();
+            String nombreProducto = producto.getNombre();
             int cantidad = vp.getCantidad();
-            productosVendidos.put(nombre, productosVendidos.getOrDefault(nombre, 0) + cantidad);
+
+            List<Proveedor> proveedores = producto.getProveedores();
+            String nombreProveedor;
+
+            if (proveedores == null || proveedores.isEmpty()) {
+                nombreProveedor = "Sin proveedor";
+            } else {
+                nombreProveedor = proveedores.get(0).getNombre();
+            }
+
+            Map<String, Integer> productosDelProveedor = productosPorProveedor
+                    .computeIfAbsent(nombreProveedor, k -> new TreeMap<>());
+
+            productosDelProveedor.put(
+                nombreProducto,
+                productosDelProveedor.getOrDefault(nombreProducto, 0) + cantidad
+            );
         }
     }
 
-    return pdfService.generarReporteProductosVendidos(productosVendidos, inicio, fin);
+    return pdfService.generarReporteProductosVendidos(productosPorProveedor, inicio, fin);
 }
+
 
 
 }
