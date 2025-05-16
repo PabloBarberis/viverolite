@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const fechaActual = new Date();
     const mesActual = fechaActual.getMonth() + 1; // getMonth() devuelve de 0 a 11
     const anioActual = fechaActual.getFullYear();
-  
+
     mesInput.value = mesActual;
     anioInput.value = anioActual;
 
@@ -33,10 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Función para obtener ventas según la fecha seleccionada
     function obtenerVentas(fecha) {
-        
+
         fetch(`${BASE_URL}/ventas/fechas?fecha=${fecha}`)
             .then(response => response.json())
-            .then(data => {                
+            .then(data => {
                 document.getElementById("totalEfectivo").textContent = `$ ${(data.totalEfectivo || 0).toFixed(2)}`;
                 document.getElementById("totalCredito").textContent = `$ ${(data.totalCredito || 0).toFixed(2)}`;
                 document.getElementById("totalDebito").textContent = `$ ${(data.totalDebito || 0).toFixed(2)}`;
@@ -85,40 +85,34 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("form-reporte").addEventListener("submit", async function (e) {
         e.preventDefault();
     
-        const fechaInicioStr = document.getElementById("fechaInicio").value;
+        const fechaInicioStr = document.getElementById("fechaInicio").value; // formato YYYY-MM-DD
         const fechaFinStr = document.getElementById("fechaFin").value;
     
         if (!fechaInicioStr || !fechaFinStr) {
-          alert("Selecciona ambas fechas");
-          return;
+            alert("Selecciona ambas fechas");
+            return;
         }
     
-        const fechaInicio = new Date(fechaInicioStr);
-        const fechaFin = new Date(fechaFinStr);
+        // Evitar el uso de Date para evitar problemas de timezone
+        const [anioInicio, mesInicio, diaInicio] = fechaInicioStr.split("-");
+        const [anioFin, mesFin, diaFin] = fechaFinStr.split("-");
     
-        const diaInicio = fechaInicio.getDate();
-        const mesInicio = fechaInicio.getMonth() + 1; // getMonth() es base 0
-        const anioInicio = fechaInicio.getFullYear();
-    
-        const diaFin = fechaFin.getDate();
-        const mesFin = fechaFin.getMonth() + 1;
-        const anioFin = fechaFin.getFullYear();
-    
-        const url = `/ventas/reporte-productos?diaInicio=${diaInicio}&mesInicio=${mesInicio}&anioInicio=${anioInicio}&diaFin=${diaFin}&mesFin=${mesFin}&anioFin=${anioFin}`;
+        const url = `/ventas/reporte-productos?diaInicio=${parseInt(diaInicio)}&mesInicio=${parseInt(mesInicio)}&anioInicio=${anioInicio}&diaFin=${parseInt(diaFin)}&mesFin=${parseInt(mesFin)}&anioFin=${anioFin}`;
     
         try {
-          const response = await fetch(url);
-          if (!response.ok) throw new Error("No se pudo generar el reporte");
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("No se pudo generar el reporte");
     
-          const blob = await response.blob();
-          const link = document.createElement('a');
-          link.href = window.URL.createObjectURL(blob);
-          link.download = `reporte-productos-${fechaInicioStr}-a-${fechaFinStr}.pdf`;
-          link.click();
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `reporte-productos-${fechaInicioStr}-a-${fechaFinStr}.pdf`;
+            link.click();
         } catch (err) {
-          alert("Error al generar el PDF: " + err.message);
+            alert("Error al generar el PDF: " + err.message);
         }
-      });
+    });
+    
 
 
 });
