@@ -127,7 +127,8 @@ public class ProductoController {
     }
 
     @PutMapping("/productos/editar/{id}")
-    public ResponseEntity<String> actualizarProducto(@PathVariable Long id,
+    public ResponseEntity<Map<String, Object>> actualizarProducto(
+            @PathVariable Long id,
             @RequestParam String nombre,
             @RequestParam String tipo,
             @RequestParam double precio,
@@ -138,12 +139,18 @@ public class ProductoController {
             @RequestParam(name = "proveedoresId", required = false) List<Long> proveedoresId) {
 
         if (!productoService.existsById(id)) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "error", true,
+                    "message", "Producto no encontrado"
+            ));
         }
 
         Producto productoExistente = productoService.getProductoById(id).orElse(null);
         if (productoExistente == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "error", true,
+                    "message", "Producto no encontrado"
+            ));
         }
 
         productoExistente.setTipo(tipo);
@@ -151,12 +158,11 @@ public class ProductoController {
         productoExistente.setNombre(nombre);
         productoExistente.setPrecio(precio);
         productoExistente.setStock(stock);
-        productoExistente.setDescripcion(descripcion);
-        productoExistente.setMarca(marca);
+        productoExistente.setDescripcion(descripcion != null ? descripcion : "");
+        productoExistente.setMarca((marcaNueva != null && !marcaNueva.isBlank()) ? marcaNueva : marca);
 
         if (proveedoresId != null) {
             if (proveedoresId.size() == 1 && proveedoresId.get(0) == 0L) {
-                // Si la lista tiene un solo elemento igual a 0 (o algún valor "vacío" que uses), la tratamos como vacía
                 productoExistente.setProveedores(Collections.emptyList());
             } else {
                 List<Proveedor> proveedores = proveedorRepository.findAllById(proveedoresId);
@@ -165,7 +171,12 @@ public class ProductoController {
         }
 
         productoService.saveProducto(productoExistente);
-        return ResponseEntity.ok("Producto actualizado exitosamente");
+
+        return ResponseEntity.ok(Map.of(
+                "error", false,
+                "message", "Producto actualizado exitosamente",
+                "redirectUrl", "/productos/listar"
+        ));
     }
 
     @GetMapping("/productos/api/{id}")
