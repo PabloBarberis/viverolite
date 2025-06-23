@@ -2,7 +2,7 @@ $(document).ready(function () {
     $('#producto').select2({
         placeholder: "Buscar producto...",
         allowClear: true,
-        width: '100%',
+        width: '50%',
         minimumInputLength: 2,
         language: {
             inputTooShort: () => 'Ingresá al menos 2 caracteres',
@@ -32,26 +32,32 @@ $(document).ready(function () {
     });
 
     $('#agregarProducto').on('click', function () {
-        let productoSeleccionado = $('#producto').select2('data')[0];
+    let productoSeleccionado = $('#producto').select2('data')[0];
+    let cantidad = parseInt($('#cantidadProducto').val());
 
-        if (!productoSeleccionado) return;
+    if (!productoSeleccionado) return;
+    if (isNaN(cantidad) || cantidad <= 0) {
+        alert("Ingresá una cantidad válida.");
+        return;
+    }
 
-        let existeProducto = $(`#productosSeleccionados tr[data-id="${productoSeleccionado.id}"]`).length > 0;
-        if (existeProducto) {
-            alert("Este producto ya fue agregado.");
-            return;
-        }
+    let existeProducto = $(`#productosSeleccionados tr[data-id="${productoSeleccionado.id}"]`).length > 0;
+    if (existeProducto) {
+        alert("Este producto ya fue agregado.");
+        return;
+    }
 
-        $('#productosSeleccionados').append(`
-            <tr data-id="${productoSeleccionado.id}">
-                <td>${productoSeleccionado.id}</td>
-                <td>${productoSeleccionado.text}</td>
-                <td>${productoSeleccionado.stock}</td>
-                <td><input type="number" class="cantidad" min="1" value="1"></td>
-                <td><button class="btn btn-danger eliminarProducto">Eliminar</button></td>
-            </tr>
-        `);
-    });
+    $('#productosSeleccionados').append(`
+        <tr data-id="${productoSeleccionado.id}">
+            <td>${productoSeleccionado.id}</td>
+            <td>${productoSeleccionado.text}</td>
+            <td>${productoSeleccionado.stock}</td>
+            <td><input type="number" class="cantidad" min="1" value="${cantidad}"></td>
+            <td><button class="btn btn-danger eliminarProducto">Eliminar</button></td>
+        </tr>
+    `);
+});
+
 
     $(document).on('click', '.eliminarProducto', function () {
         $(this).closest('tr').remove();
