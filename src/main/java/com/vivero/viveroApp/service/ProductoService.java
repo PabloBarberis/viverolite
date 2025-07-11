@@ -7,7 +7,7 @@ import com.vivero.viveroApp.model.Compra;
 import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.model.ProductoCompra;
 import com.vivero.viveroApp.model.Proveedor;
-import com.vivero.viveroApp.repository.ProductoRepository;
+import com.vivero.viveroApp.Repository.ProductoRepository;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import java.util.List;

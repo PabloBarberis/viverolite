@@ -25,8 +25,18 @@
         <div class="separator"></div>
 
         <h3 class="mt-4">Seleccionar Producto</h3>
-        <div class="form-group mt-3 d-flex">
-            <select id="producto" class="form-control" style="width: 50px;"></select>
+        <div class="form-group mt-3 d-flex flex-wrap align-items-center">
+            <select id="producto" class="form-control" style="width: 40%;"></select>
+
+            <!-- Input Cantidad -->
+            <input type="number" id="cantidadProducto" class="form-control ml-2" placeholder="Cantidad" min="1"
+                value="1" style="width: 150px;">
+
+            <!-- Nuevo input Precio Compra -->
+            <input type="number" id="precioCompraInput" class="form-control ml-2" placeholder="Precio Compra" min="0"
+                step="0.01" style="width: 160px;">
+
+            <!-- Botón Agregar Producto -->
             <button type="button" id="agregarProducto" class="btn btn-success ml-2">Agregar Producto</button>
         </div>
 
@@ -57,7 +67,7 @@
             <button type="button" id="guardarCompra" class="btn btn-primary">Guardar Compra</button>
             <a href="/compras/listar" class="btn btn-danger ml-1">Cancelar</a>
         </div>
-        
+
 
     </div>
 

@@ -6,7 +6,7 @@ import com.vivero.viveroApp.dto.ProductoDTO;
 import com.vivero.viveroApp.model.Compra;
 import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.model.ProductoCompra;
-import com.vivero.viveroApp.repository.ProductoRepository;
+import com.vivero.viveroApp.Repository.ProductoRepository;
 import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProductoService;
 import java.util.List;

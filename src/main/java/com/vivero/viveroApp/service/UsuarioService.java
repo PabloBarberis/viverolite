@@ -1,7 +1,7 @@
 package com.vivero.viveroApp.service;
 
 import com.vivero.viveroApp.model.Usuario;
-import com.vivero.viveroApp.repository.UsuarioRepository;
+import com.vivero.viveroApp.Repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;

@@ -1,7 +1,7 @@
 package com.vivero.viveroApp.service;
 
 import com.vivero.viveroApp.model.Proveedor;
-import com.vivero.viveroApp.repository.ProveedorRepository;
+import com.vivero.viveroApp.Repository.ProveedorRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;

@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    // Inicializar Select2
     $('#producto').select2({
         placeholder: "Buscar producto...",
         allowClear: true,
@@ -25,44 +26,64 @@ $(document).ready(function () {
         }
     });
 
+    // Enfocar automáticamente en el campo de búsqueda dentro del select2 abierto
     $('#producto').on('select2:open', function () {
         setTimeout(() => {
             document.querySelector('.select2-container--open .select2-search__field').focus();
         }, 100);
     });
 
+    // Al seleccionar un producto, ir al campo cantidad
+    $('#producto').on('select2:select', function () {
+        setTimeout(() => $('#cantidadProducto').focus().select(), 100);
+    });
+
+    // Agregar producto al hacer clic en el botón
     $('#agregarProducto').on('click', function () {
-    let productoSeleccionado = $('#producto').select2('data')[0];
-    let cantidad = parseInt($('#cantidadProducto').val());
+        let productoSeleccionado = $('#producto').select2('data')[0];
+        let cantidad = parseInt($('#cantidadProducto').val());
 
-    if (!productoSeleccionado) return;
-    if (isNaN(cantidad) || cantidad <= 0) {
-        alert("Ingresá una cantidad válida.");
-        return;
-    }
+        if (!productoSeleccionado) return;
+        if (isNaN(cantidad) || cantidad <= 0) {
+            alert("Ingresá una cantidad válida.");
+            return;
+        }
 
-    let existeProducto = $(`#productosSeleccionados tr[data-id="${productoSeleccionado.id}"]`).length > 0;
-    if (existeProducto) {
-        alert("Este producto ya fue agregado.");
-        return;
-    }
+        let existeProducto = $(`#productosSeleccionados tr[data-id="${productoSeleccionado.id}"]`).length > 0;
+        if (existeProducto) {
+            alert("Este producto ya fue agregado.");
+            return;
+        }
 
-    $('#productosSeleccionados').append(`
-        <tr data-id="${productoSeleccionado.id}">
-            <td>${productoSeleccionado.id}</td>
-            <td>${productoSeleccionado.text}</td>
-            <td>${productoSeleccionado.stock}</td>
-            <td><input type="number" class="cantidad" min="1" value="${cantidad}"></td>
-            <td><button class="btn btn-danger eliminarProducto">Eliminar</button></td>
-        </tr>
-    `);
-});
+        // Insertar al inicio de la lista
+        $('#productosSeleccionados').prepend(`
+            <tr data-id="${productoSeleccionado.id}">
+                <td>${productoSeleccionado.id}</td>
+                <td>${productoSeleccionado.text}</td>
+                <td>${productoSeleccionado.stock}</td>
+                <td><input type="number" class="cantidad" min="1" value="${cantidad}"></td>
+                <td><button class="btn btn-danger eliminarProducto">Eliminar</button></td>
+            </tr>
+        `);
 
+        // Limpiar cantidad y volver a enfocar en el producto
+        $('#cantidadProducto').val(1);
+        $('#producto').select2('focus');
+    });
 
+    // Manejar Enter en el campo cantidad para agregar producto
+    $('#cantidadProducto').on('keypress', function (e) {
+        if (e.which === 13) { // Enter
+            $('#agregarProducto').click(); // Simular clic en "Agregar Producto"
+        }
+    });
+
+    // Eliminar producto
     $(document).on('click', '.eliminarProducto', function () {
         $(this).closest('tr').remove();
     });
 
+    // Generar pedido
     $('#generarPedido').on('click', function () {
         let productos = [];
         $('#productosSeleccionados tr').each(function () {
@@ -105,4 +126,7 @@ $(document).ready(function () {
         })
         .catch(error => console.error("Error:", error));
     });
+
+    // Foco inicial en el select2 al cargar la página
+    setTimeout(() => $('#producto').select2('focus'), 300);
 });

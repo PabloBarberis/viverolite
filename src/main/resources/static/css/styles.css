@@ -460,3 +460,35 @@ input[type="number"] {
     padding: 8px;  /* 🔹 Espacio uniforme para mejor visibilidad */
     border: 1px solid #ddd; /* 🔹 Bordes sutiles para separación */
 }
+
+/* Para números negativos */
+.text-danger {
+    color: red !important;
+}
+
+/* Formato moneda */
+.moneda {
+    font-family: monospace;
+}
+
+/* Títulos dinámicos */
+#tituloResumen {
+    color: #a1bedb; /* Color base */
+    font-weight: bold;
+}
+
+#tituloResumen.efectivo {
+    color: gold;
+}
+
+#tituloResumen.tarjeta {
+    color: steelblue;
+}
+
+#tituloResumen.mpvale {
+    color: orange;
+}
+
+#tituloResumen.mpsacha {
+    color: mediumpurple;
+}

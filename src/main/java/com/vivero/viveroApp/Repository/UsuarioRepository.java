@@ -1,4 +1,4 @@
-package com.vivero.viveroApp.repository;
+package com.vivero.viveroApp.Repository;
 
 import com.vivero.viveroApp.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;

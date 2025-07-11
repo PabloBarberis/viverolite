@@ -20,107 +20,119 @@
     </div>
 
     <div class="container-fluid mt-5" style="max-width: 90%; margin-bottom: 20px;">
-        <div class="row align-items-center justify-content-between">
-            <h1>Ventas</h1>
-            <div>
-                <a th:href="@{/ventas/crear}" class="btn btn-nueva-venta">Nueva Venta</a>
+        <div class="container mt-5">
+            <!-- Título y botón nueva venta -->
+            <div class="row align-items-center justify-content-between mb-4">
+                <div class="col-auto">
+                    <h1>Ventas</h1>
+                </div>
+                
+                <div class="col-auto">
+                    <a th:href="@{/ventas/crear}" class="btn btn-nueva-venta">Nueva Venta</a>
+                </div>
+            </div>
+
+            <hr class="separator">
+
+            <!-- Filtros: Totales del día + Reporte de ventas + Reporte de productos -->
+            <div class="row mb-4">
+                <!-- Columna 1: Totales del Día -->
+                <div class="col-md-3">
+                    <h3>Totales del Día:</h3>
+                    <form>
+                        <label for="fecha">Seleccionar fecha:</label>
+                        <input type="date" id="fecha" name="fecha" class="form-control" style="width: 180px;">
+                    </form>
+                </div>
+
+                <!-- Columna 2: Reporte de Ventas -->
+                <div class="col-md-3">
+                    <h3>Reporte de Ventas</h3>
+                    <form id="form-reporte-ventas">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="mes">Mes</label>
+                                <input type="number" id="mes" min="1" max="12" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="anio">Año</label>
+                                <input type="number" id="anio" min="2000" max="2100" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button id="btnGenerarReporte" class="btn btn-info w-100" type="button">Generar
+                                Reporte</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Columna 3: Reporte de Productos -->
+                <div class="col-md-6">
+                    <h3>Reporte de Productos</h3>
+                    <form id="form-reporte" class="mb-3">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="fechaInicio">Fecha inicio:</label>
+                                <input type="date" id="fechaInicio" name="fechaInicio" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fechaFin">Fecha fin:</label>
+                                <input type="date" id="fechaFin" name="fechaFin" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary w-100">Generar Reporte</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla de totales por método de pago -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <table class="table table-bordered text-center">
+                        <thead>
+                            <tr>
+                                <th>Efectivo</th>
+                                <th>Crédito</th>
+                                <th>Débito</th>
+                                <th>MP Valeria</th>
+                                <th>MP Sacha</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="min-width: 150px;" class="form-control text-center" id="totalEfectivo"
+                                        readonly>$ 0.00</div>
+                                </td>
+                                <td>
+                                    <div style="min-width: 150px;" class="form-control text-center" id="totalCredito"
+                                        readonly>$ 0.00</div>
+                                </td>
+                                <td>
+                                    <div style="min-width: 150px;" class="form-control text-center" id="totalDebito"
+                                        readonly>$ 0.00</div>
+                                </td>
+                                <td>
+                                    <div style="min-width: 150px;" class="form-control text-center"
+                                        id="totalMercadoPagoVale" readonly>$ 0.00</div>
+                                </td>
+                                <td>
+                                    <div style="min-width: 150px;" class="form-control text-center"
+                                        id="totalMercadoPagoSacha" readonly>$ 0.00</div>
+                                </td>
+                                <td>
+                                    <div style="min-width: 150px;" class="form-control fw-bold text-center"
+                                        id="totalGeneral" readonly>$ 0.00</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-
-        <div class="separator"></div>
-
-
-        <div class="row mb-3">
-            <!-- Columna 1: Totales del Día -->
-            <div class="col-2">
-                <h3>Totales del Día:</h3>
-                <form style="margin-bottom: 20px;">
-                    <label for="fecha">Seleccionar fecha:</label>
-                    <input type="date" id="fecha" name="fecha" class="form-control" style="width: 180px;">
-                </form>
-            </div>
-        
-            <!-- Columna 2: Reporte de Ventas (ajustada como la columna 3) -->
-            <div class="col-4">
-                <h3>Reporte de Ventas</h3>
-                <form id="form-reporte-ventas">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="mes">Mes</label>
-                            <input type="number" id="mes" min="1" max="12" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="anio">Año</label>
-                            <input type="number" id="anio" min="2000" max="2100" class="form-control">
-                        </div>
-                    </div>
-                    <div class="text-center mt-3">
-                        <button id="btnGenerarReporte" class="btn btn-info" type="button">Generar Reporte</button>
-                    </div>
-                </form>
-            </div>
-        
-            <!-- Columna 3: Reporte de Productos -->
-            <div class="col-6">
-                <h3>Reporte de Productos</h3>
-                <form id="form-reporte">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="fechaInicio">Fecha inicio:</label>
-                            <input type="date" id="fechaInicio" name="fechaInicio" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="fechaFin">Fecha fin:</label>
-                            <input type="date" id="fechaFin" name="fechaFin" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3">
-                        <button type="submit" class="btn btn-primary">Generar Reporte</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-      
-        <table class="table table-bordered text-center">
-            <thead>
-                <tr>
-                    <th>Efectivo</th>
-                    <th>Crédito</th>
-                    <th>Débito</th>
-                    <th>MP Valeria</th>
-                    <th>MP Sacha</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <div style="min-width: 150px;" class="form-control text-center" id="totalEfectivo" readonly>$
-                            0.00</div>
-                    </td>
-                    <td>
-                        <div style="min-width: 150px;" class="form-control text-center" id="totalCredito" readonly>$
-                            0.00</div>
-                    </td>
-                    <td>
-                        <div style="min-width: 150px;" class="form-control text-center" id="totalDebito" readonly>$ 0.00
-                        </div>
-                    </td>
-                    <td>
-                        <div style="min-width: 150px;" class="form-control text-center" id="totalMercadoPagoVale"
-                            readonly>$ 0.00</div>
-                    </td>
-                    <td>
-                        <div style="min-width: 150px;" class="form-control text-center" id="totalMercadoPagoSacha"
-                            readonly>$ 0.00</div>
-                    </td>
-                    <td>
-                        <div style="min-width: 150px;" class="form-control fw-bold text-center" id="totalGeneral"
-                            readonly>$ 0.00</div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
 
 
         <div class="separator"></div>
@@ -171,7 +183,7 @@
         totalPages=${totalPages}, nombre=${nombre}, color=${color}, material=${material}, marca=${marca}, tipo=${tipo})}">
         </div>
 
-        
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

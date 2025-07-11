@@ -5,10 +5,12 @@ import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.RegistroHorario;
 import com.vivero.viveroApp.model.Usuario;
 import com.vivero.viveroApp.model.enums.MetodoPago;
-import com.vivero.viveroApp.repository.UsuarioRepository;
+import com.vivero.viveroApp.Repository.UsuarioRepository;
 import com.vivero.viveroApp.service.IngresoEgresoService;
 import com.vivero.viveroApp.service.RegistroHorarioService;
 import com.vivero.viveroApp.service.UsuarioService;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Controller;
@@ -49,58 +51,43 @@ public class IngresoEgresoController {
     }
 
     @PostMapping("/guardar")
-    @ResponseBody
-    public Map<String, Object> guardarIngresoEgreso(@RequestBody Map<String, Object> requestData) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<IngresoEgreso> guardarIngresoEgreso(@RequestBody Map<String, Object> payload) {
+        IngresoEgreso ingresoEgreso;
 
-        try {
-            boolean ingreso = (boolean) requestData.get("ingreso");
-            String metodoPagoStr = (String) requestData.get("metodoPago");
-            Long usuarioId = Long.valueOf(requestData.get("usuarioId").toString());
-            String fechaStr = (String) requestData.get("fecha");
-            String descripcion = (String) requestData.get("descripcion");
-            double monto = Double.parseDouble(requestData.get("monto").toString());
-            boolean esAdelanto = (boolean) requestData.get("adelanto");
-
-            Optional<Usuario> usuarioOptional = usuarioService.getUsuarioById(usuarioId);
-            if (usuarioOptional.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "Usuario no encontrado.");
-                return response;
-            }
-
-            MetodoPago metodoPago = MetodoPago.valueOf(metodoPagoStr.toUpperCase());
-
-            LocalDateTime fecha;
-            try {
-                fecha = LocalDateTime.parse(fechaStr);
-            } catch (Exception e) {
-                response.put("success", false);
-                response.put("message", "Formato de fecha inválido. Use: 'YYYY-MM-DDTHH:MM:SS'");
-                return response;
-            }
-
-            IngresoEgreso movimiento = new IngresoEgreso();
-
-            movimiento.setIngreso(ingreso);
-            if (esAdelanto) {
-                movimiento.setIngreso(false);
-            }
-            movimiento.setMetodoPago(metodoPago);
-            movimiento.setUsuario(usuarioOptional.get());
-            movimiento.setFecha(fecha);
-            movimiento.setDescripcion(descripcion);
-            movimiento.setMonto(monto);
-            movimiento.setAdelanto(esAdelanto);
-
-            ingresoEgresoService.createIngresoEgreso(movimiento);
-            response.put("success", true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "Error guardando movimiento.");
+        // Si viene un ID, es edición
+        if (payload.containsKey("id") && payload.get("id") != null) {
+            Long id = Long.valueOf(payload.get("id").toString());
+            ingresoEgreso = ingresoEgresoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("No encontrado"));
+        } else {
+            ingresoEgreso = new IngresoEgreso();
         }
-        return response;
+
+        // Mapear campos
+        ingresoEgreso.setIngreso((Boolean) payload.get("tipoMovimiento"));
+        ingresoEgreso.setMetodoPago(MetodoPago.valueOf((String) payload.get("metodoPago")));
+
+        // Usuario
+        Map<String, Object> usuarioMap = (Map<String, Object>) payload.get("usuario");
+        Long usuarioId = Long.valueOf(usuarioMap.get("id").toString());
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        ingresoEgreso.setUsuario(usuario);
+
+        // Otros campos
+        LocalDate fecha = LocalDate.parse((String) payload.get("fecha"));
+        LocalDateTime fechaConHora = fecha.atStartOfDay(); // Le pone las 00:00:00
+        ingresoEgreso.setFecha(fechaConHora);
+        ingresoEgreso.setDescripcion((String) payload.get("descripcion"));
+        ingresoEgreso.setMonto(Double.parseDouble(payload.get("monto").toString()));
+        ingresoEgreso.setAdelanto((Boolean) payload.get("adelanto"));
+        if (ingresoEgreso.isAdelanto()){
+            ingresoEgreso.setIngreso(false);
+        }
+
+        // Guardar
+        IngresoEgreso guardado = ingresoEgresoRepository.save(ingresoEgreso);
+        return ResponseEntity.ok(guardado);
     }
 
     @GetMapping("/totales")
@@ -137,20 +124,27 @@ public class IngresoEgresoController {
     }
 
     @PostMapping("/eliminar")
-    @Transactional
     @ResponseBody
-    public void eliminarIngresoeGreso(@RequestBody Map<String, Long> payload) throws Exception {
+    public Map<String, String> eliminarIngresoeGreso(@RequestBody Map<String, Long> payload) {
         Long id = payload.get("id");
-        System.out.println("ID RECIBIDO EN CONTROLLER: " + id);
-        try {
-            if (id != null || id != 0) {
-                ingresoEgresoRepository.deleteById(id);
-            } else {
-                throw new Exception(" IngresoEgresoiD null");
-            }
-        } catch (Exception e) {
+
+        if (id == null || id == 0) {
+            Map<String, String> res = new HashMap<>();
+            res.put("error", "ID inválido");
+            return res;
         }
 
+        try {
+            ingresoEgresoRepository.deleteById(id);
+            Map<String, String> res = new HashMap<>();
+            res.put("mensaje", "Eliminado con éxito");
+            return res;
+
+        } catch (Exception e) {
+            Map<String, String> res = new HashMap<>();
+            res.put("error", "Error al eliminar");
+            return res;
+        }
     }
 
     @GetMapping("/editar/{id}")
@@ -167,7 +161,7 @@ public class IngresoEgresoController {
         dto.put("fecha", ie.getFecha().toString());
         dto.put("descripcion", ie.getDescripcion());
         dto.put("metodoPago", ie.getMetodoPago().name());
-        dto.put("ingreso", ie.getIngreso());
+        dto.put("tipoMovimiento", ie.getIngreso());
         dto.put("monto", ie.getMonto());
         dto.put("usuarioId", ie.getUsuario().getId());
         dto.put("adelanto", ie.isAdelanto());
@@ -191,21 +185,27 @@ public class IngresoEgresoController {
 
             IngresoEgreso ie = optional.get();
 
+
             ie.setDescripcion(datos.get("descripcion").toString());
             ie.setMetodoPago(MetodoPago.valueOf(datos.get("metodoPago").toString()));
-            ie.setIngreso(Boolean.parseBoolean(datos.get("ingreso").toString()));
+
+            ie.setIngreso((Boolean) datos.get("tipoMovimiento"));
             ie.setMonto(Double.parseDouble(datos.get("monto").toString()));
             ie.setAdelanto(Boolean.parseBoolean(datos.get("adelanto").toString()));
 
-            String fechaStr = datos.get("fecha").toString();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-            LocalDateTime fechaLocal = LocalDateTime.parse(fechaStr, formatter);
-            ie.setFecha(fechaLocal);
-
-            Long usuarioId = Long.valueOf(datos.get("usuarioId").toString());
+            LocalDate fecha = LocalDate.parse((String) datos.get(("fecha")));
+            LocalDateTime fechaConHora = fecha.atStartOfDay(); // Le pone las 00:00:00
+            ie.setFecha(fechaConHora);
+            // Usuario
+            Map<String, Object> usuarioMap = (Map<String, Object>) datos.get("usuario");
+            Long usuarioId = Long.valueOf(usuarioMap.get("id").toString());
             Usuario usuario = usuarioRepository.findById(usuarioId)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
             ie.setUsuario(usuario);
+
+            if (ie.isAdelanto()){
+                ie.setIngreso(false);
+            }
 
             ingresoEgresoRepository.save(ie);
 
@@ -214,10 +214,12 @@ public class IngresoEgresoController {
             return ResponseEntity.ok(respuesta);
 
         } catch (Exception e) {
+            e.printStackTrace(); // o log error
             respuesta.put("success", false);
-            respuesta.put("message", "Error al actualizar: " + e.getMessage());
+            respuesta.put("message", "Error al actualizar: " + (e.getMessage() != null ? e.getMessage() : "Excepción sin mensaje (" + e.getClass().getSimpleName() + ")"));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
         }
+
     }
 
 }

@@ -1,4 +1,4 @@
-package com.vivero.viveroApp.repository;
+package com.vivero.viveroApp.Repository;
 
 import com.vivero.viveroApp.model.Venta;
 import java.time.LocalDateTime;
@@ -23,5 +23,7 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
             + "WHERE fecha BETWEEN :fechaInicio AND :fechaFin", nativeQuery = true)
     List<Venta> obtenerVentasEntreFechas(@Param("fechaInicio") Long fechaInicio,
             @Param("fechaFin") Long fechaFin);
+
+    public List<Venta> findByFechaBefore(LocalDateTime hastaMesAnterior);
 
 }

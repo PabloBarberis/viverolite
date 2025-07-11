@@ -4,7 +4,7 @@ import com.vivero.viveroApp.Repository.IngresoEgresoRepository;
 import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.RegistroHorario;
 import com.vivero.viveroApp.model.Usuario;
-import com.vivero.viveroApp.repository.RegistroHorarioRepository;
+import com.vivero.viveroApp.Repository.RegistroHorarioRepository;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;

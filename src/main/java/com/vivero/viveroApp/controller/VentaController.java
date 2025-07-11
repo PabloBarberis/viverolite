@@ -5,9 +5,10 @@ import com.vivero.viveroApp.dto.MetodoPagoDTO;
 import com.vivero.viveroApp.dto.VentaDTO;
 import com.vivero.viveroApp.model.Cliente;
 import com.vivero.viveroApp.model.IngresoEgreso;
+import com.vivero.viveroApp.model.PagoVenta;
 import com.vivero.viveroApp.model.Venta;
 import com.vivero.viveroApp.model.enums.MetodoPago;
-import com.vivero.viveroApp.repository.VentaRepository;
+import com.vivero.viveroApp.Repository.VentaRepository;
 import com.vivero.viveroApp.service.VentaService;
 import com.vivero.viveroApp.service.ClienteService;
 import com.vivero.viveroApp.service.IngresoEgresoService;
@@ -20,9 +21,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityNotFoundException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -225,35 +225,6 @@ public class VentaController {
         return response;
     }
 
-    @GetMapping("/movimientos")
-    public ResponseEntity<Map<String, Object>> obtenerMovimientosPorMesYAnio(
-            @RequestParam int mes,
-            @RequestParam int anio) {
-
-        LocalDate inicio = LocalDate.of(anio, mes, 1);
-        LocalDate fin = inicio.withDayOfMonth(inicio.lengthOfMonth());
-        LocalDateTime desde = inicio.atStartOfDay();
-        LocalDateTime hasta = fin.atTime(23, 59, 59);
-
-        List<Venta> ventas = ventaRepository.findByFechaBetween(desde, hasta);
-        List<IngresoEgreso> ingresosEgresos = ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(desde, hasta);
-
-        LocalDate mesAnterior = inicio.minusMonths(1);
-        LocalDateTime desdeMesAnterior = mesAnterior.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime hastaMesAnterior = mesAnterior.withDayOfMonth(mesAnterior.lengthOfMonth()).atTime(23, 59, 59);
-
-        List<Venta> ventasMesAnterior = ventaRepository.findByFechaBetween(desdeMesAnterior, hastaMesAnterior);
-        List<IngresoEgreso> ingresosEgresosMesAnterior = ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(desdeMesAnterior, hastaMesAnterior);
-
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("ventas", ventas);
-        respuesta.put("ingresosEgresos", ingresosEgresos);
-        respuesta.put("ventasMesAnterior", ventasMesAnterior);
-        respuesta.put("ingresosEgresosMesAnterior", ingresosEgresosMesAnterior);
-
-        return ResponseEntity.ok(respuesta);
-    }
-
     @GetMapping("/reporte-pdf")
     public ResponseEntity<byte[]> generarReportePdf(
             @RequestParam int mes,
@@ -300,4 +271,163 @@ public class VentaController {
         }
     }
 
+    ///////////////////////////////////////////////////
+    @GetMapping("/movimientos")
+    public ResponseEntity<Map<String, Object>> obtenerMovimientos(
+            @RequestParam int mes,
+            @RequestParam int anio,
+            @RequestParam(defaultValue = "todos") String metodoPago) {
+
+        LocalDate inicioMesActual = LocalDate.of(anio, mes, 1);
+        LocalDate finMesActual = inicioMesActual.withDayOfMonth(inicioMesActual.lengthOfMonth());
+        LocalDateTime desdeMesActual = inicioMesActual.atStartOfDay();
+        LocalDateTime hastaMesActual = finMesActual.atTime(23, 59, 59);
+
+        List<Venta> ventas = ventaRepository.findByFechaBetween(desdeMesActual, hastaMesActual);
+        List<IngresoEgreso> movimientos = ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(desdeMesActual, hastaMesActual);
+
+        boolean todosLosMetodos = "todos".equalsIgnoreCase(metodoPago);
+
+        // Filtrar movimientos según método de pago
+        List<IngresoEgreso> movimientosFiltrados = movimientos.stream()
+                .filter(ie -> todosLosMetodos || ie.getMetodoPago().name().equals(metodoPago))
+                .toList();
+
+        // Calcular ventas por semana
+        Map<String, Double> ventasPorSemana = inicializarMapSemana();
+        double totalVentas = 0.0;
+
+        for (Venta venta : ventas) {
+            for (PagoVenta pago : venta.getPagos()) {
+                if (todosLosMetodos || pago.getMetodo().name().equals(metodoPago)) {
+                    int dia = venta.getFecha().getDayOfMonth();
+                    sumarAlPeriodo(ventasPorSemana, dia, pago.getMonto());
+                    totalVentas += pago.getMonto();
+                }
+            }
+        }
+
+        // Calcular ingresos y egresos
+        double totalIngresos = movimientosFiltrados.stream()
+                .filter(IngresoEgreso::getIngreso)
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        double totalEgresos = movimientosFiltrados.stream()
+                .filter(ie -> !ie.getIngreso())
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        // Saldo del mes anterior
+        LocalDate inicioMesAnterior = inicioMesActual.minusMonths(1);
+        LocalDateTime desdeMesAnterior = inicioMesAnterior.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime hastaMesAnteriorFin = inicioMesAnterior.withDayOfMonth(inicioMesAnterior.lengthOfMonth()).atTime(23, 59, 59);
+
+        List<Venta> ventasMesAnterior = ventaRepository.findByFechaBetween(desdeMesAnterior, hastaMesAnteriorFin);
+        List<IngresoEgreso> movimientosMesAnterior = ingresoEgresoRepository.findByFechaBetweenOrderByFechaAsc(desdeMesAnterior, hastaMesAnteriorFin);
+
+        double totalVentasMesAnterior = ventasMesAnterior.stream()
+                .flatMap(v -> v.getPagos().stream())
+                .filter(p -> todosLosMetodos || p.getMetodo().name().equals(metodoPago))
+                .mapToDouble(PagoVenta::getMonto)
+                .sum();
+
+        double totalIngresosMesAnterior = movimientosMesAnterior.stream()
+                .filter(ie -> ie.getIngreso() && (todosLosMetodos || ie.getMetodoPago().name().equals(metodoPago)))
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        double totalEgresosMesAnterior = movimientosMesAnterior.stream()
+                .filter(ie -> !ie.getIngreso() && (todosLosMetodos || ie.getMetodoPago().name().equals(metodoPago)))
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        double saldoMesAnterior = totalVentasMesAnterior + totalIngresosMesAnterior - totalEgresosMesAnterior;
+
+        // Saldo de meses anteriores (todo antes del mes seleccionado)
+        LocalDateTime hastaMesAnterior = inicioMesActual.minusDays(1).atTime(23, 59, 59);
+        List<Venta> todasLasVentasAnteriores = ventaRepository.findByFechaBefore(hastaMesAnterior);
+        List<IngresoEgreso> todosLosIngresosEgresosAnteriores = ingresoEgresoRepository.findByFechaBefore(hastaMesAnterior);
+
+        double totalVentasAcumuladas = todasLasVentasAnteriores.stream()
+                .flatMap(v -> v.getPagos().stream())
+                .filter(p -> todosLosMetodos || p.getMetodo().name().equals(metodoPago))
+                .mapToDouble(PagoVenta::getMonto)
+                .sum();
+
+        double totalIngresosAcumulados = todosLosIngresosEgresosAnteriores.stream()
+                .filter(ie -> ie.getIngreso() && (todosLosMetodos || ie.getMetodoPago().name().equals(metodoPago)))
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        double totalEgresosAcumulados = todosLosIngresosEgresosAnteriores.stream()
+                .filter(ie -> !ie.getIngreso() && (todosLosMetodos || ie.getMetodoPago().name().equals(metodoPago)))
+                .mapToDouble(IngresoEgreso::getMonto)
+                .sum();
+
+        double saldoMesesAnteriores = totalVentasAcumuladas + totalIngresosAcumulados - totalEgresosAcumulados;
+
+        // Totales generales
+        double totalDelMes = totalVentas + totalIngresos - totalEgresos;
+        double totalGeneral = totalDelMes + saldoMesesAnteriores;
+
+        // Devolver solo datos necesarios
+        Map<String, Object> resumen = new HashMap<>();
+        resumen.put("saldoMesesAnteriores", saldoMesesAnteriores);
+        resumen.put("saldoMesAnterior", saldoMesAnterior);
+        resumen.put("ventasPorSemana", ventasPorSemana);
+        resumen.put("totalVentas", totalVentas);
+        resumen.put("totalIngresos", totalIngresos);
+        resumen.put("totalEgresos", totalEgresos);
+        resumen.put("totalDelMes", totalDelMes);
+        resumen.put("totalGeneral", totalGeneral);
+
+        // Movimientos listos para tabla
+        List<Map<String, Object>> movimientosDto = movimientosFiltrados.stream()
+                .map(this::toDto)
+                .toList();
+
+        // Respuesta final
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("resumen", resumen);
+        respuesta.put("movimientos", movimientosDto);
+
+        return ResponseEntity.ok(respuesta);
+    }
+
+    private Map<String, Double> inicializarMapSemana() {
+        Map<String, Double> map = new HashMap<>();
+        map.put("1 al 7", 0.0);
+        map.put("8 al 14", 0.0);
+        map.put("15 al 21", 0.0);
+        map.put("22 al 28", 0.0);
+        map.put("29 al fin de mes", 0.0);
+        return map;
+    }
+
+    private void sumarAlPeriodo(Map<String, Double> map, int dia, double monto) {
+        if (dia <= 7) {
+            map.compute("1 al 7", (k, v) -> v + monto);
+        } else if (dia <= 14) {
+            map.compute("8 al 14", (k, v) -> v + monto);
+        } else if (dia <= 21) {
+            map.compute("15 al 21", (k, v) -> v + monto);
+        } else if (dia <= 28) {
+            map.compute("22 al 28", (k, v) -> v + monto);
+        } else {
+            map.compute("29 al fin de mes", (k, v) -> v + monto);
+        }
+    }
+
+    private Map<String, Object> toDto(IngresoEgreso ie) {
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("id", ie.getId());
+        dto.put("fecha", ie.getFecha().toLocalDate().toString());
+        dto.put("descripcion", ie.getDescripcion());
+        dto.put("tipoMovimiento", ie.getIngreso());
+        dto.put("metodoPago", ie.getMetodoPago());
+        dto.put("monto", ie.getMonto());
+        dto.put("usuario", Map.of("nombre", ie.getUsuario().getNombre()));
+        return dto;
+    }
 }
