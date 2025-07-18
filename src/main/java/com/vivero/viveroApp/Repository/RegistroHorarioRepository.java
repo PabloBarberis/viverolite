@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface RegistroHorarioRepository extends JpaRepository<RegistroHorario, Long> {
 
-    List<RegistroHorario> findByUsuarioAndFechaBetween(Usuario usuario, LocalDate startDate, LocalDate endDate);
+    List<RegistroHorario> findByUsuarioAndFechaBetweenOrderByFechaAsc(Usuario usuario, LocalDate start, LocalDate end);
 
     @Query(value = "SELECT * FROM registro_horario "
             + "WHERE strftime('%Y', datetime(fecha / 1000, 'unixepoch')) = :anio "
@@ -30,4 +30,5 @@ List<RegistroHorario> obtenerIngresosRegistrosHorariosPorMesAnioYUsuario(@Param(
                                                                           @Param("id") Long id);
 
 
+    boolean existsByUsuarioIdAndFecha(Long usuarioId, LocalDate fecha);
 }

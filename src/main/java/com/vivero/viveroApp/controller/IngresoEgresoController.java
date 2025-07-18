@@ -1,6 +1,8 @@
 package com.vivero.viveroApp.controller;
 
 import com.vivero.viveroApp.Repository.IngresoEgresoRepository;
+import com.vivero.viveroApp.dto.AdelantoDTO;
+import com.vivero.viveroApp.dto.AdelantoListDTO;
 import com.vivero.viveroApp.model.IngresoEgreso;
 import com.vivero.viveroApp.model.RegistroHorario;
 import com.vivero.viveroApp.model.Usuario;
@@ -221,5 +223,7 @@ public class IngresoEgresoController {
         }
 
     }
+
+
 
 }

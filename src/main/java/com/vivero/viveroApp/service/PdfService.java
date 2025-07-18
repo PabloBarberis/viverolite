@@ -183,10 +183,10 @@ public class PdfService {
 
             for (RegistroHorario registro : registros) {
                 tableRegistros.addCell(new Cell().add(new Paragraph(String.valueOf(registro.getFecha()))));
-                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTM())));
-                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTM())));
-                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTT())));
-                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTT())));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTM() != null ? registro.getEntradaTM().toString() : "")));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTM() != null ? registro.getSalidaTM().toString() : "")));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getEntradaTT() != null ? registro.getEntradaTT().toString() : "")));
+                tableRegistros.addCell(new Cell().add(new Paragraph(registro.getSalidaTT() != null ? registro.getSalidaTT().toString() : "")));
 
                 double horas = registro.getTotalHoras();
                 double precioHora = registro.getPrecioHora();

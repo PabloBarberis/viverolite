@@ -34,4 +34,6 @@ public interface IngresoEgresoRepository extends JpaRepository<IngresoEgreso, Lo
 
     public List<IngresoEgreso> findByFechaBefore(LocalDateTime hastaMesAnterior);
 
+
+
 }

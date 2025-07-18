@@ -1,5 +1,6 @@
 package com.vivero.viveroApp.controller;
 
+import com.vivero.viveroApp.dto.UsuarioDTO;
 import com.vivero.viveroApp.model.Usuario;
 import com.vivero.viveroApp.service.UsuarioService;
 import java.util.HashMap;
@@ -81,5 +82,11 @@ public class UsuarioController {
         usuarioService.deleteUsuarioById(id);
         response.put("success", true);
         return response;
+    }
+
+    @GetMapping("/lista-usuarios")
+    @ResponseBody
+    public List<UsuarioDTO> listarUsuariosDTO() {
+        return usuarioService.getUsuariosDTO();
     }
 }

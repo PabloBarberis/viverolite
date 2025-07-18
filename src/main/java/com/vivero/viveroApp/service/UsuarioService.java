@@ -1,5 +1,6 @@
 package com.vivero.viveroApp.service;
 
+import com.vivero.viveroApp.dto.UsuarioDTO;
 import com.vivero.viveroApp.model.Usuario;
 import com.vivero.viveroApp.Repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,12 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public boolean existsById(Long id) {
         return usuarioRepository.existsById(id);
+    }
+
+    public List<UsuarioDTO> getUsuariosDTO() {
+        return usuarioRepository.findAll().stream()
+                .map(usuario -> new UsuarioDTO(usuario.getId(), usuario.getNombre()))
+                .toList();
     }
 
 }

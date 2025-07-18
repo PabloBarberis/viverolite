@@ -1,246 +1,196 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Incluir los tokens CSRF utilizando Thymeleaf -->
-        <meta name="_csrf" th:content="${_csrf.token}">
-        <meta name="_csrf_header" th:content="${_csrf.headerName}">
-        <title>Gestión de Horas</title>        
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">        
-        <link rel="stylesheet" href="/css/styles.css">        
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>        
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>      
-    </head>
 
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>Gestión de Registros Horarios</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css ">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
+</head>
 
-        <div class="navbar-container d-flex justify-content-between align-items-center">
+<body>
 
-            <div th:replace="~{navbar :: navbar}"></div>
+    <div class="navbar-container d-flex justify-content-between align-items-center">
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div>
 
+    <div class="container mt-5">
 
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Registros Horarios</h2>
+            <div class="d-flex gap-2">
+
+                <button id="btnGenerarReporte" class="btn btn-info" onclick="generarReportePdf()">
+                    Generar Reporte
+                </button>
+
+                <button id="btnNuevoRegistro" class="btn btn-success" data-toggle="modal"
+                    data-target="#crearRegistroModal">
+                    Nuevo Registro
+                </button>
+
+            </div>
         </div>
 
-        <div class="container-fluid mt-5" style="max-width: 90%;">
+        <div class="separator"></div>
 
-            <div class="row align-items-center justify-content-between">
-                <h1>Gestión de Horas</h1>
-                <div>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#crearUsuarioModal">
-                        Crear Usuario
-                    </button>
-                    <button type="button" class="btn btn-danger ml-2" data-toggle="modal" data-target="#eliminarUsuarioModal">
-                        Eliminar Usuario
-                    </button>
-                </div>
-            </div>
-
-
-            <div class="separator"></div>
-            <div class="form-group">
+        <div class="form-row mb-4">
+            <div class="form-group col-md-4">
                 <label for="usuario">Usuario</label>
-                <select style="width: 25%;" id="usuario" class="form-control" onchange="cargarUsuario()">
-                    <option value="" disabled selected>Seleccione un Usuario</option>
-                    <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
+                <select id="usuario" class="form-control">
+                    <option value="" disabled selected>Seleccione un usuario</option>
                 </select>
             </div>
-
-            <div id="configuracion" style="display:none;">
-                <div class="separator"></div>
-                <p id="saludo" class = "saludo-texto" th:text="'Hola, ' + ${usuarioSeleccionado != null ? usuarioSeleccionado.nombre : 'Seleccione un usuario'} + '!'"></p>
-                <h2 id="nombreUsuario" th:if="${usuarioSeleccionado != null}" th:text="'Tabla de ' + ${usuarioSeleccionado.nombre}"></h2>
-
-        
-
-                <!-- Selección de Mes y Año -->
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="mes">Mes</label>
-                        <select id="mes" class="form-control" onchange="cargarDias()">
-                            <option value="1">Enero</option>
-                            <option value="2">Febrero</option>
-                            <option value="3">Marzo</option>
-                            <option value="4">Abril</option>
-                            <option value="5">Mayo</option>
-                            <option value="6">Junio</option>
-                            <option value="7">Julio</option>
-                            <option value="8">Agosto</option>
-                            <option value="9">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="año">Año</label>
-                        <select id="año" class="form-control" onchange="cargarDias()">
-                            <option value="2022">2022</option>
-                            <option value="2023">2023</option>
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                            <option value="2029">2029</option>
-                            <option value="2030">2030</option>
-                        </select>
-                    </div>
-                </div>
-
-
-                <button class="btn btn-secondary" onclick="cargarDias()">Cargar Días</button>
-                <button id="btnGenerarReporte" class="btn btn-info">Generar Reporte</button>
-
-                <div class="separator"></div>
-
-                <!-- Tabla de Registros de Horarios -->
-                <h3>Registros de Horarios</h3>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Día</th>
-                            <th>Entrada TM</th>
-                            <th>Salida TM</th>
-                            <th>Entrada TT</th>
-                            <th>Salida TT</th>
-                            <th>Total Horas</th>
-                            <th>Feriado</th>
-                            <th>Precio Hora</th>
-                            <th>Total Día ($)</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaRegistros">
-                        <!-- Filas generadas dinámicamente por JavaScript -->
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Día</th>
-                            <th>Entrada TM</th>
-                            <th>Salida TM</th>
-                            <th>Entrada TT</th>
-                            <th>Salida TT</th>
-                            <th>Total Horas</th>
-                            <th>Feriado</th>
-                            <th>Precio Hora</th>
-                            <th>Total Día ($)</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </tfoot>
-                </table>
-
-
-
-                <!-- Inputs para nuevos Gastos -->
-
-                <!-- GANANCIA-->
-
-
-                <div class="row">
-                    <div class="col-md-3">
-                        <h4>Total Horas</h4>
-                        <input type="text" id="totalGanado" class="form-control" readonly>
-                    </div>
-
-                    <div class="col-md-3">
-                        <h4>Total Adelantos</h4>
-                        <input type="text" id="totalAdelantos" class="form-control" readonly>
-                    </div>
-                    <div class="col-md-3">
-                        <h4>Total Neto</h4>
-                        <input type="text" id="totalNeto" class="form-control" readonly>
-                    </div>
-                </div>
-
-                <div class="separator"></div>
-
-                <table class="table">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Fecha</th>
-                            <th scope="col">Descripción</th>
-                            <th scope="col">Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaAdelantos">
-                        <!-- Las filas de datos se generarán dinámicamente -->
-                    </tbody>
-                </table>
-
+            <div class="form-group col-md-4">
+                <label for="mes">Mes</label>
+                <select id="mes" class="form-control">
+                    <!-- Meses generados dinámicamente -->
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="año">Año</label>
+                <select id="año" class="form-control">
+                    <!-- Años generados dinámicamente -->
+                </select>
             </div>
         </div>
 
+        <div class="separator"></div>
 
-        <!-- Modal para Nuevo Usuario -->
-        <div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="crearUsuarioModalLabel">Crear Usuario</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Formulario de creación de usuario -->
-                        <form id="usuarioForm">
-                            <div class="mb-3">
-                                <label for="nombre" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" required>
-                            </div>
-                            <!-- CSRF Token -->
-                            <input type="hidden" id="csrfToken" name="_csrf" value="${_csrf.token}">
-                            <button type="submit" class="btn btn-primary">Guardar</button>
-                            <!-- Botón Cancelar -->
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        </form>
-                        <div id="message" class="mt-3"></div>
-                    </div>
-                </div>
+        <h4>Registros Horarios</h4>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Entrada TM</th>
+                    <th>Salida TM</th>
+                    <th>Entrada TT</th>
+                    <th>Salida TT</th>
+                    <th>Total Horas</th>
+                    <th>Feriado</th>
+                    <th>Precio Hora</th>
+                    <th>Total Día ($)</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaRegistros">
+                <!-- Datos cargados dinámicamente -->
+            </tbody>
+        </table>
+
+        <!-- Totales -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <h4>Total Ganado</h4>
+                <input type="text" id="totalGanado" class="form-control" readonly>
+            </div>
+            <div class="col-md-4">
+                <h4>Total Adelantos</h4>
+                <input type="text" id="totalAdelantos" class="form-control" readonly>
+            </div>
+            <div class="col-md-4">
+                <h4>Total Neto</h4>
+                <input type="text" id="totalNeto" class="form-control" readonly>
             </div>
         </div>
 
+        <div class="separator"></div>
+
+        <h4>Adelantos</h4>
+
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+            <tbody id="tablaAdelantos">
+                <!-- Filas generadas dinámicamente -->
+            </tbody>
+        </table>
+    </div>
 
 
 
+    <!-- Modal para Crear Nuevo Registro -->
+    <div class="modal fade" id="crearRegistroModal" tabindex="-1" aria-labelledby="crearRegistroModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="crearRegistroModalLabel">Nuevo Registro Horario</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registroForm">
 
-        <!-- Modal para Eliminar Usuario -->
-        <div class="modal fade" id="eliminarUsuarioModal" tabindex="-1" role="dialog" aria-labelledby="eliminarUsuarioModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="eliminarUsuarioModalLabel">Eliminar Usuario</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
+                        <input type="hidden" id="registroId" value="">
+
                         <div class="form-group">
-                            <label for="usuarioEliminar">Seleccione el Usuario</label>
-                            <select id="usuarioEliminar" class="form-control">
-                                <!-- Opciones de usuarios se cargarán dinámicamente -->
+                            <label for="usuarioRegistro">Usuario</label>
+                            <select id="usuarioRegistro" class="form-control" required>
+                                <option value="" disabled selected>Seleccione un usuario</option>
+                                <!-- Opciones cargadas dinámicamente -->
                             </select>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                        <button type="button" class="btn btn-danger" onclick="eliminarUsuario()">Eliminar Usuario</button>
-                    </div>
+
+                        <div class="form-group">
+                            <label for="fecha">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="entradaTM">Entrada TM</label>
+                                <input type="time" class="form-control" id="entradaTM" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="salidaTM">Salida TM</label>
+                                <input type="time" class="form-control" id="salidaTM">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="entradaTT">Entrada TT</label>
+                                <input type="time" class="form-control" id="entradaTT">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="salidaTT">Salida TT</label>
+                                <input type="time" class="form-control" id="salidaTT">
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="feriado">
+                            <label class="form-check-label" for="feriado">Feriado</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="precioHora">Precio por Hora</label>
+                            <input type="number" step="0.01" class="form-control" id="precioHora" value="0.00" required>
+                        </div>
+                        <!-- Campo oculto para el usuarioId -->
+                        <input type="hidden" id="usuarioIdRegistro">
+                        <!-- CSRF Token -->
+                        <input type="hidden" id="csrfTokenRegistro" name="_csrf" th:value="${_csrf.token}">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarNuevoRegistro()">Guardar</button>
                 </div>
             </div>
         </div>
+    </div>
 
-
-
-
-        <script type="module" src="/js/horas.js"></script>
-    </body>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/js/registrohorario.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
+    <script src="https://cdn.jsdelivr.net/npm/ @popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js "></script>
+</body>
 
 </html>

@@ -338,87 +338,120 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    function enviarVenta() {
-        // 🔥 Obtener el CSRF token y el nombre del header desde el HTML
+    let ventaEnviando = false;
 
-        const csrfMeta = document.querySelector("meta[name='_csrf']");
-        const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
-
-        if (!csrfMeta || !csrfHeaderMeta) {
-            console.error("CSRF meta tags no encontrados, revisa la configuración de seguridad.");
-            return; // 🔥 Evita que `fetch` falle
-        }
-
-        const csrfToken = csrfMeta.getAttribute("content");
-        const csrfHeader = csrfHeaderMeta.getAttribute("content");
-
-        const clienteId = document.getElementById("cliente").value;
-        const productos = [];
-        const pagos = [];
-        //const descuento = parseFloat(document.getElementById("descuentoGlobal").value) || 0;
-
-        // 🔥 Recopilar los productos seleccionados
-        document.querySelectorAll("#productosSeleccionados tr").forEach(row => {
-            const productoId = row.querySelector("input[name='productoIds[]']").value;
-            const cantidad = parseInt(row.querySelector(".cantidad").value);
-            const descuentoProducto = parseFloat(row.querySelector(".descuento").value) || 0;
-            const precioUnitario = parseFloat(row.querySelector(".precio").textContent);
-
-            productos.push({ productoId, cantidad, descuentoProducto, precioUnitario });
-        });
-
-        // 🔥 Recopilar métodos de pago
-        document.querySelectorAll("#metodosPagoSeleccionados tr").forEach(row => {
-            const metodo = row.querySelector("input[name='metodos[]']").value;
-            const monto = parseFloat(row.querySelector(".montoPago").value);
-
-            pagos.push({ metodo, monto });
-        });
-
-        const ventaDTO = { clienteId, productos, pagos };
-
-        // 🚨 Validar que haya al menos un método de pago
-        if (pagos.length === 0) {
-            alert("Debes agregar al menos un método de pago.");
-            return; // 🔥 Cancelar el envío
-        }
-
-        for (const pago of pagos) {
-            if (!pago.metodo || isNaN(pago.monto) || pago.monto <= 0) {
-                alert("Verifica que cada método de pago tenga un monto válido.");
-                return;
-            }
-        }
-
-
-        if (totalMontos.toFixed(2) != totalProductos.toFixed(2)) {
-            alert("El total de los métodos de pago no coincide con el total de los productos.");
-            return; // 🛑 Detiene el flujo de la función y evita el envío
-        }
-
-
-
-        // 🔥 Enviar la venta al backend con el token CSRF correcto
-        fetch("/ventas/crear", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(ventaDTO)
-        })
-            .then(response => response.json()) // 🔥 Ahora la respuesta sí será JSON
-            .then(data => {
-                alert(data.message);
-                window.location.href = "/ventas/listar";
-            })
-            .catch(error => {
-                console.error("Error al enviar la venta:", error);
-                alert(`Hubo un problema al procesar la venta: ${error.message}`);
-            });
-
-
+function enviarVenta() {
+    // 🔒 Prevenir múltiples envíos simultáneos
+    if (ventaEnviando) {
+        alert("Ya se está procesando una venta. Por favor, espere...");
+        return;
     }
+
+    // 🔥 Obtener el CSRF token y el nombre del header desde el HTML
+    const csrfMeta = document.querySelector("meta[name='_csrf']");
+    const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
+
+    if (!csrfMeta || !csrfHeaderMeta) {
+        console.error("CSRF meta tags no encontrados, revisa la configuración de seguridad.");
+        return;
+    }
+
+    const csrfToken = csrfMeta.getAttribute("content");
+    const csrfHeader = csrfHeaderMeta.getAttribute("content");
+
+    const clienteId = document.getElementById("cliente").value;
+    const productos = [];
+    const pagos = [];
+
+    // 🔥 Recopilar los productos seleccionados
+    document.querySelectorAll("#productosSeleccionados tr").forEach(row => {
+        const productoId = row.querySelector("input[name='productoIds[]']").value;
+        const cantidad = parseInt(row.querySelector(".cantidad").value);
+        const descuentoProducto = parseFloat(row.querySelector(".descuento").value) || 0;
+        const precioUnitario = parseFloat(row.querySelector(".precio").textContent);
+
+        productos.push({ productoId, cantidad, descuentoProducto, precioUnitario });
+    });
+
+    // 🔥 Recopilar métodos de pago
+    document.querySelectorAll("#metodosPagoSeleccionados tr").forEach(row => {
+        const metodo = row.querySelector("input[name='metodos[]']").value;
+        const monto = parseFloat(row.querySelector(".montoPago").value);
+
+        pagos.push({ metodo, monto });
+    });
+
+    const ventaDTO = { clienteId, productos, pagos };
+
+    // 🚨 Validar que haya al menos un método de pago
+    if (pagos.length === 0) {
+        alert("Debes agregar al menos un método de pago.");
+        return;
+    }
+
+    for (const pago of pagos) {
+        if (!pago.metodo || isNaN(pago.monto) || pago.monto <= 0) {
+            alert("Verifica que cada método de pago tenga un monto válido.");
+            return;
+        }
+    }
+
+    // 🚨 Validar que los totales coincidan
+    const totalMontos = pagos.reduce((acc, pago) => acc + pago.monto, 0);
+    const totalProductos = productos.reduce((acc, prod) => {
+        const subtotal = prod.cantidad * prod.precioUnitario;
+        const conDescuento = subtotal - (subtotal * prod.descuentoProducto / 100);
+        return acc + conDescuento;
+    }, 0);
+
+    if (totalMontos.toFixed(2) !== totalProductos.toFixed(2)) {
+        alert("El total de los métodos de pago no coincide con el total de los productos.");
+        return;
+    }
+
+    // 💥 Deshabilitar el botón y marcar como "enviando"
+    const botonEnviar = document.getElementById("btnGuardarVenta"); // Asegúrate que el ID sea correcto
+    if (botonEnviar) {
+        botonEnviar.disabled = true;
+        botonEnviar.textContent = "Enviando...";
+    }
+
+    ventaEnviando = true;
+
+    // 🔥 Enviar la venta al backend con el token CSRF correcto
+    fetch("/ventas/crear", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            [csrfHeader]: csrfToken
+        },
+        body: JSON.stringify(ventaDTO)
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || "Error en la solicitud");
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message || "Venta creada correctamente");
+            window.location.href = "/ventas/listar";
+        })
+        .catch(error => {
+            console.error("Error al enviar la venta:", error);
+            alert(`Hubo un problema al procesar la venta: ${error.message}`);
+        })
+        .finally(() => {
+            // ✅ Restablecer el botón y el estado
+            ventaEnviando = false;
+            if (botonEnviar) {
+                botonEnviar.disabled = false;
+                botonEnviar.textContent = "Guardar Venta";
+            }
+        });
+}
 
     // 🔥 Llamar a `enviarVenta()` cuando el usuario envíe el formulario
     document.getElementById("ventaForm").addEventListener("submit", function (event) {
