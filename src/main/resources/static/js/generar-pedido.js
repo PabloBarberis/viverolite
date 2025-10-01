@@ -129,4 +129,15 @@ $(document).ready(function () {
 
     // Foco inicial en el select2 al cargar la página
     setTimeout(() => $('#producto').select2('focus'), 300);
+
+    window.addEventListener('beforeunload', function (e) {
+    const productosCargados = $('#productosSeleccionados tr').length > 0;
+    if (productosCargados) {
+        const mensaje = "¿Desea cancelar el pedido? Tiene productos cargados.";
+        e.preventDefault(); // Requerido por algunos navegadores
+        e.returnValue = mensaje; // Chrome y otros mostrarán un mensaje genérico
+        return mensaje;
+    }
+});
+
 });
