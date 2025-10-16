@@ -2,7 +2,6 @@ package com.vivero.viveroApp.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,27 +28,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/webjars/**", "/login",
                                 "/images/**", "/fotos/**", "/resources/**").permitAll()
-
-                        // Acceso exclusivo para ADMIN
-                        .requestMatchers("/ingresoegreso/**").hasRole("ADMIN")
-                        .requestMatchers("/productos/dar-de-baja",
-                                "/productos/actualizar-campo",
-                                "/productos/crear",
-                                "/productos/guardar",
-                                "/productos/editar/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/productos/editar/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/productos/editar/**").hasRole("ADMIN")
-
-                        // Acceso compartido entre ADMIN y VENTA
-                        .requestMatchers("/ventas/**", "/ventas/listar*", "/ventas/listar/**",
+                        .requestMatchers("/ventas/**", "/ventas/listar*", "/ventas/listar/**",                                
                                 "/proveedores/**", "/clientes/**", "/productos/**", "/dashboard",
-                                "/api/**", "/usuarios/listar")
-                        .hasAnyRole("ADMIN", "VENTA")
-
-                        // Todo lo demás solo para ADMIN
+                                 "/api/**", "/ingresoegreso", "/ingresoegreso/guardar", "/usuarios/listar")                        
+                        .hasAnyRole("ADMIN", "VENTA")                        
                         .anyRequest().hasRole("ADMIN")
                 )
-
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/dashboard", true)
