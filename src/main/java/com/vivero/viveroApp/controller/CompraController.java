@@ -7,21 +7,20 @@ import com.vivero.viveroApp.model.Compra;
 import com.vivero.viveroApp.model.Producto;
 import com.vivero.viveroApp.model.ProductoCompra;
 import com.vivero.viveroApp.Repository.ProductoRepository;
+import com.vivero.viveroApp.service.CompraService;
 import com.vivero.viveroApp.service.PdfService;
 import com.vivero.viveroApp.service.ProductoService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class CompraController {
     private final ProductoService productoService;
     private final CompraRepository compraRepository;
     private final ProductoRepository productoRepository;
+    private final CompraService compraService;
 
     @GetMapping("/pedido")
     public String crearPedido() {
@@ -75,19 +75,14 @@ public class CompraController {
 
     @GetMapping("/compras/mostrar")
     @ResponseBody
-    public List<CompraDTO> mostrarCompras() {
-        List<Compra> compras = compraRepository.findAll();
+    public Page<CompraDTO> mostrarCompras(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        System.out.println("Compras encontradas: " + compras); // 🔥 Ver qué devuelve el backend
+        // Ordenar por fecha descendente: más reciente primero
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fecha"));
 
-        return compras.stream().map(compra -> {
-            CompraDTO dto = new CompraDTO();
-            dto.setId(compra.getId());
-            dto.setFecha(compra.getFecha());
-            dto.setComentario(compra.getComentario());
-            dto.setProductos(null);
-            return dto;
-        }).toList();
+        return compraService.obtenerComprasPaginadas(pageable);
     }
 
     @GetMapping("/compras/detalle/{id}")

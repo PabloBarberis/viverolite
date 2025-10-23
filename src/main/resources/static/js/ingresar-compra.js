@@ -85,65 +85,108 @@ $(document).ready(function () {
         $(this).closest('tr').remove();
     });
 
-    // Guardar compra
-    $('#guardarCompra').on('click', function () {
-        let productos = [];
-        let valid = true;
+    // 🚦 Bandera global para evitar envíos duplicados de compra
+let compraEnviando = false;
 
-        $('#productosSeleccionados tr').each(function () {
-            let cantidad = $(this).find('.cantidad').val();
-            let precioCompra = $(this).find('.precioCompra').val();
+$('#guardarCompra').on('click', function () {
+    // 🔒 Si ya se está enviando, ignorar
+    if (compraEnviando) {
+        console.warn("Intento de envío duplicado de compra bloqueado.");
+        return;
+    }
 
-            if (!cantidad || cantidad <= 0) {
-                alert("Todos los productos deben tener una cantidad válida mayor a cero.");
-                valid = false;
-                return false;
-            }
+    let productos = [];
+    let valid = true;
 
-            let producto = {
-                id: $(this).data('id'),
-                nombre: $(this).find('td:eq(1)').text(),
-                stock: parseInt($(this).find('td:eq(2)').text()),
-                cantidad: parseInt($(this).find('.cantidad').val()),
-                precio: parseFloat($(this).find('.precio').val()),  // Precio de venta
-                precioCompra: parseFloat($(this).find('.precioCompra').val()) // Precio de compra
-            };
+    $('#productosSeleccionados tr').each(function () {
+        let cantidad = $(this).find('.cantidad').val();
+        let precioCompra = $(this).find('.precioCompra').val();
 
-            productos.push(producto);
-        });
-
-        if (!valid) return;
-        if (productos.length === 0) {
-            alert("Debes agregar al menos un producto antes de guardar la compra.");
-            return;
+        if (!cantidad || cantidad <= 0) {
+            alert("Todos los productos deben tener una cantidad válida mayor a cero.");
+            valid = false;
+            return false; // break del each
         }
 
-        let comentario = $('#comentario').val().trim();
+        if (!precioCompra || parseFloat(precioCompra) <= 0) {
+            alert("Todos los productos deben tener un precio de compra válido.");
+            valid = false;
+            return false;
+        }
 
-        const csrfMeta = document.querySelector("meta[name='_csrf']");
-        const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
-
-        let compraData = {
-            comentario: comentario,
-            productos: productos
+        let producto = {
+            id: $(this).data('id'),
+            nombre: $(this).find('td:eq(1)').text(),
+            stock: parseInt($(this).find('td:eq(2)').text()),
+            cantidad: parseInt($(this).find('.cantidad').val()),
+            precio: parseFloat($(this).find('.precio').val()) || 0,        // Precio de venta
+            precioCompra: parseFloat($(this).find('.precioCompra').val())  // Precio de compra
         };
 
-        fetch("/ingresarcompra", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                [csrfHeaderMeta.content]: csrfMeta.content
-            },
-            body: JSON.stringify(compraData)
-        })
-        .then(response => response.text())
-        .then(data => {
-            alert(data);
-            location.reload();
-        })
-        .catch(error => console.error("Error:", error));
+        productos.push(producto);
     });
 
+    if (!valid) return;
+    if (productos.length === 0) {
+        alert("Debes agregar al menos un producto antes de guardar la compra.");
+        return;
+    }
+
+    let comentario = $('#comentario').val().trim();
+
+    const csrfMeta = document.querySelector("meta[name='_csrf']");
+    const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
+
+    if (!csrfMeta || !csrfHeaderMeta) {
+        alert("Error de seguridad: token CSRF no disponible.");
+        return;
+    }
+
+    // ✅ ACTIVAR BANDERA ANTES DEL ENVÍO
+    compraEnviando = true;
+
+    // 💡 Deshabilitar botón y campos para feedback visual
+    const boton = $('#guardarCompra');
+    const inputs = $('#productosSeleccionados input, #comentario');
+    boton.prop('disabled', true).text('Guardando...');
+    inputs.prop('disabled', true);
+
+    let compraData = {
+        comentario: comentario,
+        productos: productos
+    };
+
+    fetch("/ingresarcompra", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            [csrfHeaderMeta.content]: csrfMeta.content
+        },
+        body: JSON.stringify(compraData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(text || "Error en la respuesta del servidor");
+            });
+        }
+        return response.text();
+    })
+    .then(data => {
+        alert(data || "Compra guardada correctamente");
+        location.reload();
+    })
+    .catch(error => {
+        console.error("Error al guardar la compra:", error);
+        alert("Error al guardar la compra: " + error.message);
+    })
+    .finally(() => {
+        // ✅ Restablecer estado, incluso si falla
+        compraEnviando = false;
+        $('#guardarCompra').prop('disabled', false).text('Guardar Compra');
+        $('#productosSeleccionados input, #comentario').prop('disabled', false);
+    });
+});
     // Foco inicial en el select2 al cargar la página
     setTimeout(() => $('#producto').select2('focus'), 300);
 

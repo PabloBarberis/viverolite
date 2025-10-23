@@ -83,6 +83,18 @@ $(document).ready(function () {
         $(this).closest('tr').remove();
     });
 
+    function hayProductosCargados() {
+    return $('#productosSeleccionados tr').length > 0;
+}
+
+window.addEventListener('beforeunload', function (e) {
+    if (hayProductosCargados()) {
+        // Solo con esto, el navegador mostrará su advertencia nativa
+        e.preventDefault();
+        // Nota: No necesitas return ni e.returnValue
+    }
+});
+
     // Generar pedido
     $('#generarPedido').on('click', function () {
         let productos = [];
@@ -123,6 +135,7 @@ $(document).ready(function () {
             link.href = URL.createObjectURL(blob);
             link.download = "pedido.pdf";
             link.click();
+            $('#productosSeleccionados').empty();
         })
         .catch(error => console.error("Error:", error));
     });
