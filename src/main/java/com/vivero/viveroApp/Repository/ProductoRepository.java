@@ -33,7 +33,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     public List<Producto> findByNombreContainingIgnoreCase(String q);
 
-    @Query("SELECT new com.vivero.viveroApp.dto.ProductoDTO(p.id, p.nombre, p.precio, p.stock) FROM Producto p WHERE UPPER(p.nombre) LIKE UPPER(CONCAT('%', :q, '%'))")
+    @Query("SELECT new com.vivero.viveroApp.dto.ProductoDTO(p.id, p.nombre, p.precio, p.stock) FROM Producto p WHERE UPPER(p.nombre) LIKE UPPER(CONCAT('%', :q, '%')) AND p.activo = TRUE")
     public List<ProductoDTO> buscarProductoPorNombre(String q);
 
     @Modifying
